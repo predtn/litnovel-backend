@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="LitNovel.Application/LitNovel.Application.csproj" />
+  <Project Path="LitNovel.Domain/LitNovel.Domain.csproj" />
+  <Project Path="LitNovel.Infrastructure/LitNovel.Infrastructure.csproj" />
+  <Project Path="LitNovel.WebAPI/LitNovel.WebAPI.csproj" />
+</Solution>
