@@ -1,7 +1,16 @@
+using LitNovel.WebAPI.Middlewares;
+
 namespace LitNovel.WebAPI
 {
-    public class DependencyInjection
+    public static class DependencyInjection
     {
-        
+        public static IServiceCollection AddWebAPI(this IServiceCollection services)
+        {
+            services.AddControllers();
+            services.AddOpenApi();
+            services.AddScoped<ExceptionHandlingMiddleware>();
+
+            return services;
+        }
     }
 }

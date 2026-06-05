@@ -1,5 +1,12 @@
+using LitNovel.Application;
+using LitNovel.Infrastructure;
+using LitNovel.WebAPI;
+using LitNovel.WebAPI.Middlewares;
+
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddOpenApi();
+builder.Services.AddWebAPI();
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
@@ -9,5 +16,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
+app.MapControllers();
 app.Run();
