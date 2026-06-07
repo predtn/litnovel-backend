@@ -13,6 +13,7 @@ namespace LitNovel.Application
             services.AddScoped<IRegisterUseCase, RegisterUseCase>();
             services.AddScoped<ILoginUseCase, LoginUseCase>();
             services.AddScoped<IRefreshTokenUseCase, RefreshTokenUseCase>();
+            services.AddScoped<ILogoutUseCase, LogoutUseCase>();
             services.AddScoped<IForgotPasswordUseCase, ForgotPasswordUseCase>();
             services.AddScoped<IResetPasswordUseCase, ResetPasswordUseCase>();
             services.AddScoped<IGetMyProfileUseCase, GetMyProfileUseCase>();

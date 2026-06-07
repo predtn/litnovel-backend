@@ -12,14 +12,16 @@ namespace LitNovel.WebAPI.Controllers
         private readonly IRegisterUseCase _registerUseCase;
         private readonly ILoginUseCase _loginUseCase;
         private readonly IRefreshTokenUseCase _refreshTokenUseCase;
+        private readonly ILogoutUseCase _logoutUseCase;
         private readonly IForgotPasswordUseCase _forgotPasswordUseCase;
         private readonly IResetPasswordUseCase _resetPasswordUseCase;
 
-        public AuthController(IRegisterUseCase registerUseCase, ILoginUseCase loginUseCase, IRefreshTokenUseCase refreshTokenUseCase, IForgotPasswordUseCase forgotPasswordUseCase, IResetPasswordUseCase resetPasswordUseCase)
+        public AuthController(IRegisterUseCase registerUseCase, ILoginUseCase loginUseCase, IRefreshTokenUseCase refreshTokenUseCase, ILogoutUseCase logoutUseCase, IForgotPasswordUseCase forgotPasswordUseCase, IResetPasswordUseCase resetPasswordUseCase)
         {
             _registerUseCase = registerUseCase;
             _loginUseCase = loginUseCase;
             _refreshTokenUseCase = refreshTokenUseCase;
+            _logoutUseCase = logoutUseCase;
             _forgotPasswordUseCase = forgotPasswordUseCase;
             _resetPasswordUseCase = resetPasswordUseCase;
         }
@@ -57,6 +59,18 @@ namespace LitNovel.WebAPI.Controllers
                 Success = true,
                 Message = "Token refreshed",
                 Data = result
+            });
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout(LogoutRequestDto request, CancellationToken ct)
+        {
+            await _logoutUseCase.ExecuteAsync(request, ct);
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Logout successful",
+                Data = null
             });
         }
 
