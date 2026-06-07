@@ -26,5 +26,10 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 })
                 .ToListAsync(ct);
         }
+
+        public Task<bool> ExistsAsync(int id, CancellationToken ct)
+        {
+            return _context.Categories.AnyAsync(c => c.Id == id, ct);
+        }
     }
 }

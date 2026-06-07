@@ -2,11 +2,12 @@ namespace LitNovel.Domain.Enums
 {
     public enum NovelStatus
     {
-        Pending = 0,
-        Ongoing = 1,
-        Ended = 2,
-        Hiatus = 3,
-        Dropped = 4,
-        Canceled = 5
+        Draft = 0,
+        Pending = 1,
+        Ongoing = 2,
+        Ended = 3,
+        Hiatus = 4,
+        Dropped = 5,
+        Canceled = 6
     }
 }

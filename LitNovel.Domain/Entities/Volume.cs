@@ -1,8 +1,9 @@
+using LitNovel.Domain.Common;
+
 namespace LitNovel.Domain.Entities
 {
-    public class Volume
+    public class Volume : BaseEntity
     {
-        public int Id { get; set; }
         public int NovelId { get; set; }
         public int VolumeNumber { get; set; }
         public string Title { get; set; } = default!;

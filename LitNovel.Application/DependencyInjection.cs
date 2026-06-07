@@ -20,7 +20,18 @@ namespace LitNovel.Application
             services.AddScoped<IGetPublicProfileUseCase, GetPublicProfileUseCase>();
             services.AddScoped<IChangePasswordUseCase, ChangePasswordUseCase>();
             services.AddScoped<IGetCategoriesUseCase, GetCategoriesUseCase>();
+            services.AddScoped<IGetTagsUseCase, GetTagsUseCase>();
             services.AddScoped<IGetNovelsUseCase, GetNovelsUseCase>();
+            services.AddScoped<IGetNovelUseCase, GetNovelUseCase>();
+            services.AddScoped<IGetMyNovelsUseCase, GetMyNovelsUseCase>();
+            services.AddScoped<ICreateNovelUseCase, CreateNovelUseCase>();
+            services.AddScoped<IUpdateNovelUseCase, UpdateNovelUseCase>();
+            services.AddScoped<ISubmitNovelUseCase, SubmitNovelUseCase>();
+            services.AddScoped<IDeleteNovelUseCase, DeleteNovelUseCase>();
+            services.AddScoped<IGetVolumesUseCase, GetVolumesUseCase>();
+            services.AddScoped<ICreateVolumeUseCase, CreateVolumeUseCase>();
+            services.AddScoped<IUpdateVolumeUseCase, UpdateVolumeUseCase>();
+            services.AddScoped<IDeleteVolumeUseCase, DeleteVolumeUseCase>();
             services.AddScoped<ICreateUserReportUseCase, CreateUserReportUseCase>();
 
             return services;
