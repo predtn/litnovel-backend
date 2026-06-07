@@ -35,10 +35,10 @@ namespace LitNovel.WebAPI
                     Description = "Paste only the JWT access token returned by /api/auth/login."
                 });
 
-                options.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
+                options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
                 {
                     {
-                        new OpenApiSecuritySchemeReference("Bearer", null, null),
+                        new OpenApiSecuritySchemeReference("Bearer", document, null),
                         new List<string>()
                     }
                 });
@@ -52,6 +52,7 @@ namespace LitNovel.WebAPI
                 .ValidateDataAnnotations();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer();
+            services.AddAuthorization();
             services.ConfigureOptions<JwtBearerOptionsSetup>();
 
             return services;
