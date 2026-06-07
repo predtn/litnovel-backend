@@ -1,4 +1,8 @@
+using LitNovel.Application.Common.Interfaces.Repositories;
+using LitNovel.Application.Common.Interfaces.Services;
 using LitNovel.Infrastructure.Persistences;
+using LitNovel.Infrastructure.Persistences.Repositories;
+using LitNovel.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +19,16 @@ namespace LitNovel.Infrastructure
 
             services.AddDbContext<LitNovelContext>(options =>
                 options.UseSqlServer(connectionString));
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<INovelRepository, NovelRepository>();
+            services.AddScoped<IUserReportRepository, UserReportRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IPasswordService, PasswordService>();
+            services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();
+            services.AddScoped<IEmailService, EmailService>();
 
             return services;
         }
