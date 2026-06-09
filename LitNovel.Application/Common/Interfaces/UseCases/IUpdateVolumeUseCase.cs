@@ -4,6 +4,6 @@ namespace LitNovel.Application.Common.Interfaces.UseCases
 {
     public interface IUpdateVolumeUseCase
     {
-        Task<VolumeResponseDto> ExecuteAsync(int id, UpdateVolumeRequestDto request, CancellationToken ct);
+        Task<VolumeResponseDto> ExecuteAsync(int volumeId, UpdateVolumeRequestDto request, CancellationToken ct);
     }
 }

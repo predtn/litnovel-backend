@@ -1,7 +1,9 @@
 using LitNovel.Application.Common.Interfaces.UseCases;
 using LitNovel.Application.DTOs.Tag;
+using LitNovel.WebAPI.Common;
 using LitNovel.WebAPI.Common.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace LitNovel.WebAPI.Controllers
 {
@@ -17,9 +19,17 @@ namespace LitNovel.WebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get(CancellationToken ct)
+        public async Task<IActionResult> Get(ODataQueryOptions<TagResponseDto> queryOptions, CancellationToken ct)
         {
             var result = await _getTagsUseCase.ExecuteAsync(ct);
+            result = await ODataQueryResultFactory.ToListAsync(
+                result.AsQueryable(),
+                queryOptions,
+                tags => tags.OrderBy(t => t.Name),
+                defaultTop: 100,
+                maxTop: 100,
+                ct);
+
             return Ok(new ApiResponse<List<TagResponseDto>> { Success = true, Data = result });
         }
     }

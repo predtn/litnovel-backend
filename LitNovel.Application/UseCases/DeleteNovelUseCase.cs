@@ -26,7 +26,7 @@ namespace LitNovel.Application.UseCases
                 throw new BadRequestException("Invalid novel id");
             }
 
-            var novel = await _novelRepository.GetByIdForUpdateAsync(id, ct);
+            var novel = await _novelRepository.GetByIdForDeleteAsync(id, ct);
             if (novel == null)
             {
                 throw new NotFoundException("Novel not found");

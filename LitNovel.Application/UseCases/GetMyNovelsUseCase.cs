@@ -25,5 +25,10 @@ namespace LitNovel.Application.UseCases
             await _validator.ValidateAndThrowAsync(query, ct);
             return await _novelRepository.GetMyNovelsAsync(_currentUserService.UserId, query, ct);
         }
+
+        public IQueryable<MyNovelListItemResponseDto> ExecuteQuery()
+        {
+            return _novelRepository.QueryMyNovels(_currentUserService.UserId);
+        }
     }
 }

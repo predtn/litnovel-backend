@@ -23,6 +23,7 @@ namespace LitNovel.Application
             services.AddScoped<IGetTagsUseCase, GetTagsUseCase>();
             services.AddScoped<IGetNovelsUseCase, GetNovelsUseCase>();
             services.AddScoped<IGetNovelUseCase, GetNovelUseCase>();
+            services.AddScoped<IGetNovelAnalyticsUseCase, GetNovelAnalyticsUseCase>();
             services.AddScoped<IGetMyNovelsUseCase, GetMyNovelsUseCase>();
             services.AddScoped<ICreateNovelUseCase, CreateNovelUseCase>();
             services.AddScoped<IUpdateNovelUseCase, UpdateNovelUseCase>();
@@ -32,6 +33,12 @@ namespace LitNovel.Application
             services.AddScoped<ICreateVolumeUseCase, CreateVolumeUseCase>();
             services.AddScoped<IUpdateVolumeUseCase, UpdateVolumeUseCase>();
             services.AddScoped<IDeleteVolumeUseCase, DeleteVolumeUseCase>();
+            services.AddScoped<IGetChaptersUseCase, GetChaptersUseCase>();
+            services.AddScoped<IGetChapterUseCase, GetChapterUseCase>();
+            services.AddScoped<ICreateChapterUseCase, CreateChapterUseCase>();
+            services.AddScoped<IUpdateChapterUseCase, UpdateChapterUseCase>();
+            services.AddScoped<ISubmitChapterUseCase, SubmitChapterUseCase>();
+            services.AddScoped<IDeleteChapterUseCase, DeleteChapterUseCase>();
             services.AddScoped<ICreateUserReportUseCase, CreateUserReportUseCase>();
 
             return services;

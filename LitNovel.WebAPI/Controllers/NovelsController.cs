@@ -2,9 +2,11 @@ using LitNovel.Application.Common.Interfaces.UseCases;
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Novel;
 using LitNovel.Application.DTOs.Volume;
+using LitNovel.WebAPI.Common;
 using LitNovel.WebAPI.Common.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace LitNovel.WebAPI.Controllers
 {
@@ -14,6 +16,7 @@ namespace LitNovel.WebAPI.Controllers
     {
         private readonly IGetNovelsUseCase _getNovelsUseCase;
         private readonly IGetNovelUseCase _getNovelUseCase;
+        private readonly IGetNovelAnalyticsUseCase _getNovelAnalyticsUseCase;
         private readonly IGetMyNovelsUseCase _getMyNovelsUseCase;
         private readonly ICreateNovelUseCase _createNovelUseCase;
         private readonly IUpdateNovelUseCase _updateNovelUseCase;
@@ -25,6 +28,7 @@ namespace LitNovel.WebAPI.Controllers
         public NovelsController(
             IGetNovelsUseCase getNovelsUseCase,
             IGetNovelUseCase getNovelUseCase,
+            IGetNovelAnalyticsUseCase getNovelAnalyticsUseCase,
             IGetMyNovelsUseCase getMyNovelsUseCase,
             ICreateNovelUseCase createNovelUseCase,
             IUpdateNovelUseCase updateNovelUseCase,
@@ -35,6 +39,7 @@ namespace LitNovel.WebAPI.Controllers
         {
             _getNovelsUseCase = getNovelsUseCase;
             _getNovelUseCase = getNovelUseCase;
+            _getNovelAnalyticsUseCase = getNovelAnalyticsUseCase;
             _getMyNovelsUseCase = getMyNovelsUseCase;
             _createNovelUseCase = createNovelUseCase;
             _updateNovelUseCase = updateNovelUseCase;
@@ -58,11 +63,27 @@ namespace LitNovel.WebAPI.Controllers
             return Ok(new ApiResponse<NovelDetailResponseDto> { Success = true, Data = result });
         }
 
+        [HttpGet("{id:int}/analytics")]
+        [HttpGet("analytics/{id:int}")]
+        [Authorize]
+        public async Task<IActionResult> GetAnalytics(int id, CancellationToken ct)
+        {
+            var result = await _getNovelAnalyticsUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<NovelAnalyticsResponseDto> { Success = true, Data = result });
+        }
+
         [HttpGet("my")]
         [Authorize]
-        public async Task<IActionResult> GetMyNovels([FromQuery] MyNovelListQueryDto query, CancellationToken ct)
+        public async Task<IActionResult> GetMyNovels(ODataQueryOptions<MyNovelListItemResponseDto> queryOptions, CancellationToken ct)
         {
-            var result = await _getMyNovelsUseCase.ExecuteAsync(query, ct);
+            var result = await ODataQueryResultFactory.ToPagedResultAsync(
+                _getMyNovelsUseCase.ExecuteQuery(),
+                queryOptions,
+                novels => novels.OrderByDescending(n => n.UpdatedAt),
+                defaultPageSize: 20,
+                maxTop: 100,
+                ct);
+
             return Ok(new ApiResponse<PagedResult<MyNovelListItemResponseDto>> { Success = true, Data = result });
         }
 
@@ -100,9 +121,16 @@ namespace LitNovel.WebAPI.Controllers
 
         [HttpGet("{novelId:int}/volumes")]
         [Authorize]
-        public async Task<IActionResult> GetVolumes(int novelId, CancellationToken ct)
+        public async Task<IActionResult> GetVolumes(int novelId, ODataQueryOptions<VolumeResponseDto> queryOptions, CancellationToken ct)
         {
-            var result = await _getVolumesUseCase.ExecuteAsync(novelId, ct);
+            var result = await ODataQueryResultFactory.ToListAsync(
+                await _getVolumesUseCase.ExecuteQueryAsync(novelId, ct),
+                queryOptions,
+                volumes => volumes.OrderBy(v => v.VolumeNumber),
+                defaultTop: 100,
+                maxTop: 100,
+                ct);
+
             return Ok(new ApiResponse<List<VolumeResponseDto>> { Success = true, Data = result });
         }
 

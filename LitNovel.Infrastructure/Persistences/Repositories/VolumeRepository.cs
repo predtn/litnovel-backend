@@ -1,4 +1,5 @@
 using LitNovel.Application.Common.Interfaces.Repositories;
+using LitNovel.Application.DTOs.Volume;
 using LitNovel.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,12 +24,36 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .ToListAsync(ct);
         }
 
-        public Task<Volume?> GetByIdForUpdateAsync(int id, CancellationToken ct)
+        public IQueryable<VolumeResponseDto> QueryByNovelId(int novelId)
+        {
+            return _context.Volumes
+                .AsNoTracking()
+                .Where(v => v.NovelId == novelId)
+                .Select(v => new VolumeResponseDto
+                {
+                    Id = v.Id,
+                    VolumeNumber = v.VolumeNumber,
+                    Title = v.Title,
+                    ChapterCount = v.Chapters.Count,
+                    CreatedAt = v.CreatedAt
+                });
+        }
+
+        public Task<Volume?> GetByIdForUpdateAsync(int volumeId, CancellationToken ct)
         {
             return _context.Volumes
                 .Include(v => v.Novel)
                 .Include(v => v.Chapters)
-                .FirstOrDefaultAsync(v => v.Id == id, ct);
+                .FirstOrDefaultAsync(v => v.Id == volumeId, ct);
+        }
+
+        public Task<Volume?> GetByIdForDeleteAsync(int volumeId, CancellationToken ct)
+        {
+            return _context.Volumes
+                .Include(v => v.Novel)
+                .Include(v => v.Chapters)
+                    .ThenInclude(c => c.ChapterProgresses)
+                .FirstOrDefaultAsync(v => v.Id == volumeId, ct);
         }
 
         public Task<bool> VolumeNumberExistsAsync(int novelId, int volumeNumber, int? excludeVolumeId, CancellationToken ct)
@@ -47,6 +72,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
 
         public void Delete(Volume volume)
         {
+            _context.ReadingProgresses.RemoveRange(volume.Chapters.SelectMany(c => c.ChapterProgresses));
             _context.Volumes.Remove(volume);
         }
     }

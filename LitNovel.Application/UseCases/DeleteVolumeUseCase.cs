@@ -21,14 +21,14 @@ namespace LitNovel.Application.UseCases
             _unitOfWork = unitOfWork;
         }
 
-        public async Task ExecuteAsync(int id, CancellationToken ct)
+        public async Task ExecuteAsync(int volumeId, CancellationToken ct)
         {
-            if (id <= 0)
+            if (volumeId <= 0)
             {
                 throw new BadRequestException("Invalid volume id");
             }
 
-            var volume = await _volumeRepository.GetByIdForUpdateAsync(id, ct);
+            var volume = await _volumeRepository.GetByIdForDeleteAsync(volumeId, ct);
             if (volume == null)
             {
                 throw new NotFoundException("Volume not found");

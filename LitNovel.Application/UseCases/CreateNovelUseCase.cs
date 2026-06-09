@@ -39,10 +39,16 @@ namespace LitNovel.Application.UseCases
             await _validator.ValidateAndThrowAsync(request, ct);
             await EnsureReferencesExistAsync(request.CategoryId, request.TagIds, ct);
 
-            var slug = await CreateUniqueSlugAsync(request.Title, null, ct);
+            var title = request.Title.Trim();
+            if (await _novelRepository.TitleExistsForAuthorAsync(_currentUserService.UserId, title, null, ct))
+            {
+                throw new ConflictException("Novel title already exists");
+            }
+
+            var slug = await CreateUniqueSlugAsync(title, null, ct);
             var novel = new Novel
             {
-                Title = request.Title.Trim(),
+                Title = title,
                 Slug = slug,
                 Description = request.Description,
                 CoverImage = request.CoverImage,

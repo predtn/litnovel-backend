@@ -44,6 +44,31 @@ namespace LitNovel.Application.UseCases
             return volumes.Select(Map).ToList();
         }
 
+        public async Task<IQueryable<VolumeResponseDto>> ExecuteQueryAsync(int novelId, CancellationToken ct)
+        {
+            await EnsureCanManageNovelAsync(novelId, ct);
+            return _volumeRepository.QueryByNovelId(novelId);
+        }
+
+        private async Task EnsureCanManageNovelAsync(int novelId, CancellationToken ct)
+        {
+            if (novelId <= 0)
+            {
+                throw new BadRequestException("Invalid novel id");
+            }
+
+            var novel = await _novelRepository.GetByIdWithDetailsAsync(novelId, ct);
+            if (novel == null)
+            {
+                throw new NotFoundException("Novel not found");
+            }
+
+            if (!VolumePermissionHelper.CanManage(_currentUserService, novel.AuthorId))
+            {
+                throw new ForbiddenException("You do not have permission to edit this novel");
+            }
+        }
+
         private static VolumeResponseDto Map(Domain.Entities.Volume volume)
         {
             return new VolumeResponseDto

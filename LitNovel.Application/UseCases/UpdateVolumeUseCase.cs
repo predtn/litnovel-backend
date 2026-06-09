@@ -26,15 +26,15 @@ namespace LitNovel.Application.UseCases
             _validator = validator;
         }
 
-        public async Task<VolumeResponseDto> ExecuteAsync(int id, UpdateVolumeRequestDto request, CancellationToken ct)
+        public async Task<VolumeResponseDto> ExecuteAsync(int volumeId, UpdateVolumeRequestDto request, CancellationToken ct)
         {
             await _validator.ValidateAndThrowAsync(request, ct);
-            if (id <= 0)
+            if (volumeId <= 0)
             {
                 throw new BadRequestException("Invalid volume id");
             }
 
-            var volume = await _volumeRepository.GetByIdForUpdateAsync(id, ct);
+            var volume = await _volumeRepository.GetByIdForUpdateAsync(volumeId, ct);
             if (volume == null)
             {
                 throw new NotFoundException("Volume not found");
@@ -45,7 +45,7 @@ namespace LitNovel.Application.UseCases
                 throw new ForbiddenException("You do not have permission to edit this novel");
             }
 
-            if (await _volumeRepository.VolumeNumberExistsAsync(volume.NovelId, request.VolumeNumber, id, ct))
+            if (await _volumeRepository.VolumeNumberExistsAsync(volume.NovelId, request.VolumeNumber, volumeId, ct))
             {
                 throw new ConflictException("Volume number already exists in this novel");
             }

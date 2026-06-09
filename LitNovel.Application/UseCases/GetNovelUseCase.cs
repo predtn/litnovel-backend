@@ -37,6 +37,30 @@ namespace LitNovel.Application.UseCases
                 throw new ForbiddenException("Novel is not publicly available");
             }
 
+            var canManage = CanManage(novel);
+            var visibleVolumes = novel.Volumes
+                .OrderBy(v => v.VolumeNumber)
+                .Select(v => new NovelDetailVolumeResponseDto
+                {
+                    Id = v.Id,
+                    VolumeNumber = v.VolumeNumber,
+                    Title = v.Title,
+                    Chapters = v.Chapters
+                        .Where(c => canManage || c.Status == ChapterStatus.Published)
+                        .OrderBy(c => c.ChapterNumber)
+                        .Select(c => new NovelDetailChapterResponseDto
+                        {
+                            Id = c.Id,
+                            ChapterNumber = c.ChapterNumber,
+                            Title = c.Title,
+                            Status = c.Status.ToString(),
+                            CreatedAt = c.CreatedAt
+                        })
+                        .ToList()
+                })
+                .Where(v => canManage || v.Chapters.Count > 0)
+                .ToList();
+
             return new NovelDetailResponseDto
             {
                 Id = novel.Id,
@@ -61,10 +85,11 @@ namespace LitNovel.Application.UseCases
                 Status = novel.Status.ToString(),
                 ViewCount = novel.ViewCount,
                 LikeCount = novel.LikeCount,
-                TotalChapters = novel.TotalChapters,
-                TotalVolumes = novel.TotalVolumes,
+                TotalChapters = canManage ? novel.TotalChapters : visibleVolumes.Sum(v => v.Chapters.Count),
+                TotalVolumes = canManage ? novel.TotalVolumes : visibleVolumes.Count,
                 RatingAverage = novel.NovelRatings.Any() ? novel.NovelRatings.Average(r => r.Rating) : 0,
                 RatingCount = novel.NovelRatings.Count,
+                Volumes = visibleVolumes,
                 CreatedAt = novel.CreatedAt,
                 UpdatedAt = novel.UpdatedAt
             };
@@ -78,9 +103,14 @@ namespace LitNovel.Application.UseCases
             }
 
             return _currentUserService.IsAuthenticated
-                && (novel.AuthorId == _currentUserService.UserId
-                    || string.Equals(_currentUserService.Role, UserRole.Staff.ToString(), StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(_currentUserService.Role, UserRole.Admin.ToString(), StringComparison.OrdinalIgnoreCase));
+                && CanManage(novel);
+        }
+
+        private bool CanManage(Novel novel)
+        {
+            return novel.AuthorId == _currentUserService.UserId
+                || string.Equals(_currentUserService.Role, UserRole.Staff.ToString(), StringComparison.OrdinalIgnoreCase)
+                || string.Equals(_currentUserService.Role, UserRole.Admin.ToString(), StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsPublicStatus(NovelStatus status)

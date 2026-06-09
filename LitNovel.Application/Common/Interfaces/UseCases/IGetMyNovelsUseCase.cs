@@ -6,5 +6,6 @@ namespace LitNovel.Application.Common.Interfaces.UseCases
     public interface IGetMyNovelsUseCase
     {
         Task<PagedResult<MyNovelListItemResponseDto>> ExecuteAsync(MyNovelListQueryDto query, CancellationToken ct);
+        IQueryable<MyNovelListItemResponseDto> ExecuteQuery();
     }
 }

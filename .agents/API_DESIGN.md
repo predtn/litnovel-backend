@@ -1264,8 +1264,8 @@ GET /api/novels
 |---|---|---|
 | `GET` | `/api/novels/{novelId}/volumes` | Load volume list |
 | `POST` | `/api/novels/{novelId}/volumes` | Create volume |
-| `PUT` | `/api/volumes/{id}` | Edit volume |
-| `DELETE` | `/api/volumes/{id}` | Delete volume (cascade chapters) |
+| `PUT` | `/api/volumes/{volumeId}` | Edit volume |
+| `DELETE` | `/api/volumes/{volumeId}` | Delete volume (cascade chapters) |
 
 ---
 
@@ -1523,7 +1523,7 @@ GET /api/novels
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/novels/my?status=Pending` | Pending novels |
-| `GET` | `/api/volumes/{novelId}/chapters?status=Pending` | Pending chapters |
+| `GET` | `/api/volumes/{volumeId}/chapters?status=Pending` | Pending chapters |
 
 ---
 

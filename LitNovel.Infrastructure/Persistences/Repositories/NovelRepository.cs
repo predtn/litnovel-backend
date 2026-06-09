@@ -137,6 +137,74 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             };
         }
 
+        public IQueryable<MyNovelListItemResponseDto> QueryMyNovels(int authorId)
+        {
+            return _context.Novels
+                .AsNoTracking()
+                .Where(n => n.AuthorId == authorId)
+                .Select(n => new MyNovelListItemResponseDto
+                {
+                    Id = n.Id,
+                    Title = n.Title,
+                    Slug = n.Slug,
+                    CoverImage = n.CoverImage,
+                    Status = n.Status.ToString(),
+                    TotalChapters = n.TotalChapters,
+                    TotalVolumes = n.TotalVolumes,
+                    ViewCount = n.ViewCount,
+                    RatingAverage = n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0,
+                    CreatedAt = n.CreatedAt,
+                    UpdatedAt = n.UpdatedAt
+                });
+        }
+
+        public async Task<NovelAnalyticsResponseDto> GetAnalyticsAsync(int id, CancellationToken ct)
+        {
+            var analytics = await _context.Novels
+                .AsNoTracking()
+                .Where(n => n.Id == id)
+                .Select(n => new NovelAnalyticsResponseDto
+                {
+                    NovelId = n.Id,
+                    ViewCount = n.ViewCount,
+                    LikeCount = n.LikeCount,
+                    FavoritesCount = n.Favorites.Count,
+                    RatingAverage = n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0,
+                    RatingCount = n.NovelRatings.Count,
+                    CommentCount = n.Volumes
+                        .SelectMany(v => v.Chapters)
+                        .SelectMany(c => c.CommentChapters)
+                        .Count()
+                })
+                .FirstAsync(ct);
+
+            var ratingCounts = await _context.NovelRatings
+                .AsNoTracking()
+                .Where(r => r.NovelId == id)
+                .GroupBy(r => r.Rating)
+                .Select(g => new { Rating = (int)g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.Rating, x => x.Count, ct);
+
+            analytics.RatingDistribution = Enumerable.Range(1, 5)
+                .ToDictionary(rating => rating, rating => ratingCounts.GetValueOrDefault(rating));
+
+            analytics.TopChapters = await _context.Chapters
+                .AsNoTracking()
+                .Where(c => c.Volume.NovelId == id)
+                .Select(c => new NovelTopChapterResponseDto
+                {
+                    ChapterId = c.Id,
+                    Title = c.Title,
+                    CommentCount = c.CommentChapters.Count
+                })
+                .OrderByDescending(c => c.CommentCount)
+                .ThenBy(c => c.ChapterId)
+                .Take(5)
+                .ToListAsync(ct);
+
+            return analytics;
+        }
+
         public Task<LitNovel.Domain.Entities.Novel?> GetByIdWithDetailsAsync(int id, CancellationToken ct)
         {
             return _context.Novels
@@ -146,6 +214,8 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .Include(n => n.NovelTags)
                     .ThenInclude(nt => nt.Tag)
                 .Include(n => n.NovelRatings)
+                .Include(n => n.Volumes)
+                    .ThenInclude(v => v.Chapters)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(n => n.Id == id, ct);
         }
@@ -155,11 +225,29 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             return _context.Novels.FirstOrDefaultAsync(n => n.Id == id, ct);
         }
 
+        public Task<LitNovel.Domain.Entities.Novel?> GetByIdForDeleteAsync(int id, CancellationToken ct)
+        {
+            return _context.Novels
+                .Include(n => n.TargetReports)
+                .Include(n => n.NovelProgresses)
+                .FirstOrDefaultAsync(n => n.Id == id, ct);
+        }
+
         public Task<LitNovel.Domain.Entities.Novel?> GetByIdWithTagsForUpdateAsync(int id, CancellationToken ct)
         {
             return _context.Novels
                 .Include(n => n.NovelTags)
                 .FirstOrDefaultAsync(n => n.Id == id, ct);
+        }
+
+        public Task<bool> TitleExistsForAuthorAsync(int authorId, string title, int? excludeNovelId, CancellationToken ct)
+        {
+            var normalizedTitle = title.Trim().ToLower();
+            return _context.Novels.AnyAsync(
+                n => n.AuthorId == authorId
+                    && n.Title.ToLower() == normalizedTitle
+                    && (!excludeNovelId.HasValue || n.Id != excludeNovelId.Value),
+                ct);
         }
 
         public Task<bool> SlugExistsAsync(string slug, int? excludeNovelId, CancellationToken ct)
@@ -174,6 +262,8 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
 
         public void Delete(LitNovel.Domain.Entities.Novel novel)
         {
+            _context.NovelReports.RemoveRange(novel.TargetReports);
+            _context.ReadingProgresses.RemoveRange(novel.NovelProgresses);
             _context.Novels.Remove(novel);
         }
     }

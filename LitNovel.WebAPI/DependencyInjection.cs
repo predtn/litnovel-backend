@@ -1,9 +1,12 @@
 using System.Text;
 using LitNovel.Application.Common.Interfaces.Services;
+using LitNovel.WebAPI.Common;
+using LitNovel.WebAPI.Common.Json;
 using LitNovel.WebAPI.Configs;
 using LitNovel.WebAPI.Middlewares;
 using LitNovel.WebAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.OData;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
@@ -13,7 +16,16 @@ namespace LitNovel.WebAPI
     {
         public static IServiceCollection AddWebAPI(this IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new NullableDateTimeJsonConverter());
+                })
+                .AddOData(options => options
+                    .Filter()
+                    .OrderBy()
+                    .Count()
+                    .SetMaxTop(100));
             services.AddOpenApi();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(options =>
@@ -24,6 +36,7 @@ namespace LitNovel.WebAPI
                     Version = "v1",
                     Description = "Quick testing surface for LitNovel backend APIs."
                 });
+                options.OperationFilter<ODataQueryOptionsOperationFilter>();
 
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
