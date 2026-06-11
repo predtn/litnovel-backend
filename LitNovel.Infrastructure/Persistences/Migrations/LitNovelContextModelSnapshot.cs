@@ -724,6 +724,9 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("NovelId")
                         .HasColumnType("int");
 
@@ -731,6 +734,9 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("VolumeNumber")
                         .HasColumnType("int");

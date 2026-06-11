@@ -22,7 +22,10 @@ namespace LitNovel.Infrastructure
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<ITagRepository, TagRepository>();
             services.AddScoped<INovelRepository, NovelRepository>();
+            services.AddScoped<IVolumeRepository, VolumeRepository>();
+            services.AddScoped<IChapterRepository, ChapterRepository>();
             services.AddScoped<IUserReportRepository, UserReportRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPasswordService, PasswordService>();
