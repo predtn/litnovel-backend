@@ -117,14 +117,6 @@ namespace LitNovel.WebAPI.Controllers
             return Ok(new ApiResponse<PagedResult<NovelListItemResponseDto>> { Success = true, Data = result });
         }
 
-        [HttpGet("me/bookmarks")]
-        [Authorize]
-        public async Task<IActionResult> GetBookmarks([FromQuery] int page = 1, [FromQuery] int size = 20, CancellationToken ct = default)
-        {
-            var result = await _getMyFavoritesUseCase.ExecuteAsync(page, size, ct);
-            return Ok(new ApiResponse<PagedResult<NovelListItemResponseDto>> { Success = true, Data = result });
-        }
-
         [HttpGet("me/likes")]
         [Authorize]
         public async Task<IActionResult> GetLikes([FromQuery] int page = 1, [FromQuery] int size = 20, CancellationToken ct = default)
