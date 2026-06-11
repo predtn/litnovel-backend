@@ -15,6 +15,7 @@ namespace LitNovel.Domain.Entities
         public Chapter Chapter { get; set; } = default!;
         public CommentChapter? ParentComment { get; set; }
         public ICollection<CommentChapter> Replies { get; set; } = new List<CommentChapter>();
+        public ICollection<CommentLike> CommentLikes { get; set; } = new List<CommentLike>();
         public ICollection<UserReport> TargetReports { get; set; } = new List<UserReport>();
     }
 }

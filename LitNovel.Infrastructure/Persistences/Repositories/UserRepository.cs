@@ -1,4 +1,7 @@
 using LitNovel.Application.Common.Interfaces.Repositories;
+using LitNovel.Application.Common.Models;
+using LitNovel.Application.DTOs.User;
+using LitNovel.Domain.Enums;
 using LitNovel.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,6 +41,46 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         {
             var normalized = identifier.Trim();
             return _context.Users.FirstOrDefaultAsync(u => u.Email == normalized || u.Username == normalized, ct);
+        }
+
+        public async Task<PagedResult<UserSearchResponseDto>> SearchAsync(UserSearchQueryDto query, CancellationToken ct)
+        {
+            var page = query.Page <= 0 ? 1 : query.Page;
+            var size = query.Size <= 0 ? 10 : query.Size;
+
+            var users = _context.Users.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(query.Keyword))
+            {
+                var keyword = query.Keyword.Trim();
+                users = users.Where(u => u.Username.Contains(keyword));
+            }
+
+            var total = await users.CountAsync(ct);
+            var items = await users
+                .OrderBy(u => u.Username)
+                .Skip((page - 1) * size)
+                .Take(size)
+                .Select(u => new UserSearchResponseDto
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    Avatar = u.Avatar,
+                    NovelsPublished = u.Novels.Count(n => n.Status == NovelStatus.Ongoing
+                        || n.Status == NovelStatus.Ended
+                        || n.Status == NovelStatus.Hiatus
+                        || n.Status == NovelStatus.Dropped)
+                })
+                .ToListAsync(ct);
+
+            return new PagedResult<UserSearchResponseDto>
+            {
+                Items = items,
+                Page = page,
+                Size = size,
+                TotalElements = total,
+                TotalPages = (int)Math.Ceiling(total / (double)size)
+            };
         }
 
         public Task<bool> EmailExistsAsync(string email, CancellationToken ct)

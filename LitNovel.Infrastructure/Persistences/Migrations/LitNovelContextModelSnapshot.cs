@@ -212,6 +212,24 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.ToTable("CommentChapters", (string)null);
                 });
 
+            modelBuilder.Entity("LitNovel.Domain.Entities.CommentLike", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CommentChapterId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId", "CommentChapterId");
+
+                    b.HasIndex("CommentChapterId");
+
+                    b.ToTable("CommentLikes", (string)null);
+                });
+
             modelBuilder.Entity("LitNovel.Domain.Entities.Favorite", b =>
                 {
                     b.Property<int>("UserId")
@@ -352,6 +370,24 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                         .IsUnique();
 
                     b.ToTable("Novels", (string)null);
+                });
+
+            modelBuilder.Entity("LitNovel.Domain.Entities.NovelLike", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NovelId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId", "NovelId");
+
+                    b.HasIndex("NovelId");
+
+                    b.ToTable("NovelLikes", (string)null);
                 });
 
             modelBuilder.Entity("LitNovel.Domain.Entities.NovelRating", b =>
@@ -797,6 +833,25 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("LitNovel.Domain.Entities.CommentLike", b =>
+                {
+                    b.HasOne("LitNovel.Domain.Entities.CommentChapter", "CommentChapter")
+                        .WithMany("CommentLikes")
+                        .HasForeignKey("CommentChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LitNovel.Domain.Entities.User", "User")
+                        .WithMany("CommentLikes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CommentChapter");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("LitNovel.Domain.Entities.Favorite", b =>
                 {
                     b.HasOne("LitNovel.Domain.Entities.Novel", "Novel")
@@ -843,6 +898,25 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.Navigation("Author");
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("LitNovel.Domain.Entities.NovelLike", b =>
+                {
+                    b.HasOne("LitNovel.Domain.Entities.Novel", "Novel")
+                        .WithMany("NovelLikes")
+                        .HasForeignKey("NovelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LitNovel.Domain.Entities.User", "User")
+                        .WithMany("NovelLikes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Novel");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("LitNovel.Domain.Entities.NovelRating", b =>
@@ -1049,6 +1123,8 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
 
             modelBuilder.Entity("LitNovel.Domain.Entities.CommentChapter", b =>
                 {
+                    b.Navigation("CommentLikes");
+
                     b.Navigation("Replies");
 
                     b.Navigation("TargetReports");
@@ -1057,6 +1133,8 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
             modelBuilder.Entity("LitNovel.Domain.Entities.Novel", b =>
                 {
                     b.Navigation("Favorites");
+
+                    b.Navigation("NovelLikes");
 
                     b.Navigation("NovelProgresses");
 
@@ -1078,9 +1156,13 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                 {
                     b.Navigation("CommentChapters");
 
+                    b.Navigation("CommentLikes");
+
                     b.Navigation("Favorites");
 
                     b.Navigation("Notifications");
+
+                    b.Navigation("NovelLikes");
 
                     b.Navigation("NovelRatings");
 

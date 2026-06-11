@@ -30,6 +30,22 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 novels = novels.Where(n => n.AuthorId == query.AuthorId.Value);
             }
 
+            if (!string.IsNullOrWhiteSpace(query.Keyword))
+            {
+                var keyword = query.Keyword.Trim();
+                novels = novels.Where(n => n.Title.Contains(keyword) || n.Author.Username.Contains(keyword));
+            }
+
+            if (query.CategoryId.HasValue)
+            {
+                novels = novels.Where(n => n.CategoryId == query.CategoryId.Value);
+            }
+
+            if (query.TagId.Count > 0)
+            {
+                novels = novels.Where(n => query.TagId.All(tagId => n.NovelTags.Any(nt => nt.TagId == tagId)));
+            }
+
             if (Enum.TryParse<NovelStatus>(query.Status, true, out var status))
             {
                 novels = novels.Where(n => n.Status == status);

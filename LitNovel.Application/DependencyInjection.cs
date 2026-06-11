@@ -19,6 +19,7 @@ namespace LitNovel.Application
             services.AddScoped<IGetMyProfileUseCase, GetMyProfileUseCase>();
             services.AddScoped<IUpdateMyProfileUseCase, UpdateMyProfileUseCase>();
             services.AddScoped<IGetPublicProfileUseCase, GetPublicProfileUseCase>();
+            services.AddScoped<ISearchUsersUseCase, SearchUsersUseCase>();
             services.AddScoped<IChangePasswordUseCase, ChangePasswordUseCase>();
             services.AddScoped<IGetCategoriesUseCase, GetCategoriesUseCase>();
             services.AddScoped<IGetTagsUseCase, GetTagsUseCase>();
@@ -41,6 +42,28 @@ namespace LitNovel.Application
             services.AddScoped<ISubmitChapterUseCase, SubmitChapterUseCase>();
             services.AddScoped<IDeleteChapterUseCase, DeleteChapterUseCase>();
             services.AddScoped<ICreateUserReportUseCase, CreateUserReportUseCase>();
+            services.AddScoped<IGetReadingHistoryUseCase, GetReadingHistoryUseCase>();
+            services.AddScoped<IGetNotificationsUseCase, GetNotificationsUseCase>();
+            services.AddScoped<ISaveReadingProgressUseCase, SaveReadingProgressUseCase>();
+            services.AddScoped<IDeleteReadingHistoryUseCase, DeleteReadingHistoryUseCase>();
+            services.AddScoped<IGetMyFavoritesUseCase, GetMyFavoritesUseCase>();
+            services.AddScoped<IAddFavoriteUseCase, AddFavoriteUseCase>();
+            services.AddScoped<IRemoveFavoriteUseCase, RemoveFavoriteUseCase>();
+            services.AddScoped<IGetMyNovelLikesUseCase, GetMyNovelLikesUseCase>();
+            services.AddScoped<IAddNovelLikeUseCase, AddNovelLikeUseCase>();
+            services.AddScoped<IRemoveNovelLikeUseCase, RemoveNovelLikeUseCase>();
+            services.AddScoped<IGetNovelReviewsUseCase, GetNovelReviewsUseCase>();
+            services.AddScoped<ICreateNovelReviewUseCase, CreateNovelReviewUseCase>();
+            services.AddScoped<IUpdateNovelReviewUseCase, UpdateNovelReviewUseCase>();
+            services.AddScoped<IDeleteNovelReviewUseCase, DeleteNovelReviewUseCase>();
+            services.AddScoped<IGetChapterCommentsUseCase, GetChapterCommentsUseCase>();
+            services.AddScoped<ICreateChapterCommentUseCase, CreateChapterCommentUseCase>();
+            services.AddScoped<ICreateCommentReplyUseCase, CreateCommentReplyUseCase>();
+            services.AddScoped<IUpdateCommentUseCase, UpdateCommentUseCase>();
+            services.AddScoped<IDeleteCommentUseCase, DeleteCommentUseCase>();
+            services.AddScoped<IAddCommentLikeUseCase, AddCommentLikeUseCase>();
+            services.AddScoped<IRemoveCommentLikeUseCase, RemoveCommentLikeUseCase>();
+            services.AddScoped<ICreateNovelReportUseCase, CreateNovelReportUseCase>();
 
             return services;
         }

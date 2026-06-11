@@ -1,6 +1,7 @@
 using LitNovel.Application.Common.Interfaces.UseCases;
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Novel;
+using LitNovel.Application.DTOs.Review;
 using LitNovel.Application.DTOs.Volume;
 using LitNovel.WebAPI.Common;
 using LitNovel.WebAPI.Common.Models;
@@ -24,6 +25,12 @@ namespace LitNovel.WebAPI.Controllers
         private readonly IDeleteNovelUseCase _deleteNovelUseCase;
         private readonly IGetVolumesUseCase _getVolumesUseCase;
         private readonly ICreateVolumeUseCase _createVolumeUseCase;
+        private readonly IAddFavoriteUseCase _addFavoriteUseCase;
+        private readonly IRemoveFavoriteUseCase _removeFavoriteUseCase;
+        private readonly IAddNovelLikeUseCase _addNovelLikeUseCase;
+        private readonly IRemoveNovelLikeUseCase _removeNovelLikeUseCase;
+        private readonly IGetNovelReviewsUseCase _getNovelReviewsUseCase;
+        private readonly ICreateNovelReviewUseCase _createNovelReviewUseCase;
 
         public NovelsController(
             IGetNovelsUseCase getNovelsUseCase,
@@ -35,7 +42,13 @@ namespace LitNovel.WebAPI.Controllers
             ISubmitNovelUseCase submitNovelUseCase,
             IDeleteNovelUseCase deleteNovelUseCase,
             IGetVolumesUseCase getVolumesUseCase,
-            ICreateVolumeUseCase createVolumeUseCase)
+            ICreateVolumeUseCase createVolumeUseCase,
+            IAddFavoriteUseCase addFavoriteUseCase,
+            IRemoveFavoriteUseCase removeFavoriteUseCase,
+            IAddNovelLikeUseCase addNovelLikeUseCase,
+            IRemoveNovelLikeUseCase removeNovelLikeUseCase,
+            IGetNovelReviewsUseCase getNovelReviewsUseCase,
+            ICreateNovelReviewUseCase createNovelReviewUseCase)
         {
             _getNovelsUseCase = getNovelsUseCase;
             _getNovelUseCase = getNovelUseCase;
@@ -47,6 +60,12 @@ namespace LitNovel.WebAPI.Controllers
             _deleteNovelUseCase = deleteNovelUseCase;
             _getVolumesUseCase = getVolumesUseCase;
             _createVolumeUseCase = createVolumeUseCase;
+            _addFavoriteUseCase = addFavoriteUseCase;
+            _removeFavoriteUseCase = removeFavoriteUseCase;
+            _addNovelLikeUseCase = addNovelLikeUseCase;
+            _removeNovelLikeUseCase = removeNovelLikeUseCase;
+            _getNovelReviewsUseCase = getNovelReviewsUseCase;
+            _createNovelReviewUseCase = createNovelReviewUseCase;
         }
 
         [HttpGet]
@@ -140,6 +159,53 @@ namespace LitNovel.WebAPI.Controllers
         {
             var result = await _createVolumeUseCase.ExecuteAsync(novelId, request, ct);
             return StatusCode(StatusCodes.Status201Created, new ApiResponse<VolumeResponseDto> { Success = true, Message = "Volume created successfully", Data = result });
+        }
+
+        [HttpPost("{id:int}/favorites")]
+        [Authorize]
+        public async Task<IActionResult> AddFavorite(int id, CancellationToken ct)
+        {
+            await _addFavoriteUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<object> { Success = true, Message = "Added to favorites", Data = null });
+        }
+
+        [HttpDelete("{id:int}/favorites")]
+        [Authorize]
+        public async Task<IActionResult> RemoveFavorite(int id, CancellationToken ct)
+        {
+            await _removeFavoriteUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<object> { Success = true, Message = "Removed from favorites", Data = null });
+        }
+
+        [HttpPost("{id:int}/likes")]
+        [Authorize]
+        public async Task<IActionResult> AddLike(int id, CancellationToken ct)
+        {
+            await _addNovelLikeUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<object> { Success = true, Message = "Novel liked", Data = null });
+        }
+
+        [HttpDelete("{id:int}/likes")]
+        [Authorize]
+        public async Task<IActionResult> RemoveLike(int id, CancellationToken ct)
+        {
+            await _removeNovelLikeUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<object> { Success = true, Message = "Novel unliked", Data = null });
+        }
+
+        [HttpGet("{id:int}/reviews")]
+        public async Task<IActionResult> GetReviews(int id, [FromQuery] int page = 1, [FromQuery] int size = 20, CancellationToken ct = default)
+        {
+            var result = await _getNovelReviewsUseCase.ExecuteAsync(id, page, size, ct);
+            return Ok(new ApiResponse<PagedResult<NovelReviewResponseDto>> { Success = true, Data = result });
+        }
+
+        [HttpPost("{id:int}/reviews")]
+        [Authorize]
+        public async Task<IActionResult> CreateReview(int id, CreateNovelReviewRequestDto request, CancellationToken ct)
+        {
+            var result = await _createNovelReviewUseCase.ExecuteAsync(id, request, ct);
+            return StatusCode(StatusCodes.Status201Created, new ApiResponse<NovelReviewResponseDto> { Success = true, Message = "Review submitted", Data = result });
         }
     }
 }

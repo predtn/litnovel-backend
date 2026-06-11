@@ -27,6 +27,14 @@ namespace LitNovel.Infrastructure
             services.AddScoped<IVolumeRepository, VolumeRepository>();
             services.AddScoped<IChapterRepository, ChapterRepository>();
             services.AddScoped<IUserReportRepository, UserReportRepository>();
+            services.AddScoped<IReadingProgressRepository, ReadingProgressRepository>();
+            services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+            services.AddScoped<INovelRatingRepository, NovelRatingRepository>();
+            services.AddScoped<ICommentChapterRepository, CommentChapterRepository>();
+            services.AddScoped<INovelReportRepository, NovelReportRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<INovelLikeRepository, NovelLikeRepository>();
+            services.AddScoped<ICommentLikeRepository, CommentLikeRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPasswordService, PasswordService>();
             services.AddScoped<IJwtService, JwtService>();
