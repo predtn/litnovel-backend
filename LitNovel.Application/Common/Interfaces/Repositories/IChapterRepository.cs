@@ -1,5 +1,6 @@
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Chapter;
+using LitNovel.Application.DTOs.Staff;
 using LitNovel.Domain.Entities;
 
 namespace LitNovel.Application.Common.Interfaces.Repositories
@@ -14,5 +15,8 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
         Task<bool> ChapterNumberExistsAsync(int volumeId, int chapterNumber, int? excludeChapterId, CancellationToken ct);
         Task AddAsync(Chapter chapter, CancellationToken ct);
         void Delete(Chapter chapter);
+        Task<PagedResult<PendingChapterListItemResponseDto>> GetPendingAsync(int page, int size, CancellationToken ct);
+        Task<Chapter?> GetByIdForModerationAsync(int id, CancellationToken ct);
+        Task<int> CountPendingAsync(CancellationToken ct);
     }
 }

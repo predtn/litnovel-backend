@@ -1,6 +1,7 @@
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Notification;
+using LitNovel.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace LitNovel.Infrastructure.Persistences.Repositories
@@ -53,6 +54,11 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 TotalElements = total,
                 TotalPages = (int)Math.Ceiling(total / (double)size)
             };
+        }
+
+        public async Task AddAsync(Notification notification, CancellationToken ct)
+        {
+            await _context.Notifications.AddAsync(notification, ct);
         }
     }
 }

@@ -64,6 +64,18 @@ namespace LitNovel.Application
             services.AddScoped<IAddCommentLikeUseCase, AddCommentLikeUseCase>();
             services.AddScoped<IRemoveCommentLikeUseCase, RemoveCommentLikeUseCase>();
             services.AddScoped<ICreateNovelReportUseCase, CreateNovelReportUseCase>();
+            services.AddScoped<IGetStaffDashboardUseCase, GetStaffDashboardUseCase>();
+            services.AddScoped<IGetPendingNovelsUseCase, GetPendingNovelsUseCase>();
+            services.AddScoped<IGetNovelForReviewUseCase, GetNovelForReviewUseCase>();
+            services.AddScoped<IModerateNovelUseCase, ModerateNovelUseCase>();
+            services.AddScoped<IGetPendingChaptersUseCase, GetPendingChaptersUseCase>();
+            services.AddScoped<IGetChapterForReviewUseCase, GetChapterForReviewUseCase>();
+            services.AddScoped<IModerateChapterUseCase, ModerateChapterUseCase>();
+            services.AddScoped<IGetReportsUseCase, GetReportsUseCase>();
+            services.AddScoped<IGetReportDetailUseCase, GetReportDetailUseCase>();
+            services.AddScoped<IResolveReportUseCase, ResolveReportUseCase>();
+            services.AddScoped<IWarnUserUseCase, WarnUserUseCase>();
+            services.AddScoped<IGetModerationHistoryUseCase, GetModerationHistoryUseCase>();
 
             return services;
         }
