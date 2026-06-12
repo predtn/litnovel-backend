@@ -76,6 +76,7 @@ namespace LitNovel.Application
             services.AddScoped<IResolveReportUseCase, ResolveReportUseCase>();
             services.AddScoped<IWarnUserUseCase, WarnUserUseCase>();
             services.AddScoped<IGetModerationHistoryUseCase, GetModerationHistoryUseCase>();
+            services.AddScoped<IGetUserWarningsUseCase, GetUserWarningsUseCase>();
 
             return services;
         }

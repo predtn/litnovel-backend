@@ -32,6 +32,8 @@ namespace LitNovel.Infrastructure.Persistences
 
         public DbSet<NovelReport> NovelReports => Set<NovelReport>();
         public DbSet<UserReport> UserReports => Set<UserReport>();
+        public DbSet<UserWarning> UserWarnings => Set<UserWarning>();
+        public DbSet<ModerationLog> ModerationLogs => Set<ModerationLog>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

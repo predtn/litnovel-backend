@@ -2,7 +2,10 @@ namespace LitNovel.Application.DTOs.Staff
 {
     public class WarnUserRequestDto
     {
-        public int UserId { get; set; }
-        public string Message { get; set; } = default!;
+        /// <summary>Warning reason (1–1000 chars).</summary>
+        public string Reason { get; set; } = default!;
+
+        /// <summary>Minor | Major</summary>
+        public string Severity { get; set; } = default!;
     }
 }

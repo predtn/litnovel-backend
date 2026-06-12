@@ -1,3 +1,4 @@
+using FluentValidation;
 using LitNovel.Application.Common.Exceptions;
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Interfaces.Services;
@@ -10,30 +11,55 @@ namespace LitNovel.Application.UseCases
 {
     public class WarnUserUseCase : IWarnUserUseCase
     {
-        private readonly IUserRepository        _userRepository;
-        private readonly INotificationRepository _notificationRepository;
-        private readonly IUnitOfWork            _unitOfWork;
+        private readonly IUserRepository          _userRepository;
+        private readonly IUserWarningRepository   _userWarningRepository;
+        private readonly INotificationRepository  _notificationRepository;
+        private readonly IModerationLogRepository _moderationLogRepository;
+        private readonly ICurrentUserService      _currentUserService;
+        private readonly IUnitOfWork              _unitOfWork;
+        private readonly IValidator<WarnUserRequestDto> _validator;
 
         public WarnUserUseCase(
             IUserRepository userRepository,
+            IUserWarningRepository userWarningRepository,
             INotificationRepository notificationRepository,
-            IUnitOfWork unitOfWork)
+            IModerationLogRepository moderationLogRepository,
+            ICurrentUserService currentUserService,
+            IUnitOfWork unitOfWork,
+            IValidator<WarnUserRequestDto> validator)
         {
-            _userRepository         = userRepository;
-            _notificationRepository = notificationRepository;
-            _unitOfWork             = unitOfWork;
+            _userRepository          = userRepository;
+            _userWarningRepository   = userWarningRepository;
+            _notificationRepository  = notificationRepository;
+            _moderationLogRepository = moderationLogRepository;
+            _currentUserService      = currentUserService;
+            _unitOfWork              = unitOfWork;
+            _validator               = validator;
         }
 
-        public async Task ExecuteAsync(WarnUserRequestDto request, CancellationToken ct)
+        public async Task ExecuteAsync(int userId, WarnUserRequestDto request, CancellationToken ct)
         {
-            if (request.UserId <= 0)
-                throw new BadRequestException("UserId is required.");
+            await _validator.ValidateAndThrowAsync(request, ct);
 
-            if (string.IsNullOrWhiteSpace(request.Message))
-                throw new BadRequestException("Warning message is required.");
+            var staffId = _currentUserService.UserId;
 
-            var user = await _userRepository.GetByIdAsync(request.UserId, ct)
+            if (userId <= 0)
+                throw new BadRequestException("Invalid user ID.");
+
+            var user = await _userRepository.GetByIdAsync(userId, ct)
                 ?? throw new NotFoundException("User not found.");
+
+            var severity = Enum.TryParse<WarningSeverity>(request.Severity, true, out var parsedSeverity)
+                ? parsedSeverity
+                : throw new BadRequestException("Severity must be 'Minor' or 'Major'.");
+
+            var warning = new UserWarning
+            {
+                UserId     = user.Id,
+                IssuedById = staffId,
+                Reason     = request.Reason,
+                Severity   = severity
+            };
 
             var notification = new Notification
             {
@@ -41,11 +67,24 @@ namespace LitNovel.Application.UseCases
                 NotificationType = NotificationType.SystemAlert,
                 EntityType       = "Warning",
                 EntityId         = null,
-                Message          = $"⚠️ Cảnh báo từ Ban kiểm duyệt: {request.Message}",
+                Message          = $"⚠️ [{severity}] Cảnh báo từ Ban kiểm duyệt: {request.Reason}",
                 IsRead           = false
             };
 
+            var log = new ModerationLog
+            {
+                StaffId     = staffId,
+                Action      = "WarnUser",
+                TargetType  = "User",
+                TargetId    = user.Id,
+                TargetTitle = user.Username,
+                Notes       = $"[{severity}] {request.Reason}",
+                PerformedAt = DateTime.UtcNow
+            };
+
+            await _userWarningRepository.AddAsync(warning, ct);
             await _notificationRepository.AddAsync(notification, ct);
+            await _moderationLogRepository.AddAsync(log, ct);
             await _unitOfWork.SaveChangesAsync(ct);
         }
     }
