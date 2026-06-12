@@ -1,6 +1,7 @@
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Chapter;
+using LitNovel.Application.DTOs.Staff;
 using LitNovel.Domain.Entities;
 using LitNovel.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -126,6 +127,59 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         {
             _context.ReadingProgresses.RemoveRange(chapter.ChapterProgresses);
             _context.Chapters.Remove(chapter);
+        }
+
+        public async Task<PagedResult<PendingChapterListItemResponseDto>> GetPendingAsync(int page, int size, CancellationToken ct)
+        {
+            var query = _context.Chapters
+                .AsNoTracking()
+                .Where(c => c.Status == ChapterStatus.Pending)
+                .OrderBy(c => c.UpdatedAt);
+
+            var total = await query.CountAsync(ct);
+            var items = await query
+                .Skip((page - 1) * size)
+                .Take(size)
+                .Select(c => new PendingChapterListItemResponseDto
+                {
+                    Id              = c.Id,
+                    ChapterNumber   = c.ChapterNumber,
+                    Title           = c.Title,
+                    Slug            = c.Slug,
+                    NovelId         = c.Volume.Novel.Id,
+                    NovelTitle      = c.Volume.Novel.Title,
+                    NovelSlug       = c.Volume.Novel.Slug,
+                    AuthorId        = c.Volume.Novel.AuthorId,
+                    AuthorUsername  = c.Volume.Novel.Author.Username,
+                    SubmittedAt     = c.UpdatedAt
+                })
+                .ToListAsync(ct);
+
+            return new PagedResult<PendingChapterListItemResponseDto>
+            {
+                Items         = items,
+                Page          = page,
+                Size          = size,
+                TotalElements = total,
+                TotalPages    = (int)Math.Ceiling(total / (double)size)
+            };
+        }
+
+        public Task<Chapter?> GetByIdForModerationAsync(int id, CancellationToken ct)
+        {
+            return _context.Chapters
+                .AsNoTracking()
+                .Include(c => c.Content)
+                .Include(c => c.Volume)
+                    .ThenInclude(v => v.Novel)
+                        .ThenInclude(n => n.Author)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(c => c.Id == id, ct);
+        }
+
+        public Task<int> CountPendingAsync(CancellationToken ct)
+        {
+            return _context.Chapters.CountAsync(c => c.Status == ChapterStatus.Pending, ct);
         }
     }
 }
