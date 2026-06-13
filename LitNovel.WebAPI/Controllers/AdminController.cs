@@ -1,6 +1,7 @@
 using LitNovel.Application.Common.Interfaces.UseCases;
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Admin;
+using LitNovel.Application.DTOs.Category;
 using LitNovel.WebAPI.Common;
 using LitNovel.WebAPI.Common.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -28,6 +29,10 @@ namespace LitNovel.WebAPI.Controllers
         private readonly IUpdateAdminBadgeUseCase _updateAdminBadgeUseCase;
         private readonly IDeleteAdminBadgeUseCase _deleteAdminBadgeUseCase;
         private readonly IAwardBadgeUseCase _awardBadgeUseCase;
+        private readonly IGetAdminCategoriesUseCase _getAdminCategoriesUseCase;
+        private readonly ICreateAdminCategoryUseCase _createAdminCategoryUseCase;
+        private readonly IUpdateAdminCategoryUseCase _updateAdminCategoryUseCase;
+        private readonly IDeleteAdminCategoryUseCase _deleteAdminCategoryUseCase;
 
         public AdminController(
             IGetAdminStatisticsUseCase getAdminStatisticsUseCase,
@@ -43,7 +48,11 @@ namespace LitNovel.WebAPI.Controllers
             ICreateAdminBadgeUseCase createAdminBadgeUseCase,
             IUpdateAdminBadgeUseCase updateAdminBadgeUseCase,
             IDeleteAdminBadgeUseCase deleteAdminBadgeUseCase,
-            IAwardBadgeUseCase awardBadgeUseCase)
+            IAwardBadgeUseCase awardBadgeUseCase,
+            IGetAdminCategoriesUseCase getAdminCategoriesUseCase,
+            ICreateAdminCategoryUseCase createAdminCategoryUseCase,
+            IUpdateAdminCategoryUseCase updateAdminCategoryUseCase,
+            IDeleteAdminCategoryUseCase deleteAdminCategoryUseCase)
         {
             _getAdminStatisticsUseCase = getAdminStatisticsUseCase;
             _getAdminUsersUseCase = getAdminUsersUseCase;
@@ -59,6 +68,10 @@ namespace LitNovel.WebAPI.Controllers
             _updateAdminBadgeUseCase = updateAdminBadgeUseCase;
             _deleteAdminBadgeUseCase = deleteAdminBadgeUseCase;
             _awardBadgeUseCase = awardBadgeUseCase;
+            _getAdminCategoriesUseCase = getAdminCategoriesUseCase;
+            _createAdminCategoryUseCase = createAdminCategoryUseCase;
+            _updateAdminCategoryUseCase = updateAdminCategoryUseCase;
+            _deleteAdminCategoryUseCase = deleteAdminCategoryUseCase;
         }
 
         [HttpGet("statistics")]
@@ -204,6 +217,44 @@ namespace LitNovel.WebAPI.Controllers
                 Message = "Badge awarded successfully",
                 Data = result
             });
+        }
+
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetCategories(CancellationToken ct)
+        {
+            var result = await _getAdminCategoriesUseCase.ExecuteAsync(ct);
+            return Ok(new ApiResponse<IReadOnlyList<CategoryResponseDto>> { Success = true, Data = result });
+        }
+
+        [HttpPost("categories")]
+        public async Task<IActionResult> CreateCategory(CreateCategoryRequestDto request, CancellationToken ct)
+        {
+            var result = await _createAdminCategoryUseCase.ExecuteAsync(request, ct);
+            return StatusCode(StatusCodes.Status201Created, new ApiResponse<CategoryResponseDto>
+            {
+                Success = true,
+                Message = "Category created",
+                Data = result
+            });
+        }
+
+        [HttpPut("categories/{id:int}")]
+        public async Task<IActionResult> UpdateCategory(int id, UpdateCategoryRequestDto request, CancellationToken ct)
+        {
+            var result = await _updateAdminCategoryUseCase.ExecuteAsync(id, request, ct);
+            return Ok(new ApiResponse<CategoryResponseDto>
+            {
+                Success = true,
+                Message = "Category updated",
+                Data = result
+            });
+        }
+
+        [HttpDelete("categories/{id:int}")]
+        public async Task<IActionResult> DeleteCategory(int id, CancellationToken ct)
+        {
+            await _deleteAdminCategoryUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<object> { Success = true, Data = null });
         }
     }
 }
