@@ -88,6 +88,7 @@ namespace LitNovel.Application
             services.AddScoped<IDeleteAdminTagUseCase, DeleteAdminTagUseCase>();
             services.AddScoped<IGetAdminSentNotificationsUseCase, GetAdminSentNotificationsUseCase>();
             services.AddScoped<ISendAdminNotificationUseCase, SendAdminNotificationUseCase>();
+            services.AddScoped<IGetAdminReportsUseCase, GetAdminReportsUseCase>();
 
             return services;
         }

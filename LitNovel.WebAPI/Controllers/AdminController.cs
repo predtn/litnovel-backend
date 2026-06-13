@@ -40,6 +40,7 @@ namespace LitNovel.WebAPI.Controllers
         private readonly IDeleteAdminTagUseCase _deleteAdminTagUseCase;
         private readonly IGetAdminSentNotificationsUseCase _getAdminSentNotificationsUseCase;
         private readonly ISendAdminNotificationUseCase _sendAdminNotificationUseCase;
+        private readonly IGetAdminReportsUseCase _getAdminReportsUseCase;
 
         public AdminController(
             IGetAdminStatisticsUseCase getAdminStatisticsUseCase,
@@ -65,7 +66,8 @@ namespace LitNovel.WebAPI.Controllers
             IUpdateAdminTagUseCase updateAdminTagUseCase,
             IDeleteAdminTagUseCase deleteAdminTagUseCase,
             IGetAdminSentNotificationsUseCase getAdminSentNotificationsUseCase,
-            ISendAdminNotificationUseCase sendAdminNotificationUseCase)
+            ISendAdminNotificationUseCase sendAdminNotificationUseCase,
+            IGetAdminReportsUseCase getAdminReportsUseCase)
         {
             _getAdminStatisticsUseCase = getAdminStatisticsUseCase;
             _getAdminUsersUseCase = getAdminUsersUseCase;
@@ -91,6 +93,7 @@ namespace LitNovel.WebAPI.Controllers
             _deleteAdminTagUseCase = deleteAdminTagUseCase;
             _getAdminSentNotificationsUseCase = getAdminSentNotificationsUseCase;
             _sendAdminNotificationUseCase = sendAdminNotificationUseCase;
+            _getAdminReportsUseCase = getAdminReportsUseCase;
         }
 
         [HttpGet("statistics")]
@@ -333,6 +336,13 @@ namespace LitNovel.WebAPI.Controllers
                 Message = message,
                 Data = result
             });
+        }
+
+        [HttpGet("reports")]
+        public async Task<IActionResult> GetReports([FromQuery] AdminReportsQueryDto query, CancellationToken ct)
+        {
+            var result = await _getAdminReportsUseCase.ExecuteAsync(query, ct);
+            return Ok(new ApiResponse<PagedResult<AdminReportResponseDto>> { Success = true, Data = result });
         }
     }
 }
