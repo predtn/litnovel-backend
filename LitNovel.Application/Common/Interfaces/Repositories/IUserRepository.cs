@@ -11,6 +11,7 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
         Task<User?> GetByIdAsync(int id, CancellationToken ct);
         Task<User?> GetByIdWithProfileAsync(int id, CancellationToken ct);
         Task<User?> GetByIdentifierAsync(string identifier, CancellationToken ct);
+        Task<IReadOnlyList<int>> GetAllIdsAsync(CancellationToken ct);
         Task<PagedResult<UserSearchResponseDto>> SearchAsync(UserSearchQueryDto query, CancellationToken ct);
         IQueryable<AdminUserListItemResponseDto> QueryAdminUsers();
         Task<AdminUserDetailResponseDto?> GetAdminUserDetailAsync(int id, CancellationToken ct);

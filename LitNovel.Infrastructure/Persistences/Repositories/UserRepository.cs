@@ -44,6 +44,14 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             return _context.Users.FirstOrDefaultAsync(u => u.Email == normalized || u.Username == normalized, ct);
         }
 
+        public async Task<IReadOnlyList<int>> GetAllIdsAsync(CancellationToken ct)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .Select(u => u.Id)
+                .ToListAsync(ct);
+        }
+
         public async Task<PagedResult<UserSearchResponseDto>> SearchAsync(UserSearchQueryDto query, CancellationToken ct)
         {
             var page = query.Page <= 0 ? 1 : query.Page;

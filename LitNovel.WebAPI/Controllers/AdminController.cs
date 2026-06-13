@@ -38,6 +38,8 @@ namespace LitNovel.WebAPI.Controllers
         private readonly ICreateAdminTagUseCase _createAdminTagUseCase;
         private readonly IUpdateAdminTagUseCase _updateAdminTagUseCase;
         private readonly IDeleteAdminTagUseCase _deleteAdminTagUseCase;
+        private readonly IGetAdminSentNotificationsUseCase _getAdminSentNotificationsUseCase;
+        private readonly ISendAdminNotificationUseCase _sendAdminNotificationUseCase;
 
         public AdminController(
             IGetAdminStatisticsUseCase getAdminStatisticsUseCase,
@@ -61,7 +63,9 @@ namespace LitNovel.WebAPI.Controllers
             IGetAdminTagsUseCase getAdminTagsUseCase,
             ICreateAdminTagUseCase createAdminTagUseCase,
             IUpdateAdminTagUseCase updateAdminTagUseCase,
-            IDeleteAdminTagUseCase deleteAdminTagUseCase)
+            IDeleteAdminTagUseCase deleteAdminTagUseCase,
+            IGetAdminSentNotificationsUseCase getAdminSentNotificationsUseCase,
+            ISendAdminNotificationUseCase sendAdminNotificationUseCase)
         {
             _getAdminStatisticsUseCase = getAdminStatisticsUseCase;
             _getAdminUsersUseCase = getAdminUsersUseCase;
@@ -85,6 +89,8 @@ namespace LitNovel.WebAPI.Controllers
             _createAdminTagUseCase = createAdminTagUseCase;
             _updateAdminTagUseCase = updateAdminTagUseCase;
             _deleteAdminTagUseCase = deleteAdminTagUseCase;
+            _getAdminSentNotificationsUseCase = getAdminSentNotificationsUseCase;
+            _sendAdminNotificationUseCase = sendAdminNotificationUseCase;
         }
 
         [HttpGet("statistics")]
@@ -306,6 +312,27 @@ namespace LitNovel.WebAPI.Controllers
         {
             await _deleteAdminTagUseCase.ExecuteAsync(id, ct);
             return Ok(new ApiResponse<object> { Success = true, Data = null });
+        }
+
+        [HttpGet("notifications/sent")]
+        public async Task<IActionResult> GetSentNotifications([FromQuery] AdminSentNotificationsQueryDto query, CancellationToken ct)
+        {
+            var result = await _getAdminSentNotificationsUseCase.ExecuteAsync(query, ct);
+            return Ok(new ApiResponse<PagedResult<AdminSentNotificationResponseDto>> { Success = true, Data = result });
+        }
+
+        [HttpPost("notifications")]
+        public async Task<IActionResult> SendNotification(SendAdminNotificationRequestDto request, CancellationToken ct)
+        {
+            var result = await _sendAdminNotificationUseCase.ExecuteAsync(request, ct);
+            var message = request.TargetAll == true ? "Notification sent to all users" : "Notification sent to user";
+
+            return StatusCode(StatusCodes.Status201Created, new ApiResponse<SendAdminNotificationResponseDto>
+            {
+                Success = true,
+                Message = message,
+                Data = result
+            });
         }
     }
 }
