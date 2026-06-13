@@ -64,6 +64,12 @@ namespace LitNovel.Application
             services.AddScoped<IAddCommentLikeUseCase, AddCommentLikeUseCase>();
             services.AddScoped<IRemoveCommentLikeUseCase, RemoveCommentLikeUseCase>();
             services.AddScoped<ICreateNovelReportUseCase, CreateNovelReportUseCase>();
+            services.AddScoped<IGetAdminStatisticsUseCase, GetAdminStatisticsUseCase>();
+            services.AddScoped<IGetAdminUsersUseCase, GetAdminUsersUseCase>();
+            services.AddScoped<IUpdateAdminUserUseCase, UpdateAdminUserUseCase>();
+            services.AddScoped<IBanAdminUserUseCase, BanAdminUserUseCase>();
+            services.AddScoped<IUnbanAdminUserUseCase, UnbanAdminUserUseCase>();
+            services.AddScoped<IDeleteAdminUserUseCase, DeleteAdminUserUseCase>();
 
             return services;
         }

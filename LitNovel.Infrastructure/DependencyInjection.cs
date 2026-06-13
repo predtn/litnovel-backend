@@ -35,6 +35,7 @@ namespace LitNovel.Infrastructure
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<INovelLikeRepository, NovelLikeRepository>();
             services.AddScoped<ICommentLikeRepository, CommentLikeRepository>();
+            services.AddScoped<IAdminStatisticsRepository, AdminStatisticsRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPasswordService, PasswordService>();
             services.AddScoped<IJwtService, JwtService>();

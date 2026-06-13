@@ -1,5 +1,6 @@
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Models;
+using LitNovel.Application.DTOs.Admin;
 using LitNovel.Application.DTOs.User;
 using LitNovel.Domain.Enums;
 using LitNovel.Domain.Entities;
@@ -83,6 +84,28 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             };
         }
 
+        public IQueryable<AdminUserListItemResponseDto> QueryAdminUsers()
+        {
+            return _context.Users
+                .AsNoTracking()
+                .Select(u => new AdminUserListItemResponseDto
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    Email = u.Email,
+                    Avatar = u.Avatar,
+                    Role = u.Role.ToString(),
+                    Status = u.Status.ToString(),
+                    NovelsCount = u.Novels.Count,
+                    JoinedAt = u.CreatedAt
+                });
+        }
+
+        public Task<int> CountByRoleAsync(UserRole role, CancellationToken ct)
+        {
+            return _context.Users.AsNoTracking().CountAsync(u => u.Role == role, ct);
+        }
+
         public Task<bool> EmailExistsAsync(string email, CancellationToken ct)
         {
             var normalized = email.Trim();
@@ -98,6 +121,11 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         public Task AddAsync(User user, CancellationToken ct)
         {
             return _context.Users.AddAsync(user, ct).AsTask();
+        }
+
+        public void Delete(User user)
+        {
+            _context.Users.Remove(user);
         }
     }
 }
