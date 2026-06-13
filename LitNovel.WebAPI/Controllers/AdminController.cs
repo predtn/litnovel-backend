@@ -23,6 +23,11 @@ namespace LitNovel.WebAPI.Controllers
         private readonly IDeleteAdminUserUseCase _deleteAdminUserUseCase;
         private readonly IAssignStaffUseCase _assignStaffUseCase;
         private readonly IRevokeStaffUseCase _revokeStaffUseCase;
+        private readonly IGetAdminBadgesUseCase _getAdminBadgesUseCase;
+        private readonly ICreateAdminBadgeUseCase _createAdminBadgeUseCase;
+        private readonly IUpdateAdminBadgeUseCase _updateAdminBadgeUseCase;
+        private readonly IDeleteAdminBadgeUseCase _deleteAdminBadgeUseCase;
+        private readonly IAwardBadgeUseCase _awardBadgeUseCase;
 
         public AdminController(
             IGetAdminStatisticsUseCase getAdminStatisticsUseCase,
@@ -33,7 +38,12 @@ namespace LitNovel.WebAPI.Controllers
             IUnbanAdminUserUseCase unbanAdminUserUseCase,
             IDeleteAdminUserUseCase deleteAdminUserUseCase,
             IAssignStaffUseCase assignStaffUseCase,
-            IRevokeStaffUseCase revokeStaffUseCase)
+            IRevokeStaffUseCase revokeStaffUseCase,
+            IGetAdminBadgesUseCase getAdminBadgesUseCase,
+            ICreateAdminBadgeUseCase createAdminBadgeUseCase,
+            IUpdateAdminBadgeUseCase updateAdminBadgeUseCase,
+            IDeleteAdminBadgeUseCase deleteAdminBadgeUseCase,
+            IAwardBadgeUseCase awardBadgeUseCase)
         {
             _getAdminStatisticsUseCase = getAdminStatisticsUseCase;
             _getAdminUsersUseCase = getAdminUsersUseCase;
@@ -44,6 +54,11 @@ namespace LitNovel.WebAPI.Controllers
             _deleteAdminUserUseCase = deleteAdminUserUseCase;
             _assignStaffUseCase = assignStaffUseCase;
             _revokeStaffUseCase = revokeStaffUseCase;
+            _getAdminBadgesUseCase = getAdminBadgesUseCase;
+            _createAdminBadgeUseCase = createAdminBadgeUseCase;
+            _updateAdminBadgeUseCase = updateAdminBadgeUseCase;
+            _deleteAdminBadgeUseCase = deleteAdminBadgeUseCase;
+            _awardBadgeUseCase = awardBadgeUseCase;
         }
 
         [HttpGet("statistics")]
@@ -139,6 +154,56 @@ namespace LitNovel.WebAPI.Controllers
         {
             await _deleteAdminUserUseCase.ExecuteAsync(id, ct);
             return Ok(new ApiResponse<object> { Success = true, Data = null });
+        }
+
+        [HttpGet("badges")]
+        public async Task<IActionResult> GetBadges(CancellationToken ct)
+        {
+            var result = await _getAdminBadgesUseCase.ExecuteAsync(ct);
+            return Ok(new ApiResponse<IReadOnlyList<AdminBadgeResponseDto>> { Success = true, Data = result });
+        }
+
+        [HttpPost("badges")]
+        public async Task<IActionResult> CreateBadge(CreateAdminBadgeRequestDto request, CancellationToken ct)
+        {
+            var result = await _createAdminBadgeUseCase.ExecuteAsync(request, ct);
+            return StatusCode(StatusCodes.Status201Created, new ApiResponse<AdminBadgeResponseDto>
+            {
+                Success = true,
+                Message = "Badge created",
+                Data = result
+            });
+        }
+
+        [HttpPut("badges/{id:int}")]
+        public async Task<IActionResult> UpdateBadge(int id, UpdateAdminBadgeRequestDto request, CancellationToken ct)
+        {
+            var result = await _updateAdminBadgeUseCase.ExecuteAsync(id, request, ct);
+            return Ok(new ApiResponse<AdminBadgeResponseDto>
+            {
+                Success = true,
+                Message = "Badge updated",
+                Data = result
+            });
+        }
+
+        [HttpDelete("badges/{id:int}")]
+        public async Task<IActionResult> DeleteBadge(int id, CancellationToken ct)
+        {
+            await _deleteAdminBadgeUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<object> { Success = true, Data = null });
+        }
+
+        [HttpPost("badges/{id:int}/award/{userId:int}")]
+        public async Task<IActionResult> AwardBadge(int id, int userId, CancellationToken ct)
+        {
+            var result = await _awardBadgeUseCase.ExecuteAsync(id, userId, ct);
+            return Ok(new ApiResponse<AwardBadgeResponseDto>
+            {
+                Success = true,
+                Message = "Badge awarded successfully",
+                Data = result
+            });
         }
     }
 }

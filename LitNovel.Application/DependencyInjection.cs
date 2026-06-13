@@ -73,6 +73,11 @@ namespace LitNovel.Application
             services.AddScoped<IDeleteAdminUserUseCase, DeleteAdminUserUseCase>();
             services.AddScoped<IAssignStaffUseCase, AssignStaffUseCase>();
             services.AddScoped<IRevokeStaffUseCase, RevokeStaffUseCase>();
+            services.AddScoped<IGetAdminBadgesUseCase, GetAdminBadgesUseCase>();
+            services.AddScoped<ICreateAdminBadgeUseCase, CreateAdminBadgeUseCase>();
+            services.AddScoped<IUpdateAdminBadgeUseCase, UpdateAdminBadgeUseCase>();
+            services.AddScoped<IDeleteAdminBadgeUseCase, DeleteAdminBadgeUseCase>();
+            services.AddScoped<IAwardBadgeUseCase, AwardBadgeUseCase>();
 
             return services;
         }
