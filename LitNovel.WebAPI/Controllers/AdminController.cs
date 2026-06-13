@@ -2,6 +2,7 @@ using LitNovel.Application.Common.Interfaces.UseCases;
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Admin;
 using LitNovel.Application.DTOs.Category;
+using LitNovel.Application.DTOs.Tag;
 using LitNovel.WebAPI.Common;
 using LitNovel.WebAPI.Common.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -33,6 +34,10 @@ namespace LitNovel.WebAPI.Controllers
         private readonly ICreateAdminCategoryUseCase _createAdminCategoryUseCase;
         private readonly IUpdateAdminCategoryUseCase _updateAdminCategoryUseCase;
         private readonly IDeleteAdminCategoryUseCase _deleteAdminCategoryUseCase;
+        private readonly IGetAdminTagsUseCase _getAdminTagsUseCase;
+        private readonly ICreateAdminTagUseCase _createAdminTagUseCase;
+        private readonly IUpdateAdminTagUseCase _updateAdminTagUseCase;
+        private readonly IDeleteAdminTagUseCase _deleteAdminTagUseCase;
 
         public AdminController(
             IGetAdminStatisticsUseCase getAdminStatisticsUseCase,
@@ -52,7 +57,11 @@ namespace LitNovel.WebAPI.Controllers
             IGetAdminCategoriesUseCase getAdminCategoriesUseCase,
             ICreateAdminCategoryUseCase createAdminCategoryUseCase,
             IUpdateAdminCategoryUseCase updateAdminCategoryUseCase,
-            IDeleteAdminCategoryUseCase deleteAdminCategoryUseCase)
+            IDeleteAdminCategoryUseCase deleteAdminCategoryUseCase,
+            IGetAdminTagsUseCase getAdminTagsUseCase,
+            ICreateAdminTagUseCase createAdminTagUseCase,
+            IUpdateAdminTagUseCase updateAdminTagUseCase,
+            IDeleteAdminTagUseCase deleteAdminTagUseCase)
         {
             _getAdminStatisticsUseCase = getAdminStatisticsUseCase;
             _getAdminUsersUseCase = getAdminUsersUseCase;
@@ -72,6 +81,10 @@ namespace LitNovel.WebAPI.Controllers
             _createAdminCategoryUseCase = createAdminCategoryUseCase;
             _updateAdminCategoryUseCase = updateAdminCategoryUseCase;
             _deleteAdminCategoryUseCase = deleteAdminCategoryUseCase;
+            _getAdminTagsUseCase = getAdminTagsUseCase;
+            _createAdminTagUseCase = createAdminTagUseCase;
+            _updateAdminTagUseCase = updateAdminTagUseCase;
+            _deleteAdminTagUseCase = deleteAdminTagUseCase;
         }
 
         [HttpGet("statistics")]
@@ -254,6 +267,44 @@ namespace LitNovel.WebAPI.Controllers
         public async Task<IActionResult> DeleteCategory(int id, CancellationToken ct)
         {
             await _deleteAdminCategoryUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<object> { Success = true, Data = null });
+        }
+
+        [HttpGet("tags")]
+        public async Task<IActionResult> GetTags(CancellationToken ct)
+        {
+            var result = await _getAdminTagsUseCase.ExecuteAsync(ct);
+            return Ok(new ApiResponse<IReadOnlyList<TagResponseDto>> { Success = true, Data = result });
+        }
+
+        [HttpPost("tags")]
+        public async Task<IActionResult> CreateTag(CreateTagRequestDto request, CancellationToken ct)
+        {
+            var result = await _createAdminTagUseCase.ExecuteAsync(request, ct);
+            return StatusCode(StatusCodes.Status201Created, new ApiResponse<TagResponseDto>
+            {
+                Success = true,
+                Message = "Tag created",
+                Data = result
+            });
+        }
+
+        [HttpPut("tags/{id:int}")]
+        public async Task<IActionResult> UpdateTag(int id, UpdateTagRequestDto request, CancellationToken ct)
+        {
+            var result = await _updateAdminTagUseCase.ExecuteAsync(id, request, ct);
+            return Ok(new ApiResponse<TagResponseDto>
+            {
+                Success = true,
+                Message = "Tag updated",
+                Data = result
+            });
+        }
+
+        [HttpDelete("tags/{id:int}")]
+        public async Task<IActionResult> DeleteTag(int id, CancellationToken ct)
+        {
+            await _deleteAdminTagUseCase.ExecuteAsync(id, ct);
             return Ok(new ApiResponse<object> { Success = true, Data = null });
         }
     }

@@ -1,5 +1,6 @@
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.DTOs.Tag;
+using LitNovel.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace LitNovel.Infrastructure.Persistences.Repositories
@@ -34,6 +35,37 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .Where(t => ids.Contains(t.Id))
                 .Select(t => t.Id)
                 .ToListAsync(ct);
+        }
+
+        public Task<Tag?> GetByIdAsync(int id, CancellationToken ct)
+        {
+            return _context.Tags.FirstOrDefaultAsync(t => t.Id == id, ct);
+        }
+
+        public Task<bool> NameExistsAsync(string name, int? excludingId, CancellationToken ct)
+        {
+            var normalized = name.Trim();
+            return _context.Tags
+                .AsNoTracking()
+                .AnyAsync(t => t.Name == normalized && (!excludingId.HasValue || t.Id != excludingId.Value), ct);
+        }
+
+        public Task<bool> SlugExistsAsync(string slug, int? excludingId, CancellationToken ct)
+        {
+            var normalized = slug.Trim();
+            return _context.Tags
+                .AsNoTracking()
+                .AnyAsync(t => t.Slug == normalized && (!excludingId.HasValue || t.Id != excludingId.Value), ct);
+        }
+
+        public Task AddAsync(Tag tag, CancellationToken ct)
+        {
+            return _context.Tags.AddAsync(tag, ct).AsTask();
+        }
+
+        public void Delete(Tag tag)
+        {
+            _context.Tags.Remove(tag);
         }
     }
 }
