@@ -21,6 +21,8 @@ namespace LitNovel.WebAPI.Controllers
         private readonly IBanAdminUserUseCase _banAdminUserUseCase;
         private readonly IUnbanAdminUserUseCase _unbanAdminUserUseCase;
         private readonly IDeleteAdminUserUseCase _deleteAdminUserUseCase;
+        private readonly IAssignStaffUseCase _assignStaffUseCase;
+        private readonly IRevokeStaffUseCase _revokeStaffUseCase;
 
         public AdminController(
             IGetAdminStatisticsUseCase getAdminStatisticsUseCase,
@@ -29,7 +31,9 @@ namespace LitNovel.WebAPI.Controllers
             IUpdateAdminUserUseCase updateAdminUserUseCase,
             IBanAdminUserUseCase banAdminUserUseCase,
             IUnbanAdminUserUseCase unbanAdminUserUseCase,
-            IDeleteAdminUserUseCase deleteAdminUserUseCase)
+            IDeleteAdminUserUseCase deleteAdminUserUseCase,
+            IAssignStaffUseCase assignStaffUseCase,
+            IRevokeStaffUseCase revokeStaffUseCase)
         {
             _getAdminStatisticsUseCase = getAdminStatisticsUseCase;
             _getAdminUsersUseCase = getAdminUsersUseCase;
@@ -38,6 +42,8 @@ namespace LitNovel.WebAPI.Controllers
             _banAdminUserUseCase = banAdminUserUseCase;
             _unbanAdminUserUseCase = unbanAdminUserUseCase;
             _deleteAdminUserUseCase = deleteAdminUserUseCase;
+            _assignStaffUseCase = assignStaffUseCase;
+            _revokeStaffUseCase = revokeStaffUseCase;
         }
 
         [HttpGet("statistics")]
@@ -100,6 +106,30 @@ namespace LitNovel.WebAPI.Controllers
             {
                 Success = true,
                 Message = "User has been unbanned",
+                Data = result
+            });
+        }
+
+        [HttpPost("users/{id:int}/assign-staff")]
+        public async Task<IActionResult> AssignStaff(int id, CancellationToken ct)
+        {
+            var result = await _assignStaffUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<StaffRoleChangeResponseDto>
+            {
+                Success = true,
+                Message = "User promoted to Staff",
+                Data = result
+            });
+        }
+
+        [HttpPost("users/{id:int}/revoke-staff")]
+        public async Task<IActionResult> RevokeStaff(int id, CancellationToken ct)
+        {
+            var result = await _revokeStaffUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<StaffRoleChangeResponseDto>
+            {
+                Success = true,
+                Message = "User demoted to User",
                 Data = result
             });
         }

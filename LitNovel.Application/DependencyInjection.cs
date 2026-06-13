@@ -71,6 +71,8 @@ namespace LitNovel.Application
             services.AddScoped<IBanAdminUserUseCase, BanAdminUserUseCase>();
             services.AddScoped<IUnbanAdminUserUseCase, UnbanAdminUserUseCase>();
             services.AddScoped<IDeleteAdminUserUseCase, DeleteAdminUserUseCase>();
+            services.AddScoped<IAssignStaffUseCase, AssignStaffUseCase>();
+            services.AddScoped<IRevokeStaffUseCase, RevokeStaffUseCase>();
 
             return services;
         }
