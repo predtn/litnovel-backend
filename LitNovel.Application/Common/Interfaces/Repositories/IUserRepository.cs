@@ -13,6 +13,7 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
         Task<User?> GetByIdentifierAsync(string identifier, CancellationToken ct);
         Task<PagedResult<UserSearchResponseDto>> SearchAsync(UserSearchQueryDto query, CancellationToken ct);
         IQueryable<AdminUserListItemResponseDto> QueryAdminUsers();
+        Task<AdminUserDetailResponseDto?> GetAdminUserDetailAsync(int id, CancellationToken ct);
         Task<int> CountByRoleAsync(UserRole role, CancellationToken ct);
         Task<bool> EmailExistsAsync(string email, CancellationToken ct);
         Task<bool> UsernameExistsAsync(string username, CancellationToken ct);

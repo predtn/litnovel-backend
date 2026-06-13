@@ -101,6 +101,49 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 });
         }
 
+        public Task<AdminUserDetailResponseDto?> GetAdminUserDetailAsync(int id, CancellationToken ct)
+        {
+            return _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == id)
+                .Select(u => new AdminUserDetailResponseDto
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    Email = u.Email,
+                    Avatar = u.Avatar,
+                    Bio = u.Bio,
+                    Role = u.Role.ToString(),
+                    Status = u.Status.ToString(),
+                    Reputation = u.Reputation == null ? 0 : u.Reputation.Score,
+                    Badges = u.UserBadges
+                        .OrderByDescending(ub => ub.EarnedAt)
+                        .Select(ub => new BadgeResponseDto
+                        {
+                            Key = ub.Badge.Key,
+                            Name = ub.Badge.Name,
+                            Icon = ub.Badge.Icon,
+                            Color = ub.Badge.Color,
+                            EarnedAt = ub.EarnedAt
+                        })
+                        .ToList(),
+                    Stats = new AdminUserDetailStatsResponseDto
+                    {
+                        NovelsCreated = u.Novels.Count,
+                        ChaptersPublished = u.Novels
+                            .SelectMany(n => n.Volumes)
+                            .SelectMany(v => v.Chapters)
+                            .Count(c => c.Status == ChapterStatus.Published),
+                        CommentsCount = u.CommentChapters.Count,
+                        ReportsReceived = u.TargetReports.Count,
+                        WarningsCount = 0
+                    },
+                    Warnings = new List<AdminUserWarningResponseDto>(),
+                    JoinedAt = u.CreatedAt
+                })
+                .FirstOrDefaultAsync(ct);
+        }
+
         public Task<int> CountByRoleAsync(UserRole role, CancellationToken ct)
         {
             return _context.Users.AsNoTracking().CountAsync(u => u.Role == role, ct);

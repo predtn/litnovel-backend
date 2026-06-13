@@ -16,6 +16,7 @@ namespace LitNovel.WebAPI.Controllers
     {
         private readonly IGetAdminStatisticsUseCase _getAdminStatisticsUseCase;
         private readonly IGetAdminUsersUseCase _getAdminUsersUseCase;
+        private readonly IGetAdminUserDetailUseCase _getAdminUserDetailUseCase;
         private readonly IUpdateAdminUserUseCase _updateAdminUserUseCase;
         private readonly IBanAdminUserUseCase _banAdminUserUseCase;
         private readonly IUnbanAdminUserUseCase _unbanAdminUserUseCase;
@@ -24,6 +25,7 @@ namespace LitNovel.WebAPI.Controllers
         public AdminController(
             IGetAdminStatisticsUseCase getAdminStatisticsUseCase,
             IGetAdminUsersUseCase getAdminUsersUseCase,
+            IGetAdminUserDetailUseCase getAdminUserDetailUseCase,
             IUpdateAdminUserUseCase updateAdminUserUseCase,
             IBanAdminUserUseCase banAdminUserUseCase,
             IUnbanAdminUserUseCase unbanAdminUserUseCase,
@@ -31,6 +33,7 @@ namespace LitNovel.WebAPI.Controllers
         {
             _getAdminStatisticsUseCase = getAdminStatisticsUseCase;
             _getAdminUsersUseCase = getAdminUsersUseCase;
+            _getAdminUserDetailUseCase = getAdminUserDetailUseCase;
             _updateAdminUserUseCase = updateAdminUserUseCase;
             _banAdminUserUseCase = banAdminUserUseCase;
             _unbanAdminUserUseCase = unbanAdminUserUseCase;
@@ -56,6 +59,13 @@ namespace LitNovel.WebAPI.Controllers
                 ct);
 
             return Ok(new ApiResponse<PagedResult<AdminUserListItemResponseDto>> { Success = true, Data = result });
+        }
+
+        [HttpGet("users/{id:int}")]
+        public async Task<IActionResult> GetUserDetail(int id, CancellationToken ct)
+        {
+            var result = await _getAdminUserDetailUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<AdminUserDetailResponseDto> { Success = true, Data = result });
         }
 
         [HttpPut("users/{id:int}")]
