@@ -17,6 +17,17 @@ namespace LitNovel.WebAPI.Services
 
         public string? Role => _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.Role);
 
+        public string? IpAddress
+        {
+            get
+            {
+                var context = _httpContextAccessor.HttpContext;
+                var forwardedFor = context?.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+                return forwardedFor?.Split(',').FirstOrDefault()?.Trim()
+                    ?? context?.Connection.RemoteIpAddress?.ToString();
+            }
+        }
+
         public int UserId
         {
             get

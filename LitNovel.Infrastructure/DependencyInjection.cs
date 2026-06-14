@@ -35,11 +35,20 @@ namespace LitNovel.Infrastructure
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<INovelLikeRepository, NovelLikeRepository>();
             services.AddScoped<ICommentLikeRepository, CommentLikeRepository>();
+            services.AddScoped<IAdminStatisticsRepository, AdminStatisticsRepository>();
+            services.AddScoped<IReportRepository, ReportRepository>();
+            services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+            services.AddScoped<IBadgeRepository, BadgeRepository>();
+            services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
+            services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
+            services.AddScoped<IBackupRepository, BackupRepository>();
+            services.AddScoped<IStaffDashboardRepository, StaffDashboardRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPasswordService, PasswordService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IBackupFileService, BackupFileService>();
 
             return services;
         }

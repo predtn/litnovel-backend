@@ -1,0 +1,26 @@
+using FluentValidation;
+using LitNovel.Application.DTOs.Category;
+
+namespace LitNovel.Application.UseCases.Validators.Category
+{
+    public class UpdateCategoryRequestValidator : AbstractValidator<UpdateCategoryRequestDto>
+    {
+        public UpdateCategoryRequestValidator()
+        {
+            RuleFor(x => x.Name)
+                .NotEmpty().WithMessage("Category name is required")
+                .MaximumLength(100).WithMessage("Category name must be at most 100 characters")
+                .When(x => x.Name is not null);
+
+            RuleFor(x => x.Slug)
+                .NotEmpty().WithMessage("Slug is required")
+                .MaximumLength(120).WithMessage("Slug must be at most 120 characters")
+                .Matches("^[a-z0-9]+(?:-[a-z0-9]+)*$").WithMessage("Slug must be URL-safe")
+                .When(x => x.Slug is not null);
+
+            RuleFor(x => x)
+                .Must(x => x.Name is not null || x.Slug is not null)
+                .WithMessage("At least one category field is required");
+        }
+    }
+}
