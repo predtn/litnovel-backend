@@ -6,5 +6,6 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
     public interface IReportRepository
     {
         Task<PagedResult<AdminReportResponseDto>> GetAdminReportsAsync(AdminReportsQueryDto query, CancellationToken ct);
+        IQueryable<AdminReportResponseDto> QueryAdminReports();
     }
 }

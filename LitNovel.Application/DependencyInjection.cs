@@ -65,6 +65,7 @@ namespace LitNovel.Application
             services.AddScoped<IRemoveCommentLikeUseCase, RemoveCommentLikeUseCase>();
             services.AddScoped<ICreateNovelReportUseCase, CreateNovelReportUseCase>();
             services.AddScoped<IGetAdminStatisticsUseCase, GetAdminStatisticsUseCase>();
+            services.AddScoped<IGetAdminStatisticsChartUseCase, GetAdminStatisticsChartUseCase>();
             services.AddScoped<IGetAdminUsersUseCase, GetAdminUsersUseCase>();
             services.AddScoped<IGetAdminUserDetailUseCase, GetAdminUserDetailUseCase>();
             services.AddScoped<IUpdateAdminUserUseCase, UpdateAdminUserUseCase>();
@@ -89,6 +90,23 @@ namespace LitNovel.Application
             services.AddScoped<IGetAdminSentNotificationsUseCase, GetAdminSentNotificationsUseCase>();
             services.AddScoped<ISendAdminNotificationUseCase, SendAdminNotificationUseCase>();
             services.AddScoped<IGetAdminReportsUseCase, GetAdminReportsUseCase>();
+            services.AddScoped<IGetAdminAuditLogsUseCase, GetAdminAuditLogsUseCase>();
+            services.AddScoped<IUpdateAdminNovelStatusUseCase, UpdateAdminNovelStatusUseCase>();
+            services.AddScoped<IUpdateAdminNovelAuthorUseCase, UpdateAdminNovelAuthorUseCase>();
+            services.AddScoped<IUpdateAdminChapterStatusUseCase, UpdateAdminChapterStatusUseCase>();
+            services.AddScoped<IGetAdminSettingsUseCase, GetAdminSettingsUseCase>();
+            services.AddScoped<IUpdateAdminSettingsUseCase, UpdateAdminSettingsUseCase>();
+            services.AddScoped<IGetAdminAnnouncementsUseCase, GetAdminAnnouncementsUseCase>();
+            services.AddScoped<ICreateAdminAnnouncementUseCase, CreateAdminAnnouncementUseCase>();
+            services.AddScoped<IUpdateAdminAnnouncementUseCase, UpdateAdminAnnouncementUseCase>();
+            services.AddScoped<IDeleteAdminAnnouncementUseCase, DeleteAdminAnnouncementUseCase>();
+            services.AddScoped<IToggleAdminAnnouncementUseCase, ToggleAdminAnnouncementUseCase>();
+            services.AddScoped<IGetAdminBackupsUseCase, GetAdminBackupsUseCase>();
+            services.AddScoped<ICreateAdminBackupUseCase, CreateAdminBackupUseCase>();
+            services.AddScoped<IDownloadAdminBackupUseCase, DownloadAdminBackupUseCase>();
+            services.AddScoped<IRestoreAdminBackupUseCase, RestoreAdminBackupUseCase>();
+            services.AddScoped<IDeleteAdminBackupUseCase, DeleteAdminBackupUseCase>();
+            services.AddScoped<IGetStaffDashboardUseCase, GetStaffDashboardUseCase>();
 
             return services;
         }

@@ -6,5 +6,6 @@ namespace LitNovel.Application.Common.Interfaces.UseCases
     public interface IGetAdminReportsUseCase
     {
         Task<PagedResult<AdminReportResponseDto>> ExecuteAsync(AdminReportsQueryDto query, CancellationToken ct);
+        IQueryable<AdminReportResponseDto> ExecuteQuery();
     }
 }

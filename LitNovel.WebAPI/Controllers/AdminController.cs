@@ -17,6 +17,7 @@ namespace LitNovel.WebAPI.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IGetAdminStatisticsUseCase _getAdminStatisticsUseCase;
+        private readonly IGetAdminStatisticsChartUseCase _getAdminStatisticsChartUseCase;
         private readonly IGetAdminUsersUseCase _getAdminUsersUseCase;
         private readonly IGetAdminUserDetailUseCase _getAdminUserDetailUseCase;
         private readonly IUpdateAdminUserUseCase _updateAdminUserUseCase;
@@ -41,9 +42,16 @@ namespace LitNovel.WebAPI.Controllers
         private readonly IGetAdminSentNotificationsUseCase _getAdminSentNotificationsUseCase;
         private readonly ISendAdminNotificationUseCase _sendAdminNotificationUseCase;
         private readonly IGetAdminReportsUseCase _getAdminReportsUseCase;
+        private readonly IGetAdminAuditLogsUseCase _getAdminAuditLogsUseCase;
+        private readonly IUpdateAdminNovelStatusUseCase _updateAdminNovelStatusUseCase;
+        private readonly IUpdateAdminNovelAuthorUseCase _updateAdminNovelAuthorUseCase;
+        private readonly IUpdateAdminChapterStatusUseCase _updateAdminChapterStatusUseCase;
+        private readonly IGetAdminSettingsUseCase _getAdminSettingsUseCase;
+        private readonly IUpdateAdminSettingsUseCase _updateAdminSettingsUseCase;
 
         public AdminController(
             IGetAdminStatisticsUseCase getAdminStatisticsUseCase,
+            IGetAdminStatisticsChartUseCase getAdminStatisticsChartUseCase,
             IGetAdminUsersUseCase getAdminUsersUseCase,
             IGetAdminUserDetailUseCase getAdminUserDetailUseCase,
             IUpdateAdminUserUseCase updateAdminUserUseCase,
@@ -67,9 +75,16 @@ namespace LitNovel.WebAPI.Controllers
             IDeleteAdminTagUseCase deleteAdminTagUseCase,
             IGetAdminSentNotificationsUseCase getAdminSentNotificationsUseCase,
             ISendAdminNotificationUseCase sendAdminNotificationUseCase,
-            IGetAdminReportsUseCase getAdminReportsUseCase)
+            IGetAdminReportsUseCase getAdminReportsUseCase,
+            IGetAdminAuditLogsUseCase getAdminAuditLogsUseCase,
+            IUpdateAdminNovelStatusUseCase updateAdminNovelStatusUseCase,
+            IUpdateAdminNovelAuthorUseCase updateAdminNovelAuthorUseCase,
+            IUpdateAdminChapterStatusUseCase updateAdminChapterStatusUseCase,
+            IGetAdminSettingsUseCase getAdminSettingsUseCase,
+            IUpdateAdminSettingsUseCase updateAdminSettingsUseCase)
         {
             _getAdminStatisticsUseCase = getAdminStatisticsUseCase;
+            _getAdminStatisticsChartUseCase = getAdminStatisticsChartUseCase;
             _getAdminUsersUseCase = getAdminUsersUseCase;
             _getAdminUserDetailUseCase = getAdminUserDetailUseCase;
             _updateAdminUserUseCase = updateAdminUserUseCase;
@@ -94,6 +109,12 @@ namespace LitNovel.WebAPI.Controllers
             _getAdminSentNotificationsUseCase = getAdminSentNotificationsUseCase;
             _sendAdminNotificationUseCase = sendAdminNotificationUseCase;
             _getAdminReportsUseCase = getAdminReportsUseCase;
+            _getAdminAuditLogsUseCase = getAdminAuditLogsUseCase;
+            _updateAdminNovelStatusUseCase = updateAdminNovelStatusUseCase;
+            _updateAdminNovelAuthorUseCase = updateAdminNovelAuthorUseCase;
+            _updateAdminChapterStatusUseCase = updateAdminChapterStatusUseCase;
+            _getAdminSettingsUseCase = getAdminSettingsUseCase;
+            _updateAdminSettingsUseCase = updateAdminSettingsUseCase;
         }
 
         [HttpGet("statistics")]
@@ -101,6 +122,13 @@ namespace LitNovel.WebAPI.Controllers
         {
             var result = await _getAdminStatisticsUseCase.ExecuteAsync(ct);
             return Ok(new ApiResponse<AdminStatisticsResponseDto> { Success = true, Data = result });
+        }
+
+        [HttpGet("statistics/chart")]
+        public async Task<IActionResult> GetStatisticsChart([FromQuery] AdminStatisticsChartQueryDto query, CancellationToken ct)
+        {
+            var result = await _getAdminStatisticsChartUseCase.ExecuteAsync(query, ct);
+            return Ok(new ApiResponse<AdminStatisticsChartResponseDto> { Success = true, Data = result });
         }
 
         [HttpGet("users")]
@@ -318,8 +346,24 @@ namespace LitNovel.WebAPI.Controllers
         }
 
         [HttpGet("notifications/sent")]
-        public async Task<IActionResult> GetSentNotifications([FromQuery] AdminSentNotificationsQueryDto query, CancellationToken ct)
+        public async Task<IActionResult> GetSentNotifications(
+            ODataQueryOptions<AdminSentNotificationResponseDto> queryOptions,
+            [FromQuery] AdminSentNotificationsQueryDto query,
+            CancellationToken ct)
         {
+            if (HasODataQuery(Request))
+            {
+                var odataResult = await ODataQueryResultFactory.ToPagedResultAsync(
+                    _getAdminSentNotificationsUseCase.ExecuteQuery(),
+                    queryOptions,
+                    notifications => notifications.OrderByDescending(n => n.SentAt),
+                    defaultPageSize: 20,
+                    maxTop: 100,
+                    ct);
+
+                return Ok(new ApiResponse<PagedResult<AdminSentNotificationResponseDto>> { Success = true, Data = odataResult });
+            }
+
             var result = await _getAdminSentNotificationsUseCase.ExecuteAsync(query, ct);
             return Ok(new ApiResponse<PagedResult<AdminSentNotificationResponseDto>> { Success = true, Data = result });
         }
@@ -339,10 +383,109 @@ namespace LitNovel.WebAPI.Controllers
         }
 
         [HttpGet("reports")]
-        public async Task<IActionResult> GetReports([FromQuery] AdminReportsQueryDto query, CancellationToken ct)
+        public async Task<IActionResult> GetReports(
+            ODataQueryOptions<AdminReportResponseDto> queryOptions,
+            [FromQuery] AdminReportsQueryDto query,
+            CancellationToken ct)
         {
+            if (HasODataQuery(Request))
+            {
+                var odataResult = await ODataQueryResultFactory.ToPagedResultAsync(
+                    _getAdminReportsUseCase.ExecuteQuery(),
+                    queryOptions,
+                    reports => reports.OrderByDescending(r => r.CreatedAt),
+                    defaultPageSize: 20,
+                    maxTop: 100,
+                    ct);
+
+                return Ok(new ApiResponse<PagedResult<AdminReportResponseDto>> { Success = true, Data = odataResult });
+            }
+
             var result = await _getAdminReportsUseCase.ExecuteAsync(query, ct);
             return Ok(new ApiResponse<PagedResult<AdminReportResponseDto>> { Success = true, Data = result });
+        }
+
+        [HttpGet("audit-logs")]
+        public async Task<IActionResult> GetAuditLogs(
+            ODataQueryOptions<AdminAuditLogResponseDto> queryOptions,
+            [FromQuery] AdminAuditLogQueryDto query,
+            CancellationToken ct)
+        {
+            if (HasODataQuery(Request))
+            {
+                var odataResult = await ODataQueryResultFactory.ToPagedResultAsync(
+                    _getAdminAuditLogsUseCase.ExecuteQuery(),
+                    queryOptions,
+                    auditLogs => auditLogs.OrderByDescending(a => a.CreatedAt),
+                    defaultPageSize: 50,
+                    maxTop: 100,
+                    ct);
+
+                return Ok(new ApiResponse<PagedResult<AdminAuditLogResponseDto>> { Success = true, Data = odataResult });
+            }
+
+            var result = await _getAdminAuditLogsUseCase.ExecuteAsync(query, ct);
+            return Ok(new ApiResponse<PagedResult<AdminAuditLogResponseDto>> { Success = true, Data = result });
+        }
+
+        [HttpGet("settings")]
+        public async Task<IActionResult> GetSettings(CancellationToken ct)
+        {
+            var result = await _getAdminSettingsUseCase.ExecuteAsync(ct);
+            return Ok(new ApiResponse<AdminSettingsResponseDto> { Success = true, Data = result });
+        }
+
+        [HttpPut("settings")]
+        public async Task<IActionResult> UpdateSettings(UpdateAdminSettingsRequestDto request, CancellationToken ct)
+        {
+            var result = await _updateAdminSettingsUseCase.ExecuteAsync(request, ct);
+            return Ok(new ApiResponse<AdminSettingsResponseDto>
+            {
+                Success = true,
+                Message = "Settings updated successfully",
+                Data = result
+            });
+        }
+
+        [HttpPut("novels/{id:int}/status")]
+        public async Task<IActionResult> UpdateNovelStatus(int id, UpdateAdminNovelStatusRequestDto request, CancellationToken ct)
+        {
+            var result = await _updateAdminNovelStatusUseCase.ExecuteAsync(id, request, ct);
+            return Ok(new ApiResponse<AdminNovelStatusResponseDto>
+            {
+                Success = true,
+                Message = "Novel status updated successfully",
+                Data = result
+            });
+        }
+
+        [HttpPut("novels/{id:int}/author")]
+        public async Task<IActionResult> UpdateNovelAuthor(int id, UpdateAdminNovelAuthorRequestDto request, CancellationToken ct)
+        {
+            var result = await _updateAdminNovelAuthorUseCase.ExecuteAsync(id, request, ct);
+            return Ok(new ApiResponse<AdminNovelAuthorResponseDto>
+            {
+                Success = true,
+                Message = "Novel author updated successfully",
+                Data = result
+            });
+        }
+
+        [HttpPut("chapters/{id:int}/status")]
+        public async Task<IActionResult> UpdateChapterStatus(int id, UpdateAdminChapterStatusRequestDto request, CancellationToken ct)
+        {
+            var result = await _updateAdminChapterStatusUseCase.ExecuteAsync(id, request, ct);
+            return Ok(new ApiResponse<AdminChapterStatusResponseDto>
+            {
+                Success = true,
+                Message = "Chapter status updated successfully",
+                Data = result
+            });
+        }
+
+        private static bool HasODataQuery(HttpRequest request)
+        {
+            return request.Query.Keys.Any(key => key.StartsWith("$", StringComparison.Ordinal));
         }
     }
 }

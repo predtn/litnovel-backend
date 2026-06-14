@@ -24,5 +24,10 @@ namespace LitNovel.Application.UseCases
             await _validator.ValidateAndThrowAsync(query, ct);
             return await _notificationRepository.GetAdminSentAsync(query, ct);
         }
+
+        public IQueryable<AdminSentNotificationResponseDto> ExecuteQuery()
+        {
+            return _notificationRepository.QueryAdminSent();
+        }
     }
 }

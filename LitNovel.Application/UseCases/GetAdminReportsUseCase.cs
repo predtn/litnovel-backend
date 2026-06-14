@@ -22,5 +22,10 @@ namespace LitNovel.Application.UseCases
             await _validator.ValidateAndThrowAsync(query, ct);
             return await _reportRepository.GetAdminReportsAsync(query, ct);
         }
+
+        public IQueryable<AdminReportResponseDto> ExecuteQuery()
+        {
+            return _reportRepository.QueryAdminReports();
+        }
     }
 }

@@ -108,6 +108,26 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             };
         }
 
+        public IQueryable<AdminSentNotificationResponseDto> QueryAdminSent()
+        {
+            return _context.Notifications
+                .AsNoTracking()
+                .Where(n => n.EntityType == INotificationRepository.AdminNotificationEntityType)
+                .Select(n => new AdminSentNotificationResponseDto
+                {
+                    Id = n.Id,
+                    NotificationType = n.NotificationType.ToString(),
+                    Message = n.Message,
+                    TargetUser = new AdminUserSummaryResponseDto
+                    {
+                        Id = n.User.Id,
+                        Username = n.User.Username
+                    },
+                    IsRead = n.IsRead,
+                    SentAt = n.CreatedAt
+                });
+        }
+
         public Task AddRangeAsync(IEnumerable<Notification> notifications, CancellationToken ct)
         {
             return _context.Notifications.AddRangeAsync(notifications, ct);

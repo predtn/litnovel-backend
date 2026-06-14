@@ -6,5 +6,6 @@ namespace LitNovel.Application.Common.Interfaces.UseCases
     public interface IGetAdminSentNotificationsUseCase
     {
         Task<PagedResult<AdminSentNotificationResponseDto>> ExecuteAsync(AdminSentNotificationsQueryDto query, CancellationToken ct);
+        IQueryable<AdminSentNotificationResponseDto> ExecuteQuery();
     }
 }

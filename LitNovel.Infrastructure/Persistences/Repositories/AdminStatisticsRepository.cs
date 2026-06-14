@@ -79,5 +79,118 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 }
             };
         }
+
+        public async Task<AdminStatisticsChartResponseDto> GetStatisticsChartAsync(
+            AdminStatisticsChartQueryDto query,
+            CancellationToken ct)
+        {
+            var from = query.From!.Value.Date;
+            var to = query.To!.Value.Date;
+            var toExclusive = to.AddDays(1);
+            var granularity = query.Granularity.ToLowerInvariant();
+
+            var dates = await GetMetricDatesAsync(query.Metric, from, toExclusive, ct);
+            var counts = dates
+                .GroupBy(date => GetBucketStart(date, granularity))
+                .ToDictionary(group => group.Key, group => group.Count());
+
+            return new AdminStatisticsChartResponseDto
+            {
+                Metric = query.Metric,
+                Points = BuildPoints(from, to, granularity, counts)
+            };
+        }
+
+        private async Task<List<DateTime>> GetMetricDatesAsync(
+            string metric,
+            DateTime from,
+            DateTime toExclusive,
+            CancellationToken ct)
+        {
+            return metric switch
+            {
+                "userGrowth" => await _context.Users
+                    .AsNoTracking()
+                    .Where(u => u.CreatedAt >= from && u.CreatedAt < toExclusive)
+                    .Select(u => u.CreatedAt)
+                    .ToListAsync(ct),
+                "novelGrowth" => await _context.Novels
+                    .AsNoTracking()
+                    .Where(n => n.CreatedAt >= from && n.CreatedAt < toExclusive)
+                    .Select(n => n.CreatedAt)
+                    .ToListAsync(ct),
+                "chapterPublished" => await _context.Chapters
+                    .AsNoTracking()
+                    .Where(c => c.Status == ChapterStatus.Published && c.UpdatedAt >= from && c.UpdatedAt < toExclusive)
+                    .Select(c => c.UpdatedAt)
+                    .ToListAsync(ct),
+                "comments" => await _context.CommentChapters
+                    .AsNoTracking()
+                    .Where(c => c.CreatedAt >= from && c.CreatedAt < toExclusive)
+                    .Select(c => c.CreatedAt)
+                    .ToListAsync(ct),
+                "ratings" => await _context.NovelRatings
+                    .AsNoTracking()
+                    .Where(r => r.CreatedAt >= from && r.CreatedAt < toExclusive)
+                    .Select(r => r.CreatedAt)
+                    .ToListAsync(ct),
+                "favorites" => await _context.Favorites
+                    .AsNoTracking()
+                    .Where(f => f.CreatedAt >= from && f.CreatedAt < toExclusive)
+                    .Select(f => f.CreatedAt)
+                    .ToListAsync(ct),
+                "reports" => await GetReportDatesAsync(from, toExclusive, ct),
+                _ => new List<DateTime>()
+            };
+        }
+
+        private async Task<List<DateTime>> GetReportDatesAsync(DateTime from, DateTime toExclusive, CancellationToken ct)
+        {
+            var novelReportDates = await _context.NovelReports
+                .AsNoTracking()
+                .Where(r => r.CreatedAt >= from && r.CreatedAt < toExclusive)
+                .Select(r => r.CreatedAt)
+                .ToListAsync(ct);
+
+            var userReportDates = await _context.UserReports
+                .AsNoTracking()
+                .Where(r => r.CreatedAt >= from && r.CreatedAt < toExclusive)
+                .Select(r => r.CreatedAt)
+                .ToListAsync(ct);
+
+            novelReportDates.AddRange(userReportDates);
+            return novelReportDates;
+        }
+
+        private static IReadOnlyList<AdminStatisticsChartPointResponseDto> BuildPoints(
+            DateTime from,
+            DateTime to,
+            string granularity,
+            IReadOnlyDictionary<DateTime, int> counts)
+        {
+            var points = new List<AdminStatisticsChartPointResponseDto>();
+            var cursor = GetBucketStart(from, granularity);
+            var end = GetBucketStart(to, granularity);
+
+            while (cursor <= end)
+            {
+                points.Add(new AdminStatisticsChartPointResponseDto
+                {
+                    Date = cursor.ToString("yyyy-MM-dd"),
+                    Value = counts.TryGetValue(cursor, out var value) ? value : 0
+                });
+
+                cursor = granularity == "month" ? cursor.AddMonths(1) : cursor.AddDays(1);
+            }
+
+            return points;
+        }
+
+        private static DateTime GetBucketStart(DateTime date, string granularity)
+        {
+            return granularity == "month"
+                ? new DateTime(date.Year, date.Month, 1)
+                : date.Date;
+        }
     }
 }

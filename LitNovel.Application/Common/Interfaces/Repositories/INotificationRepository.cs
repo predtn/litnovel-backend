@@ -11,6 +11,7 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
 
         Task<PagedResult<NotificationResponseDto>> GetByUserAsync(int userId, NotificationQueryDto query, CancellationToken ct);
         Task<PagedResult<AdminSentNotificationResponseDto>> GetAdminSentAsync(AdminSentNotificationsQueryDto query, CancellationToken ct);
+        IQueryable<AdminSentNotificationResponseDto> QueryAdminSent();
         Task AddRangeAsync(IEnumerable<Notification> notifications, CancellationToken ct);
     }
 }

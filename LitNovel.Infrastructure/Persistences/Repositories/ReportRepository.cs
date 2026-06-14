@@ -65,6 +65,27 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             };
         }
 
+        public IQueryable<AdminReportResponseDto> QueryAdminReports()
+        {
+            return QueryNovelReports(new AdminReportsQueryDto())
+                .Concat(QueryUserReports(new AdminReportsQueryDto()))
+                .Select(r => new AdminReportResponseDto
+                {
+                    Id = r.Id,
+                    ReportType = r.ReportType,
+                    TargetType = r.TargetType,
+                    TargetId = r.TargetId,
+                    TargetTitle = r.TargetTitle,
+                    Reporter = new AdminUserSummaryResponseDto
+                    {
+                        Id = r.ReporterId,
+                        Username = r.ReporterUsername
+                    },
+                    Status = r.Status,
+                    CreatedAt = r.CreatedAt
+                });
+        }
+
         private IQueryable<AdminReportRow> QueryNovelReports(AdminReportsQueryDto query)
         {
             var reports = _context.NovelReports.AsNoTracking();
