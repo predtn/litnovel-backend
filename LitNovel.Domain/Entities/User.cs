@@ -26,5 +26,6 @@ namespace LitNovel.Domain.Entities
         public ICollection<ReadingProgress> ReadingProgresses { get; set; } = new List<ReadingProgress>();
         public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
         public ICollection<NovelRating> NovelRatings { get; set; } = new List<NovelRating>();
+        public ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
     }
 }

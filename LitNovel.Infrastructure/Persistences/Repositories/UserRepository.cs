@@ -1,5 +1,6 @@
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Models;
+using LitNovel.Application.DTOs.Admin;
 using LitNovel.Application.DTOs.User;
 using LitNovel.Domain.Enums;
 using LitNovel.Domain.Entities;
@@ -43,6 +44,14 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             return _context.Users.FirstOrDefaultAsync(u => u.Email == normalized || u.Username == normalized, ct);
         }
 
+        public async Task<IReadOnlyList<int>> GetAllIdsAsync(CancellationToken ct)
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .Select(u => u.Id)
+                .ToListAsync(ct);
+        }
+
         public async Task<PagedResult<UserSearchResponseDto>> SearchAsync(UserSearchQueryDto query, CancellationToken ct)
         {
             var page = query.Page <= 0 ? 1 : query.Page;
@@ -83,6 +92,71 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             };
         }
 
+        public IQueryable<AdminUserListItemResponseDto> QueryAdminUsers()
+        {
+            return _context.Users
+                .AsNoTracking()
+                .Select(u => new AdminUserListItemResponseDto
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    Email = u.Email,
+                    Avatar = u.Avatar,
+                    Role = u.Role.ToString(),
+                    Status = u.Status.ToString(),
+                    NovelsCount = u.Novels.Count,
+                    JoinedAt = u.CreatedAt
+                });
+        }
+
+        public Task<AdminUserDetailResponseDto?> GetAdminUserDetailAsync(int id, CancellationToken ct)
+        {
+            return _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == id)
+                .Select(u => new AdminUserDetailResponseDto
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    Email = u.Email,
+                    Avatar = u.Avatar,
+                    Bio = u.Bio,
+                    Role = u.Role.ToString(),
+                    Status = u.Status.ToString(),
+                    Reputation = u.Reputation == null ? 0 : u.Reputation.Score,
+                    Badges = u.UserBadges
+                        .OrderByDescending(ub => ub.EarnedAt)
+                        .Select(ub => new BadgeResponseDto
+                        {
+                            Key = ub.Badge.Key,
+                            Name = ub.Badge.Name,
+                            Icon = ub.Badge.Icon,
+                            Color = ub.Badge.Color,
+                            EarnedAt = ub.EarnedAt
+                        })
+                        .ToList(),
+                    Stats = new AdminUserDetailStatsResponseDto
+                    {
+                        NovelsCreated = u.Novels.Count,
+                        ChaptersPublished = u.Novels
+                            .SelectMany(n => n.Volumes)
+                            .SelectMany(v => v.Chapters)
+                            .Count(c => c.Status == ChapterStatus.Published),
+                        CommentsCount = u.CommentChapters.Count,
+                        ReportsReceived = u.TargetReports.Count,
+                        WarningsCount = 0
+                    },
+                    Warnings = new List<AdminUserWarningResponseDto>(),
+                    JoinedAt = u.CreatedAt
+                })
+                .FirstOrDefaultAsync(ct);
+        }
+
+        public Task<int> CountByRoleAsync(UserRole role, CancellationToken ct)
+        {
+            return _context.Users.AsNoTracking().CountAsync(u => u.Role == role, ct);
+        }
+
         public Task<bool> EmailExistsAsync(string email, CancellationToken ct)
         {
             var normalized = email.Trim();
@@ -98,6 +172,11 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         public Task AddAsync(User user, CancellationToken ct)
         {
             return _context.Users.AddAsync(user, ct).AsTask();
+        }
+
+        public void Delete(User user)
+        {
+            _context.Users.Remove(user);
         }
     }
 }
