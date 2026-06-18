@@ -36,16 +36,12 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .AsNoTracking()
                 .OrderByDescending(a => a.CreatedAt)
                 .Take(10)
-                .Select(a => new StaffDashboardActivityResponseDto
+                .Select(a => new ModerationActivityDto
                 {
-                    Action = a.Action,
-                    Staff = new StaffUserSummaryResponseDto
-                    {
-                        Id = a.Actor.Id,
-                        Username = a.Actor.Username
-                    },
-                    Target = a.EntityType + ": " + a.EntityId,
-                    PerformedAt = a.CreatedAt
+                    Action        = a.Action,
+                    StaffUsername = a.Actor.Username,
+                    Target        = a.EntityType + ": " + a.EntityId,
+                    PerformedAt   = a.CreatedAt
                 })
                 .ToListAsync(ct);
 
