@@ -4,6 +4,7 @@ using LitNovel.Infrastructure.Persistences;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LitNovel.Infrastructure.Persistences.Migrations
 {
     [DbContext(typeof(LitNovelContext))]
-    partial class LitNovelContextModelSnapshot : ModelSnapshot
+    [Migration("20260612131558_AddUserWarningAndModerationLog")]
+    partial class AddUserWarningAndModerationLog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,134 +24,6 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("LitNovel.Domain.Entities.Announcement", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EndDate");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("StartDate");
-
-                    b.ToTable("Announcements", (string)null);
-                });
-
-            modelBuilder.Entity("LitNovel.Domain.Entities.AuditLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("ActorId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("EntityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EntityType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("IpAddress")
-                        .HasMaxLength(45)
-                        .HasColumnType("nvarchar(45)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ActorId");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("EntityType", "EntityId");
-
-                    b.ToTable("AuditLogs", (string)null);
-                });
-
-            modelBuilder.Entity("LitNovel.Domain.Entities.BackupRecord", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("FilePath")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<long>("SizeBytes")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("BackupRecords", (string)null);
-                });
 
             modelBuilder.Entity("LitNovel.Domain.Entities.Badge", b =>
                 {
@@ -208,9 +83,6 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                         .HasColumnType("nvarchar(120)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.HasIndex("Slug")
                         .IsUnique();
@@ -750,38 +622,6 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.ToTable("RefreshTokens", (string)null);
                 });
 
-            modelBuilder.Entity("LitNovel.Domain.Entities.SystemSetting", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("nvarchar(4000)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Key")
-                        .IsUnique();
-
-                    b.ToTable("SystemSettings", (string)null);
-                });
-
             modelBuilder.Entity("LitNovel.Domain.Entities.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -801,9 +641,6 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                         .HasColumnType("nvarchar(120)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.HasIndex("Slug")
                         .IsUnique();
@@ -1039,17 +876,6 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                         .IsUnique();
 
                     b.ToTable("Volumes", (string)null);
-                });
-
-            modelBuilder.Entity("LitNovel.Domain.Entities.AuditLog", b =>
-                {
-                    b.HasOne("LitNovel.Domain.Entities.User", "Actor")
-                        .WithMany("AuditLogs")
-                        .HasForeignKey("ActorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Actor");
                 });
 
             modelBuilder.Entity("LitNovel.Domain.Entities.Chapter", b =>
@@ -1451,8 +1277,6 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
 
             modelBuilder.Entity("LitNovel.Domain.Entities.User", b =>
                 {
-                    b.Navigation("AuditLogs");
-
                     b.Navigation("CommentChapters");
 
                     b.Navigation("CommentLikes");

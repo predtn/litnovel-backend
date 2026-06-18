@@ -58,6 +58,11 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             };
         }
 
+        public async Task AddAsync(Notification notification, CancellationToken ct)
+        {
+            await _context.Notifications.AddAsync(notification, ct);
+        }
+
         public async Task<PagedResult<AdminSentNotificationResponseDto>> GetAdminSentAsync(AdminSentNotificationsQueryDto query, CancellationToken ct)
         {
             var page = query.Page <= 0 ? 1 : query.Page;

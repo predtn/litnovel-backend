@@ -44,6 +44,8 @@ namespace LitNovel.Infrastructure
             services.AddScoped<IBackupRepository, BackupRepository>();
             services.AddScoped<IStaffDashboardRepository, StaffDashboardRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUserWarningRepository, UserWarningRepository>();
+            services.AddScoped<IModerationLogRepository, ModerationLogRepository>();
             services.AddScoped<IPasswordService, PasswordService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();

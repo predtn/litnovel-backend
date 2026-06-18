@@ -64,6 +64,21 @@ namespace LitNovel.Application
             services.AddScoped<IAddCommentLikeUseCase, AddCommentLikeUseCase>();
             services.AddScoped<IRemoveCommentLikeUseCase, RemoveCommentLikeUseCase>();
             services.AddScoped<ICreateNovelReportUseCase, CreateNovelReportUseCase>();
+            // Staff use cases (local)
+            services.AddScoped<IGetStaffDashboardUseCase, GetStaffDashboardUseCase>();
+            services.AddScoped<IGetPendingNovelsUseCase, GetPendingNovelsUseCase>();
+            services.AddScoped<IGetNovelForReviewUseCase, GetNovelForReviewUseCase>();
+            services.AddScoped<IModerateNovelUseCase, ModerateNovelUseCase>();
+            services.AddScoped<IGetPendingChaptersUseCase, GetPendingChaptersUseCase>();
+            services.AddScoped<IGetChapterForReviewUseCase, GetChapterForReviewUseCase>();
+            services.AddScoped<IModerateChapterUseCase, ModerateChapterUseCase>();
+            services.AddScoped<IGetReportsUseCase, GetReportsUseCase>();
+            services.AddScoped<IGetReportDetailUseCase, GetReportDetailUseCase>();
+            services.AddScoped<IResolveReportUseCase, ResolveReportUseCase>();
+            services.AddScoped<IWarnUserUseCase, WarnUserUseCase>();
+            services.AddScoped<IGetModerationHistoryUseCase, GetModerationHistoryUseCase>();
+            services.AddScoped<IGetUserWarningsUseCase, GetUserWarningsUseCase>();
+            // Admin use cases (from main)
             services.AddScoped<IGetAdminStatisticsUseCase, GetAdminStatisticsUseCase>();
             services.AddScoped<IGetAdminStatisticsChartUseCase, GetAdminStatisticsChartUseCase>();
             services.AddScoped<IGetAdminUsersUseCase, GetAdminUsersUseCase>();
@@ -106,7 +121,6 @@ namespace LitNovel.Application
             services.AddScoped<IDownloadAdminBackupUseCase, DownloadAdminBackupUseCase>();
             services.AddScoped<IRestoreAdminBackupUseCase, RestoreAdminBackupUseCase>();
             services.AddScoped<IDeleteAdminBackupUseCase, DeleteAdminBackupUseCase>();
-            services.AddScoped<IGetStaffDashboardUseCase, GetStaffDashboardUseCase>();
 
             return services;
         }
