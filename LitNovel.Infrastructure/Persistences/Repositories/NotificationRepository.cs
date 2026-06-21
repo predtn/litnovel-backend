@@ -17,7 +17,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             _context = context;
         }
 
-        public async Task<PagedResult<NotificationResponseDto>> GetByUserAsync(int userId, NotificationQueryDto query, CancellationToken ct)
+        public async Task<NotificationListResponseDto> GetByUserAsync(int userId, NotificationQueryDto query, CancellationToken ct)
         {
             var page = query.Page <= 0 ? 1 : query.Page;
             var size = query.Size <= 0 ? 20 : query.Size;
@@ -27,11 +27,17 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .Where(n => n.UserId == userId);
 
             if (query.IsRead.HasValue)
-            {
                 notifications = notifications.Where(n => n.IsRead == query.IsRead.Value);
-            }
+
+            if (!string.IsNullOrWhiteSpace(query.Type)
+                && Enum.TryParse<NotificationType>(query.Type, true, out var notifType))
+                notifications = notifications.Where(n => n.NotificationType == notifType);
 
             var total = await notifications.CountAsync(ct);
+            var unreadCount = await _context.Notifications
+                .AsNoTracking()
+                .CountAsync(n => n.UserId == userId && !n.IsRead, ct);
+
             var items = await notifications
                 .OrderByDescending(n => n.CreatedAt)
                 .Skip((page - 1) * size)
@@ -48,8 +54,9 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 })
                 .ToListAsync(ct);
 
-            return new PagedResult<NotificationResponseDto>
+            return new NotificationListResponseDto
             {
+                UnreadCount = unreadCount,
                 Items = items,
                 Page = page,
                 Size = size,
@@ -136,6 +143,51 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         public Task AddRangeAsync(IEnumerable<Notification> notifications, CancellationToken ct)
         {
             return _context.Notifications.AddRangeAsync(notifications, ct);
+        }
+
+        public async Task<bool> MarkAsReadAsync(int notificationId, int userId, CancellationToken ct)
+        {
+            var affected = await _context.Notifications
+                .Where(n => n.Id == notificationId && n.UserId == userId && !n.IsRead)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(n => n.IsRead, true)
+                    .SetProperty(n => n.UpdatedAt, DateTime.UtcNow), ct);
+            return affected > 0;
+        }
+
+        public async Task MarkAllAsReadAsync(int userId, CancellationToken ct)
+        {
+            await _context.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(n => n.IsRead, true)
+                    .SetProperty(n => n.UpdatedAt, DateTime.UtcNow), ct);
+        }
+
+        public async Task<NotificationResponseDto?> GetByIdAsync(int notificationId, int userId, CancellationToken ct)
+        {
+            return await _context.Notifications
+                .AsNoTracking()
+                .Where(n => n.Id == notificationId && n.UserId == userId)
+                .Select(n => new NotificationResponseDto
+                {
+                    Id = n.Id,
+                    NotificationType = n.NotificationType.ToString(),
+                    EntityType = n.EntityType,
+                    EntityId = n.EntityId,
+                    Message = n.Message,
+                    IsRead = n.IsRead,
+                    CreatedAt = n.CreatedAt
+                })
+                .FirstOrDefaultAsync(ct);
+        }
+
+        public async Task<bool> DeleteAsync(int notificationId, int userId, CancellationToken ct)
+        {
+            var affected = await _context.Notifications
+                .Where(n => n.Id == notificationId && n.UserId == userId)
+                .ExecuteDeleteAsync(ct);
+            return affected > 0;
         }
     }
 }
