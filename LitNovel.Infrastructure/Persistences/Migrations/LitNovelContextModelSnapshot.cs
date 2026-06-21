@@ -22,6 +22,134 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("LitNovel.Domain.Entities.Announcement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EndDate");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("StartDate");
+
+                    b.ToTable("Announcements", (string)null);
+                });
+
+            modelBuilder.Entity("LitNovel.Domain.Entities.AuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("ActorId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorId");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("EntityType", "EntityId");
+
+                    b.ToTable("AuditLogs", (string)null);
+                });
+
+            modelBuilder.Entity("LitNovel.Domain.Entities.BackupRecord", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("FilePath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("BackupRecords", (string)null);
+                });
+
             modelBuilder.Entity("LitNovel.Domain.Entities.Badge", b =>
                 {
                     b.Property<int>("Id")
@@ -80,6 +208,9 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                         .HasColumnType("nvarchar(120)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.HasIndex("Slug")
                         .IsUnique();
@@ -246,6 +377,58 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.HasIndex("NovelId");
 
                     b.ToTable("Favorites", (string)null);
+                });
+
+            modelBuilder.Entity("LitNovel.Domain.Entities.ModerationLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("PerformedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("StaffId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TargetId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TargetTitle")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("TargetType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Action");
+
+                    b.HasIndex("PerformedAt");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("ModerationLogs", (string)null);
                 });
 
             modelBuilder.Entity("LitNovel.Domain.Entities.Notification", b =>
@@ -567,6 +750,38 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.ToTable("RefreshTokens", (string)null);
                 });
 
+            modelBuilder.Entity("LitNovel.Domain.Entities.SystemSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("SystemSettings", (string)null);
+                });
+
             modelBuilder.Entity("LitNovel.Domain.Entities.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -586,6 +801,9 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                         .HasColumnType("nvarchar(120)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.HasIndex("Slug")
                         .IsUnique();
@@ -752,6 +970,44 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.ToTable("UserReputations", (string)null);
                 });
 
+            modelBuilder.Entity("LitNovel.Domain.Entities.UserWarning", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IssuedById")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IssuedById");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserWarnings", (string)null);
+                });
+
             modelBuilder.Entity("LitNovel.Domain.Entities.Volume", b =>
                 {
                     b.Property<int>("Id")
@@ -783,6 +1039,17 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                         .IsUnique();
 
                     b.ToTable("Volumes", (string)null);
+                });
+
+            modelBuilder.Entity("LitNovel.Domain.Entities.AuditLog", b =>
+                {
+                    b.HasOne("LitNovel.Domain.Entities.User", "Actor")
+                        .WithMany("AuditLogs")
+                        .HasForeignKey("ActorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Actor");
                 });
 
             modelBuilder.Entity("LitNovel.Domain.Entities.Chapter", b =>
@@ -869,6 +1136,17 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.Navigation("Novel");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("LitNovel.Domain.Entities.ModerationLog", b =>
+                {
+                    b.HasOne("LitNovel.Domain.Entities.User", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Staff");
                 });
 
             modelBuilder.Entity("LitNovel.Domain.Entities.Notification", b =>
@@ -1091,6 +1369,25 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("LitNovel.Domain.Entities.UserWarning", b =>
+                {
+                    b.HasOne("LitNovel.Domain.Entities.User", "IssuedBy")
+                        .WithMany()
+                        .HasForeignKey("IssuedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LitNovel.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("IssuedBy");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("LitNovel.Domain.Entities.Volume", b =>
                 {
                     b.HasOne("LitNovel.Domain.Entities.Novel", "Novel")
@@ -1154,6 +1451,8 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
 
             modelBuilder.Entity("LitNovel.Domain.Entities.User", b =>
                 {
+                    b.Navigation("AuditLogs");
+
                     b.Navigation("CommentChapters");
 
                     b.Navigation("CommentLikes");

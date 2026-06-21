@@ -1,5 +1,6 @@
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Novel;
+using LitNovel.Application.DTOs.Staff;
 using LitNovel.Domain.Entities;
 
 namespace LitNovel.Application.Common.Interfaces.Repositories
@@ -18,5 +19,8 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
         Task<bool> SlugExistsAsync(string slug, int? excludeNovelId, CancellationToken ct);
         Task AddAsync(Novel novel, CancellationToken ct);
         void Delete(Novel novel);
+        Task<PagedResult<PendingNovelListItemResponseDto>> GetPendingAsync(int page, int size, CancellationToken ct);
+        Task<Novel?> GetByIdForModerationAsync(int id, CancellationToken ct);
+        Task<int> CountPendingAsync(CancellationToken ct);
     }
 }

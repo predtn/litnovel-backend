@@ -5,6 +5,7 @@ namespace LitNovel.Domain.Enums
         Draft = 0,
         Pending = 1,
         Published = 2,
-        Scheduled = 3
+        Scheduled = 3,
+        Locked = 4
     }
 }

@@ -1,6 +1,7 @@
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Novel;
+using LitNovel.Application.DTOs.Staff;
 using LitNovel.Domain.Entities;
 using LitNovel.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -281,6 +282,62 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             _context.NovelReports.RemoveRange(novel.TargetReports);
             _context.ReadingProgresses.RemoveRange(novel.NovelProgresses);
             _context.Novels.Remove(novel);
+        }
+
+        public async Task<PagedResult<PendingNovelListItemResponseDto>> GetPendingAsync(int page, int size, CancellationToken ct)
+        {
+            var query = _context.Novels
+                .AsNoTracking()
+                .Where(n => n.Status == NovelStatus.Pending)
+                .OrderBy(n => n.UpdatedAt);
+
+            var total = await query.CountAsync(ct);
+            var items = await query
+                .Skip((page - 1) * size)
+                .Take(size)
+                .Select(n => new PendingNovelListItemResponseDto
+                {
+                    Id             = n.Id,
+                    Title          = n.Title,
+                    Slug           = n.Slug,
+                    CoverImage     = n.CoverImage,
+                    Description    = n.Description,
+                    AuthorId       = n.AuthorId,
+                    AuthorUsername = n.Author.Username,
+                    CategoryName   = n.Category == null ? null : n.Category.Name,
+                    Tags           = n.NovelTags.Select(nt => nt.Tag.Name).ToList(),
+                    TotalChapters  = n.TotalChapters,
+                    SubmittedAt    = n.UpdatedAt
+                })
+                .ToListAsync(ct);
+
+            return new PagedResult<PendingNovelListItemResponseDto>
+            {
+                Items         = items,
+                Page          = page,
+                Size          = size,
+                TotalElements = total,
+                TotalPages    = (int)Math.Ceiling(total / (double)size)
+            };
+        }
+
+        public Task<LitNovel.Domain.Entities.Novel?> GetByIdForModerationAsync(int id, CancellationToken ct)
+        {
+            return _context.Novels
+                .AsNoTracking()
+                .Include(n => n.Author)
+                .Include(n => n.Category)
+                .Include(n => n.NovelTags)
+                    .ThenInclude(nt => nt.Tag)
+                .Include(n => n.Volumes)
+                    .ThenInclude(v => v.Chapters)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(n => n.Id == id, ct);
+        }
+
+        public Task<int> CountPendingAsync(CancellationToken ct)
+        {
+            return _context.Novels.CountAsync(n => n.Status == NovelStatus.Pending, ct);
         }
     }
 }
