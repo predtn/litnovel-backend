@@ -1,7 +1,6 @@
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Interfaces.Services;
 using LitNovel.Application.Common.Interfaces.UseCases;
-using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Notification;
 
 namespace LitNovel.Application.UseCases
@@ -17,7 +16,7 @@ namespace LitNovel.Application.UseCases
             _currentUserService = currentUserService;
         }
 
-        public Task<PagedResult<NotificationResponseDto>> ExecuteAsync(NotificationQueryDto query, CancellationToken ct)
+        public Task<NotificationListResponseDto> ExecuteAsync(NotificationQueryDto query, CancellationToken ct)
         {
             return _notificationRepository.GetByUserAsync(_currentUserService.UserId, query, ct);
         }

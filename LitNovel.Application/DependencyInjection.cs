@@ -44,6 +44,10 @@ namespace LitNovel.Application
             services.AddScoped<ICreateUserReportUseCase, CreateUserReportUseCase>();
             services.AddScoped<IGetReadingHistoryUseCase, GetReadingHistoryUseCase>();
             services.AddScoped<IGetNotificationsUseCase, GetNotificationsUseCase>();
+            services.AddScoped<IGetNotificationByIdUseCase, GetNotificationByIdUseCase>();
+            services.AddScoped<IDeleteNotificationUseCase, DeleteNotificationUseCase>();
+            services.AddScoped<IMarkNotificationReadUseCase, MarkNotificationReadUseCase>();
+            services.AddScoped<IMarkAllNotificationsReadUseCase, MarkAllNotificationsReadUseCase>();
             services.AddScoped<ISaveReadingProgressUseCase, SaveReadingProgressUseCase>();
             services.AddScoped<IDeleteReadingHistoryUseCase, DeleteReadingHistoryUseCase>();
             services.AddScoped<IGetMyFavoritesUseCase, GetMyFavoritesUseCase>();
