@@ -46,8 +46,6 @@ namespace LitNovel.WebAPI.Controllers
         private readonly IUpdateAdminNovelStatusUseCase _updateAdminNovelStatusUseCase;
         private readonly IUpdateAdminNovelAuthorUseCase _updateAdminNovelAuthorUseCase;
         private readonly IUpdateAdminChapterStatusUseCase _updateAdminChapterStatusUseCase;
-        private readonly IGetAdminSettingsUseCase _getAdminSettingsUseCase;
-        private readonly IUpdateAdminSettingsUseCase _updateAdminSettingsUseCase;
 
         public AdminController(
             IGetAdminStatisticsUseCase getAdminStatisticsUseCase,
@@ -79,9 +77,7 @@ namespace LitNovel.WebAPI.Controllers
             IGetAdminAuditLogsUseCase getAdminAuditLogsUseCase,
             IUpdateAdminNovelStatusUseCase updateAdminNovelStatusUseCase,
             IUpdateAdminNovelAuthorUseCase updateAdminNovelAuthorUseCase,
-            IUpdateAdminChapterStatusUseCase updateAdminChapterStatusUseCase,
-            IGetAdminSettingsUseCase getAdminSettingsUseCase,
-            IUpdateAdminSettingsUseCase updateAdminSettingsUseCase)
+            IUpdateAdminChapterStatusUseCase updateAdminChapterStatusUseCase)
         {
             _getAdminStatisticsUseCase = getAdminStatisticsUseCase;
             _getAdminStatisticsChartUseCase = getAdminStatisticsChartUseCase;
@@ -113,8 +109,6 @@ namespace LitNovel.WebAPI.Controllers
             _updateAdminNovelStatusUseCase = updateAdminNovelStatusUseCase;
             _updateAdminNovelAuthorUseCase = updateAdminNovelAuthorUseCase;
             _updateAdminChapterStatusUseCase = updateAdminChapterStatusUseCase;
-            _getAdminSettingsUseCase = getAdminSettingsUseCase;
-            _updateAdminSettingsUseCase = updateAdminSettingsUseCase;
         }
 
         [HttpGet("statistics")]
@@ -426,25 +420,6 @@ namespace LitNovel.WebAPI.Controllers
 
             var result = await _getAdminAuditLogsUseCase.ExecuteAsync(query, ct);
             return Ok(new ApiResponse<PagedResult<AdminAuditLogResponseDto>> { Success = true, Data = result });
-        }
-
-        [HttpGet("settings")]
-        public async Task<IActionResult> GetSettings(CancellationToken ct)
-        {
-            var result = await _getAdminSettingsUseCase.ExecuteAsync(ct);
-            return Ok(new ApiResponse<AdminSettingsResponseDto> { Success = true, Data = result });
-        }
-
-        [HttpPut("settings")]
-        public async Task<IActionResult> UpdateSettings(UpdateAdminSettingsRequestDto request, CancellationToken ct)
-        {
-            var result = await _updateAdminSettingsUseCase.ExecuteAsync(request, ct);
-            return Ok(new ApiResponse<AdminSettingsResponseDto>
-            {
-                Success = true,
-                Message = "Settings updated successfully",
-                Data = result
-            });
         }
 
         [HttpPut("novels/{id:int}/status")]
