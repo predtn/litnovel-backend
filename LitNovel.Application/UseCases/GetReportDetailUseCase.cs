@@ -48,7 +48,15 @@ namespace LitNovel.Application.UseCases
                     },
                     TargetNovel     = report.TargetNovel == null ? null : new ReportTargetNovelDto
                     {
-                        Id = report.TargetNovel.Id, Title = report.TargetNovel.Title, Slug = report.TargetNovel.Slug
+                        Id     = report.TargetNovel.Id,
+                        Title  = report.TargetNovel.Title,
+                        Slug   = report.TargetNovel.Slug,
+                        Author = report.TargetNovel.Author == null ? null : new ReportActorDto
+                        {
+                            Id       = report.TargetNovel.Author.Id,
+                            Username = report.TargetNovel.Author.Username,
+                            Avatar   = report.TargetNovel.Author.Avatar
+                        }
                     },
                     TargetChapter   = report.TargetChapter == null ? null : new ReportTargetChapterDto
                     {

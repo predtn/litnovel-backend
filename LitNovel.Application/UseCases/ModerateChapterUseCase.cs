@@ -3,6 +3,7 @@ using LitNovel.Application.Common.Exceptions;
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Interfaces.Services;
 using LitNovel.Application.Common.Interfaces.UseCases;
+using LitNovel.Application.DTOs.Notification;
 using LitNovel.Application.DTOs.Staff;
 using LitNovel.Domain.Entities;
 using LitNovel.Domain.Enums;
@@ -17,6 +18,7 @@ namespace LitNovel.Application.UseCases
         private readonly ICurrentUserService      _currentUserService;
         private readonly IUnitOfWork              _unitOfWork;
         private readonly IValidator<ModerateChapterRequestDto> _validator;
+        private readonly INotificationPushService _notificationPush;
 
         public ModerateChapterUseCase(
             IChapterRepository chapterRepository,
@@ -24,7 +26,8 @@ namespace LitNovel.Application.UseCases
             IModerationLogRepository moderationLogRepository,
             ICurrentUserService currentUserService,
             IUnitOfWork unitOfWork,
-            IValidator<ModerateChapterRequestDto> validator)
+            IValidator<ModerateChapterRequestDto> validator,
+            INotificationPushService notificationPush)
         {
             _chapterRepository       = chapterRepository;
             _notificationRepository  = notificationRepository;
@@ -32,6 +35,7 @@ namespace LitNovel.Application.UseCases
             _currentUserService      = currentUserService;
             _unitOfWork              = unitOfWork;
             _validator               = validator;
+            _notificationPush        = notificationPush;
         }
 
         public async Task ExecuteAsync(int chapterId, ModerateChapterRequestDto request, CancellationToken ct)
@@ -101,6 +105,18 @@ namespace LitNovel.Application.UseCases
             await _notificationRepository.AddAsync(notification, ct);
             await _moderationLogRepository.AddAsync(log, ct);
             await _unitOfWork.SaveChangesAsync(ct);
+
+            var pushDto = new NotificationResponseDto
+            {
+                Id               = notification.Id,
+                NotificationType = notification.NotificationType.ToString(),
+                EntityType       = notification.EntityType,
+                EntityId         = notification.EntityId,
+                Message          = notification.Message,
+                IsRead           = false,
+                CreatedAt        = notification.CreatedAt
+            };
+            await _notificationPush.PushAsync(authorId, pushDto, ct);
         }
     }
 }

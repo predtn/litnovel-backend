@@ -34,6 +34,7 @@ namespace LitNovel.Application.DTOs.Staff
         public int Id { get; set; }
         public string Title { get; set; } = default!;
         public string Slug { get; set; } = default!;
+        public ReportActorDto? Author { get; set; }
     }
 
     public class ReportTargetChapterDto
