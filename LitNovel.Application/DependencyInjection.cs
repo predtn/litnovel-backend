@@ -113,18 +113,11 @@ namespace LitNovel.Application
             services.AddScoped<IUpdateAdminNovelStatusUseCase, UpdateAdminNovelStatusUseCase>();
             services.AddScoped<IUpdateAdminNovelAuthorUseCase, UpdateAdminNovelAuthorUseCase>();
             services.AddScoped<IUpdateAdminChapterStatusUseCase, UpdateAdminChapterStatusUseCase>();
-            services.AddScoped<IGetAdminSettingsUseCase, GetAdminSettingsUseCase>();
-            services.AddScoped<IUpdateAdminSettingsUseCase, UpdateAdminSettingsUseCase>();
             services.AddScoped<IGetAdminAnnouncementsUseCase, GetAdminAnnouncementsUseCase>();
             services.AddScoped<ICreateAdminAnnouncementUseCase, CreateAdminAnnouncementUseCase>();
             services.AddScoped<IUpdateAdminAnnouncementUseCase, UpdateAdminAnnouncementUseCase>();
             services.AddScoped<IDeleteAdminAnnouncementUseCase, DeleteAdminAnnouncementUseCase>();
             services.AddScoped<IToggleAdminAnnouncementUseCase, ToggleAdminAnnouncementUseCase>();
-            services.AddScoped<IGetAdminBackupsUseCase, GetAdminBackupsUseCase>();
-            services.AddScoped<ICreateAdminBackupUseCase, CreateAdminBackupUseCase>();
-            services.AddScoped<IDownloadAdminBackupUseCase, DownloadAdminBackupUseCase>();
-            services.AddScoped<IRestoreAdminBackupUseCase, RestoreAdminBackupUseCase>();
-            services.AddScoped<IDeleteAdminBackupUseCase, DeleteAdminBackupUseCase>();
 
             return services;
         }
