@@ -6,6 +6,7 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
     {
         Task AddAsync(RefreshToken refreshToken, CancellationToken ct);
         Task<RefreshToken?> GetActiveAsync(string token, CancellationToken ct);
+        Task<bool> HasOtherActiveTokenForUserAsync(int userId, int excludedTokenId, CancellationToken ct);
         void Revoke(RefreshToken refreshToken);
     }
 }

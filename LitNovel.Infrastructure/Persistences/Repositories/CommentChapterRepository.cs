@@ -15,7 +15,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             _context = context;
         }
 
-        public async Task<PagedResult<CommentResponseDto>> GetByChapterAsync(int chapterId, int page, int size, CancellationToken ct)
+        public async Task<PagedResult<CommentResponseDto>> GetByChapterAsync(int chapterId, int page, int size, int? currentUserId, CancellationToken ct)
         {
             page = page <= 0 ? 1 : page;
             size = size <= 0 ? 20 : size;
@@ -40,6 +40,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     },
                     Content = c.Content,
                     LikeCount = c.LikeCount,
+                    IsLiked = currentUserId.HasValue && c.CommentLikes.Any(l => l.UserId == currentUserId.Value),
                     DislikeCount = c.DislikeCount,
                     ParentCommentId = c.ParentCommentId,
                     Replies = c.Replies
@@ -55,6 +56,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                             },
                             Content = r.Content,
                             LikeCount = r.LikeCount,
+                            IsLiked = currentUserId.HasValue && r.CommentLikes.Any(l => l.UserId == currentUserId.Value),
                             DislikeCount = r.DislikeCount,
                             ParentCommentId = r.ParentCommentId,
                             CreatedAt = r.CreatedAt

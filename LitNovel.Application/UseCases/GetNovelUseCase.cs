@@ -110,6 +110,9 @@ namespace LitNovel.Application.UseCases
                 IsFavorited = _currentUserService.IsAuthenticated
                     ? novel.Favorites.Any(f => f.UserId == _currentUserService.UserId)
                     : null,
+                IsLiked = _currentUserService.IsAuthenticated
+                    ? novel.NovelLikes.Any(l => l.UserId == _currentUserService.UserId)
+                    : null,
                 TotalChapters = canManage ? novel.TotalChapters : visibleVolumes.Sum(v => v.Chapters.Count),
                 TotalVolumes = canManage ? novel.TotalVolumes : visibleVolumes.Count,
                 RatingAverage = novel.NovelRatings.Any() ? novel.NovelRatings.Average(r => r.Rating) : 0,

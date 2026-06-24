@@ -6,7 +6,7 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
 {
     public interface ICommentChapterRepository
     {
-        Task<PagedResult<CommentResponseDto>> GetByChapterAsync(int chapterId, int page, int size, CancellationToken ct);
+        Task<PagedResult<CommentResponseDto>> GetByChapterAsync(int chapterId, int page, int size, int? currentUserId, CancellationToken ct);
         Task<CommentChapter?> GetByIdAsync(int id, CancellationToken ct);
         Task AddAsync(CommentChapter comment, CancellationToken ct);
         void Delete(CommentChapter comment);

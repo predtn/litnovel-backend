@@ -14,6 +14,7 @@ namespace LitNovel.Application.DTOs.Novel
         public int ViewCount { get; set; }
         public int LikeCount { get; set; }
         public bool? IsFavorited { get; set; }
+        public bool? IsLiked { get; set; }
         public int TotalChapters { get; set; }
         public int TotalVolumes { get; set; }
         public double RatingAverage { get; set; }

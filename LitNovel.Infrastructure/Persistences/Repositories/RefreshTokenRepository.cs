@@ -25,6 +25,15 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .FirstOrDefaultAsync(rt => rt.Token == token && !rt.IsRevoked && rt.ExpiresAt > DateTime.UtcNow, ct);
         }
 
+        public Task<bool> HasOtherActiveTokenForUserAsync(int userId, int excludedTokenId, CancellationToken ct)
+        {
+            return _context.RefreshTokens
+                .AnyAsync(rt => rt.UserId == userId
+                    && rt.Id != excludedTokenId
+                    && !rt.IsRevoked
+                    && rt.ExpiresAt > DateTime.UtcNow, ct);
+        }
+
         public void Revoke(RefreshToken refreshToken)
         {
             refreshToken.IsRevoked = true;

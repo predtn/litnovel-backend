@@ -32,6 +32,8 @@ namespace LitNovel.Application.UseCases
                 Username = user.Username,
                 Avatar = user.Avatar,
                 Bio = user.Bio,
+                Role = user.Role.ToString(),
+                Status = user.Status.ToString(),
                 Reputation = user.UserBadges.Count,
                 Badges = MapBadges(user),
                 Stats = MapStats(user),
