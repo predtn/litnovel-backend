@@ -10,6 +10,8 @@ namespace LitNovel.Application.DTOs.Novel
         public NovelCategoryResponseDto? Category { get; set; }
         public List<NovelTagResponseDto> Tags { get; set; } = new();
         public string Status { get; set; } = default!;
+        public int TotalChapters { get; set; }
+        public int TotalVolumes { get; set; }
         public int ViewCount { get; set; }
         public double RatingAverage { get; set; }
         public DateTime UpdatedAt { get; set; }

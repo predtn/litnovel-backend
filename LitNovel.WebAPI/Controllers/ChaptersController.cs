@@ -48,6 +48,14 @@ namespace LitNovel.WebAPI.Controllers
             return Ok(new ApiResponse<ChapterDetailResponseDto> { Success = true, Data = result });
         }
 
+        [HttpGet("{slug}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetBySlug(string slug, CancellationToken ct)
+        {
+            var result = await _getChapterUseCase.ExecuteBySlugAsync(slug, ct);
+            return Ok(new ApiResponse<ChapterDetailResponseDto> { Success = true, Data = result });
+        }
+
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateChapterRequestDto request, CancellationToken ct)
         {

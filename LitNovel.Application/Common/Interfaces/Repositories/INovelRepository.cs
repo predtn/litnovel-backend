@@ -12,6 +12,7 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
         IQueryable<MyNovelListItemResponseDto> QueryMyNovels(int authorId);
         Task<NovelAnalyticsResponseDto> GetAnalyticsAsync(int id, CancellationToken ct);
         Task<Novel?> GetByIdWithDetailsAsync(int id, CancellationToken ct);
+        Task<Novel?> GetBySlugWithDetailsAsync(string slug, CancellationToken ct);
         Task<Novel?> GetByIdForUpdateAsync(int id, CancellationToken ct);
         Task<Novel?> GetByIdForDeleteAsync(int id, CancellationToken ct);
         Task<Novel?> GetByIdWithTagsForUpdateAsync(int id, CancellationToken ct);

@@ -123,7 +123,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     Bio = u.Bio,
                     Role = u.Role.ToString(),
                     Status = u.Status.ToString(),
-                    Reputation = u.Reputation == null ? 0 : u.Reputation.Score,
+                    Reputation = u.UserBadges.Count,
                     Badges = u.UserBadges
                         .OrderByDescending(ub => ub.EarnedAt)
                         .Select(ub => new BadgeResponseDto

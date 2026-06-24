@@ -82,6 +82,13 @@ namespace LitNovel.WebAPI.Controllers
             return Ok(new ApiResponse<NovelDetailResponseDto> { Success = true, Data = result });
         }
 
+        [HttpGet("{slug}")]
+        public async Task<IActionResult> GetBySlug(string slug, CancellationToken ct)
+        {
+            var result = await _getNovelUseCase.ExecuteBySlugAsync(slug, ct);
+            return Ok(new ApiResponse<NovelDetailResponseDto> { Success = true, Data = result });
+        }
+
         [HttpGet("{id:int}/analytics")]
         [HttpGet("analytics/{id:int}")]
         [Authorize]

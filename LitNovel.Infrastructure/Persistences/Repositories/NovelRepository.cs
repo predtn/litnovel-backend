@@ -1,4 +1,4 @@
-using LitNovel.Application.Common.Interfaces.Repositories;
+﻿using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Novel;
 using LitNovel.Application.DTOs.Staff;
@@ -86,6 +86,8 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                         .Select(nt => new NovelTagResponseDto { Id = nt.Tag.Id, Name = nt.Tag.Name })
                         .ToList(),
                     Status = n.Status.ToString(),
+                    TotalChapters = n.TotalChapters,
+                    TotalVolumes = n.TotalVolumes,
                     ViewCount = n.ViewCount,
                     RatingAverage = n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0,
                     UpdatedAt = n.UpdatedAt
@@ -231,10 +233,27 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .Include(n => n.NovelTags)
                     .ThenInclude(nt => nt.Tag)
                 .Include(n => n.NovelRatings)
+                .Include(n => n.Favorites)
                 .Include(n => n.Volumes)
                     .ThenInclude(v => v.Chapters)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(n => n.Id == id, ct);
+        }
+
+        public Task<LitNovel.Domain.Entities.Novel?> GetBySlugWithDetailsAsync(string slug, CancellationToken ct)
+        {
+            return _context.Novels
+                .AsNoTracking()
+                .Include(n => n.Author)
+                .Include(n => n.Category)
+                .Include(n => n.NovelTags)
+                    .ThenInclude(nt => nt.Tag)
+                .Include(n => n.NovelRatings)
+                .Include(n => n.Favorites)
+                .Include(n => n.Volumes)
+                    .ThenInclude(v => v.Chapters)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(n => n.Slug == slug, ct);
         }
 
         public Task<LitNovel.Domain.Entities.Novel?> GetByIdForUpdateAsync(int id, CancellationToken ct)
@@ -341,3 +360,4 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         }
     }
 }
+

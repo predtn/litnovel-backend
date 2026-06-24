@@ -34,6 +34,27 @@ namespace LitNovel.Application.UseCases
                 throw new NotFoundException("Chapter not found");
             }
 
+            return MapChapter(chapter);
+        }
+
+        public async Task<ChapterDetailResponseDto> ExecuteBySlugAsync(string slug, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(slug))
+            {
+                throw new BadRequestException("Invalid chapter slug");
+            }
+
+            var chapter = await _chapterRepository.GetBySlugWithDetailsAsync(slug.Trim(), ct);
+            if (chapter == null)
+            {
+                throw new NotFoundException("Chapter not found");
+            }
+
+            return MapChapter(chapter);
+        }
+
+        private ChapterDetailResponseDto MapChapter(Chapter chapter)
+        {
             if (!CanView(chapter))
             {
                 throw new ForbiddenException("Chapter is not publicly available");

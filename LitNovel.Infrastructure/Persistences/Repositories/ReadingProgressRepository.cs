@@ -51,6 +51,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     LastChapter = new ReadingProgressChapterResponseDto
                     {
                         Id = rp.Chapter.Id,
+                        Slug = rp.Chapter.Slug,
                         ChapterNumber = rp.Chapter.ChapterNumber,
                         Title = rp.Chapter.Title
                     },

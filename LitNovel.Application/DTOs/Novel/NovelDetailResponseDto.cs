@@ -13,6 +13,7 @@ namespace LitNovel.Application.DTOs.Novel
         public string Status { get; set; } = default!;
         public int ViewCount { get; set; }
         public int LikeCount { get; set; }
+        public bool? IsFavorited { get; set; }
         public int TotalChapters { get; set; }
         public int TotalVolumes { get; set; }
         public double RatingAverage { get; set; }
@@ -33,6 +34,7 @@ namespace LitNovel.Application.DTOs.Novel
     public class NovelDetailChapterResponseDto
     {
         public int Id { get; set; }
+        public string Slug { get; set; } = default!;
         public int ChapterNumber { get; set; }
         public string Title { get; set; } = default!;
         public string Status { get; set; } = default!;

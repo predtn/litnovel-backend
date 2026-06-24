@@ -48,6 +48,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .Select(c => new ChapterListItemResponseDto
                 {
                     Id = c.Id,
+                    Slug = c.Slug,
                     ChapterNumber = c.ChapterNumber,
                     Title = c.Title,
                     Status = c.Status.ToString(),
@@ -73,6 +74,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .Select(c => new ChapterListItemResponseDto
                 {
                     Id = c.Id,
+                    Slug = c.Slug,
                     ChapterNumber = c.ChapterNumber,
                     Title = c.Title,
                     Status = c.Status.ToString(),
@@ -89,6 +91,17 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     .ThenInclude(v => v.Novel)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(c => c.Id == id, ct);
+        }
+
+        public Task<Chapter?> GetBySlugWithDetailsAsync(string slug, CancellationToken ct)
+        {
+            return _context.Chapters
+                .AsNoTracking()
+                .Include(c => c.Content)
+                .Include(c => c.Volume)
+                    .ThenInclude(v => v.Novel)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(c => c.Slug == slug, ct);
         }
 
         public Task<Chapter?> GetByIdForUpdateAsync(int id, CancellationToken ct)

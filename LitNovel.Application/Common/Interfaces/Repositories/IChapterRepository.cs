@@ -10,6 +10,7 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
         Task<PagedResult<ChapterListItemResponseDto>> GetByVolumeIdAsync(int volumeId, ChapterListQueryDto query, CancellationToken ct);
         IQueryable<ChapterListItemResponseDto> QueryByVolumeId(int volumeId);
         Task<Chapter?> GetByIdWithDetailsAsync(int id, CancellationToken ct);
+        Task<Chapter?> GetBySlugWithDetailsAsync(string slug, CancellationToken ct);
         Task<Chapter?> GetByIdForUpdateAsync(int id, CancellationToken ct);
         Task<Chapter?> GetByIdForDeleteAsync(int id, CancellationToken ct);
         Task<bool> ChapterNumberExistsAsync(int volumeId, int chapterNumber, int? excludeChapterId, CancellationToken ct);

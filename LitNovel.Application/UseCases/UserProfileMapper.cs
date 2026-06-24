@@ -17,7 +17,7 @@ namespace LitNovel.Application.UseCases
                 Bio = user.Bio,
                 Role = user.Role.ToString(),
                 Status = user.Status.ToString(),
-                Reputation = user.Reputation?.Score ?? 0,
+                Reputation = user.UserBadges.Count,
                 Badges = MapBadges(user),
                 Stats = MapStats(user),
                 CreatedAt = user.CreatedAt
@@ -32,7 +32,7 @@ namespace LitNovel.Application.UseCases
                 Username = user.Username,
                 Avatar = user.Avatar,
                 Bio = user.Bio,
-                Reputation = user.Reputation?.Score ?? 0,
+                Reputation = user.UserBadges.Count,
                 Badges = MapBadges(user),
                 Stats = MapStats(user),
                 JoinedAt = user.CreatedAt

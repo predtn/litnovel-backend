@@ -50,6 +50,8 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                         .Select(nt => new NovelTagResponseDto { Id = nt.Tag.Id, Name = nt.Tag.Name })
                         .ToList(),
                     Status = f.Novel.Status.ToString(),
+                    TotalChapters = f.Novel.TotalChapters,
+                    TotalVolumes = f.Novel.TotalVolumes,
                     ViewCount = f.Novel.ViewCount,
                     RatingAverage = f.Novel.NovelRatings.Any() ? f.Novel.NovelRatings.Average(r => r.Rating) : 0,
                     UpdatedAt = f.Novel.UpdatedAt

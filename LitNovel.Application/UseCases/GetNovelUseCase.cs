@@ -32,6 +32,27 @@ namespace LitNovel.Application.UseCases
                 throw new NotFoundException("Novel not found");
             }
 
+            return MapNovel(novel);
+        }
+
+        public async Task<NovelDetailResponseDto> ExecuteBySlugAsync(string slug, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(slug))
+            {
+                throw new BadRequestException("Invalid novel slug");
+            }
+
+            var novel = await _novelRepository.GetBySlugWithDetailsAsync(slug.Trim(), ct);
+            if (novel == null)
+            {
+                throw new NotFoundException("Novel not found");
+            }
+
+            return MapNovel(novel);
+        }
+
+        private NovelDetailResponseDto MapNovel(Novel novel)
+        {
             if (!CanView(novel))
             {
                 throw new ForbiddenException("Novel is not publicly available");
@@ -51,6 +72,7 @@ namespace LitNovel.Application.UseCases
                         .Select(c => new NovelDetailChapterResponseDto
                         {
                             Id = c.Id,
+                            Slug = c.Slug,
                             ChapterNumber = c.ChapterNumber,
                             Title = c.Title,
                             Status = c.Status.ToString(),
@@ -85,6 +107,9 @@ namespace LitNovel.Application.UseCases
                 Status = novel.Status.ToString(),
                 ViewCount = novel.ViewCount,
                 LikeCount = novel.LikeCount,
+                IsFavorited = _currentUserService.IsAuthenticated
+                    ? novel.Favorites.Any(f => f.UserId == _currentUserService.UserId)
+                    : null,
                 TotalChapters = canManage ? novel.TotalChapters : visibleVolumes.Sum(v => v.Chapters.Count),
                 TotalVolumes = canManage ? novel.TotalVolumes : visibleVolumes.Count,
                 RatingAverage = novel.NovelRatings.Any() ? novel.NovelRatings.Average(r => r.Rating) : 0,
@@ -108,6 +133,11 @@ namespace LitNovel.Application.UseCases
 
         private bool CanManage(Novel novel)
         {
+            if (!_currentUserService.IsAuthenticated)
+            {
+                return false;
+            }
+
             return novel.AuthorId == _currentUserService.UserId
                 || string.Equals(_currentUserService.Role, UserRole.Staff.ToString(), StringComparison.OrdinalIgnoreCase)
                 || string.Equals(_currentUserService.Role, UserRole.Admin.ToString(), StringComparison.OrdinalIgnoreCase);
