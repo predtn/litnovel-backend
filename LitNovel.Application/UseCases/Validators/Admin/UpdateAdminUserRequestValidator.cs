@@ -13,12 +13,23 @@ namespace LitNovel.Application.UseCases.Validators.Admin
                 .WithMessage("Invalid user role");
 
             RuleFor(x => x.Status)
-                .Must(status => string.IsNullOrWhiteSpace(status) || Enum.TryParse<UserStatus>(status, true, out _))
-                .WithMessage("Invalid user status");
+                .Must(BeAssignableStatus)
+                .WithMessage("Invalid user status. Admin user management supports only Offline or Online.");
 
             RuleFor(x => x)
                 .Must(x => !string.IsNullOrWhiteSpace(x.Role) || !string.IsNullOrWhiteSpace(x.Status))
                 .WithMessage("Role or status is required");
+        }
+
+        private static bool BeAssignableStatus(string? status)
+        {
+            if (string.IsNullOrWhiteSpace(status))
+            {
+                return true;
+            }
+
+            return Enum.TryParse<UserStatus>(status, true, out var parsedStatus)
+                && parsedStatus is UserStatus.Offline or UserStatus.Online;
         }
     }
 }
