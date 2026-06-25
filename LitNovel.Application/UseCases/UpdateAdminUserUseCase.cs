@@ -64,7 +64,7 @@ namespace LitNovel.Application.UseCases
 
         private async Task EnsureAdminCanBeChangedAsync(int targetUserId, UserRole currentRole, UserRole newRole, UserStatus newStatus, CancellationToken ct)
         {
-            if (targetUserId == _currentUserService.UserId && (newRole != UserRole.Admin || newStatus == UserStatus.Banned))
+            if (targetUserId == _currentUserService.UserId && newRole != UserRole.Admin)
             {
                 throw new BadRequestException("You cannot remove your own admin access");
             }

@@ -21,9 +21,6 @@ namespace LitNovel.Application.UseCases.Validators.Novel
                 .NotEmpty()
                 .WithMessage("At least one tag is required");
             RuleFor(x => x.TagIds)
-                .Must(tagIds => tagIds == null || tagIds.Count <= 10)
-                .WithMessage("A novel can have at most 10 tags");
-            RuleFor(x => x.TagIds)
                 .Must(tagIds => tagIds == null || tagIds.Distinct().Count() == tagIds.Count)
                 .WithMessage("Duplicate tag ids are not allowed");
             RuleForEach(x => x.TagIds)

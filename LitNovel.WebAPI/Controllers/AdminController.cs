@@ -21,8 +21,6 @@ namespace LitNovel.WebAPI.Controllers
         private readonly IGetAdminUsersUseCase _getAdminUsersUseCase;
         private readonly IGetAdminUserDetailUseCase _getAdminUserDetailUseCase;
         private readonly IUpdateAdminUserUseCase _updateAdminUserUseCase;
-        private readonly IBanAdminUserUseCase _banAdminUserUseCase;
-        private readonly IUnbanAdminUserUseCase _unbanAdminUserUseCase;
         private readonly IDeleteAdminUserUseCase _deleteAdminUserUseCase;
         private readonly IAssignStaffUseCase _assignStaffUseCase;
         private readonly IRevokeStaffUseCase _revokeStaffUseCase;
@@ -43,9 +41,6 @@ namespace LitNovel.WebAPI.Controllers
         private readonly ISendAdminNotificationUseCase _sendAdminNotificationUseCase;
         private readonly IGetAdminReportsUseCase _getAdminReportsUseCase;
         private readonly IGetAdminAuditLogsUseCase _getAdminAuditLogsUseCase;
-        private readonly IUpdateAdminNovelStatusUseCase _updateAdminNovelStatusUseCase;
-        private readonly IUpdateAdminNovelAuthorUseCase _updateAdminNovelAuthorUseCase;
-        private readonly IUpdateAdminChapterStatusUseCase _updateAdminChapterStatusUseCase;
 
         public AdminController(
             IGetAdminStatisticsUseCase getAdminStatisticsUseCase,
@@ -53,8 +48,6 @@ namespace LitNovel.WebAPI.Controllers
             IGetAdminUsersUseCase getAdminUsersUseCase,
             IGetAdminUserDetailUseCase getAdminUserDetailUseCase,
             IUpdateAdminUserUseCase updateAdminUserUseCase,
-            IBanAdminUserUseCase banAdminUserUseCase,
-            IUnbanAdminUserUseCase unbanAdminUserUseCase,
             IDeleteAdminUserUseCase deleteAdminUserUseCase,
             IAssignStaffUseCase assignStaffUseCase,
             IRevokeStaffUseCase revokeStaffUseCase,
@@ -74,18 +67,13 @@ namespace LitNovel.WebAPI.Controllers
             IGetAdminSentNotificationsUseCase getAdminSentNotificationsUseCase,
             ISendAdminNotificationUseCase sendAdminNotificationUseCase,
             IGetAdminReportsUseCase getAdminReportsUseCase,
-            IGetAdminAuditLogsUseCase getAdminAuditLogsUseCase,
-            IUpdateAdminNovelStatusUseCase updateAdminNovelStatusUseCase,
-            IUpdateAdminNovelAuthorUseCase updateAdminNovelAuthorUseCase,
-            IUpdateAdminChapterStatusUseCase updateAdminChapterStatusUseCase)
+            IGetAdminAuditLogsUseCase getAdminAuditLogsUseCase)
         {
             _getAdminStatisticsUseCase = getAdminStatisticsUseCase;
             _getAdminStatisticsChartUseCase = getAdminStatisticsChartUseCase;
             _getAdminUsersUseCase = getAdminUsersUseCase;
             _getAdminUserDetailUseCase = getAdminUserDetailUseCase;
             _updateAdminUserUseCase = updateAdminUserUseCase;
-            _banAdminUserUseCase = banAdminUserUseCase;
-            _unbanAdminUserUseCase = unbanAdminUserUseCase;
             _deleteAdminUserUseCase = deleteAdminUserUseCase;
             _assignStaffUseCase = assignStaffUseCase;
             _revokeStaffUseCase = revokeStaffUseCase;
@@ -106,9 +94,6 @@ namespace LitNovel.WebAPI.Controllers
             _sendAdminNotificationUseCase = sendAdminNotificationUseCase;
             _getAdminReportsUseCase = getAdminReportsUseCase;
             _getAdminAuditLogsUseCase = getAdminAuditLogsUseCase;
-            _updateAdminNovelStatusUseCase = updateAdminNovelStatusUseCase;
-            _updateAdminNovelAuthorUseCase = updateAdminNovelAuthorUseCase;
-            _updateAdminChapterStatusUseCase = updateAdminChapterStatusUseCase;
         }
 
         [HttpGet("statistics")]
@@ -154,30 +139,6 @@ namespace LitNovel.WebAPI.Controllers
             {
                 Success = true,
                 Message = "User updated successfully",
-                Data = result
-            });
-        }
-
-        [HttpPost("users/{id:int}/ban")]
-        public async Task<IActionResult> BanUser(int id, BanAdminUserRequestDto request, CancellationToken ct)
-        {
-            var result = await _banAdminUserUseCase.ExecuteAsync(id, request, ct);
-            return Ok(new ApiResponse<BanAdminUserResponseDto>
-            {
-                Success = true,
-                Message = "User has been banned",
-                Data = result
-            });
-        }
-
-        [HttpPost("users/{id:int}/unban")]
-        public async Task<IActionResult> UnbanUser(int id, CancellationToken ct)
-        {
-            var result = await _unbanAdminUserUseCase.ExecuteAsync(id, ct);
-            return Ok(new ApiResponse<UnbanAdminUserResponseDto>
-            {
-                Success = true,
-                Message = "User has been unbanned",
                 Data = result
             });
         }
@@ -420,42 +381,6 @@ namespace LitNovel.WebAPI.Controllers
 
             var result = await _getAdminAuditLogsUseCase.ExecuteAsync(query, ct);
             return Ok(new ApiResponse<PagedResult<AdminAuditLogResponseDto>> { Success = true, Data = result });
-        }
-
-        [HttpPut("novels/{id:int}/status")]
-        public async Task<IActionResult> UpdateNovelStatus(int id, UpdateAdminNovelStatusRequestDto request, CancellationToken ct)
-        {
-            var result = await _updateAdminNovelStatusUseCase.ExecuteAsync(id, request, ct);
-            return Ok(new ApiResponse<AdminNovelStatusResponseDto>
-            {
-                Success = true,
-                Message = "Novel status updated successfully",
-                Data = result
-            });
-        }
-
-        [HttpPut("novels/{id:int}/author")]
-        public async Task<IActionResult> UpdateNovelAuthor(int id, UpdateAdminNovelAuthorRequestDto request, CancellationToken ct)
-        {
-            var result = await _updateAdminNovelAuthorUseCase.ExecuteAsync(id, request, ct);
-            return Ok(new ApiResponse<AdminNovelAuthorResponseDto>
-            {
-                Success = true,
-                Message = "Novel author updated successfully",
-                Data = result
-            });
-        }
-
-        [HttpPut("chapters/{id:int}/status")]
-        public async Task<IActionResult> UpdateChapterStatus(int id, UpdateAdminChapterStatusRequestDto request, CancellationToken ct)
-        {
-            var result = await _updateAdminChapterStatusUseCase.ExecuteAsync(id, request, ct);
-            return Ok(new ApiResponse<AdminChapterStatusResponseDto>
-            {
-                Success = true,
-                Message = "Chapter status updated successfully",
-                Data = result
-            });
         }
 
         private static bool HasODataQuery(HttpRequest request)

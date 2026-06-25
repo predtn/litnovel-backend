@@ -1102,9 +1102,9 @@ GET /api/novels
 |---|---|
 | `title` | Required, 1–200 chars |
 | `description` | Optional, max 5000 chars |
-| `coverImage` | Optional, valid URL, max 512 chars |
+| `coverImage` | Optional, valid URL, max 512 chars; uploaded cover assets may be larger than 2 MB before being stored and referenced by URL |
 | `categoryId` | Optional, valid category ID or null |
-| `tagIds` | Optional, array of valid tag IDs, max 10 |
+| `tagIds` | Optional, array of valid tag IDs, no maximum count enforced |
 
 **Success — 201 Created:**
 ```json
@@ -2052,7 +2052,6 @@ GET /api/novels
 | `GET` | `/api/staff/reports/{id}` | Load full report detail |
 | `POST` | `/api/staff/reports/{id}/resolve` | Resolve report |
 | `POST` | `/api/staff/reports/{id}/reject-report` | Reject report |
-| `POST` | `/api/admin/users/{id}/ban` | Ban target user (Admin) |
 
 ---
 
@@ -2254,8 +2253,6 @@ GET /api/novels
 |---|---|---|
 | `GET` | `/api/admin/users` | Load users table |
 | `PUT` | `/api/admin/users/{id}` | Edit role/status |
-| `POST` | `/api/admin/users/{id}/ban` | Ban user |
-| `POST` | `/api/admin/users/{id}/unban` | Unban user |
 | `DELETE` | `/api/admin/users/{id}` | Delete user |
 
 ---
@@ -2288,28 +2285,6 @@ GET /api/novels
 }
 ```
 
----
-
-### `POST /api/admin/users/{id}/ban`
-
-**Permission:** Admin
-
-**Request:**
-```json
-{ "reason": "Repeated violations of community guidelines." }
-```
-
-**Success — 200 OK:**
-```json
-{
-  "success": true,
-  "message": "User has been banned",
-  "data": { "userId": 7, "status": "Banned", "bannedAt": "2024-01-12T10:00:00Z" }
-}
-```
-
----
-
 ## SCR-49 — User Detail (Admin)
 
 **Purpose:** Detailed user info with admin controls.
@@ -2320,7 +2295,6 @@ GET /api/novels
 |---|---|---|
 | `GET` | `/api/admin/users/{id}` | Load full user detail |
 | `PUT` | `/api/admin/users/{id}` | Update role/status |
-| `POST` | `/api/admin/users/{id}/ban` | Ban user |
 | `POST` | `/api/staff/users/{id}/warn` | Issue warning |
 
 ---
@@ -2379,7 +2353,7 @@ GET /api/novels
 | Field | Rule |
 |---|---|
 | `role` | Optional, valid `UserRole` enum: `User` \| `Staff` \| `Admin` |
-| `status` | Optional, valid `UserStatus` enum: `Offline` \| `Online` \| `Banned` |
+| `status` | Optional, admin-manageable `UserStatus`: `Offline` \| `Online` |
 
 ---
 
@@ -2726,51 +2700,6 @@ GET /api/novels
 }
 ```
 
----
-
-## SCR-60 — Novel Override
-
-**Purpose:** Force-manage any novel regardless of ownership.
-
-### APIs Used
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/novels/{id}` | Load any novel |
-| `PUT` | `/api/admin/novels/{id}/status` | Force-change status |
-| `PUT` | `/api/admin/novels/{id}/author` | Force-change author |
-| `DELETE` | `/api/novels/{id}` | Force delete |
-
----
-
-### `PUT /api/admin/novels/{id}/status`
-
-**Permission:** Admin
-
-**Request:**
-```json
-{ "status": "Ended", "reason": "Author account deleted." }
-```
-
-**Valid status values:** `Ongoing` | `Ended` | `Hiatus` | `Dropped` | `Canceled`
-
----
-
-## SCR-61 — Chapter Override
-
-**Purpose:** Force-manage any chapter regardless of ownership.
-
-### APIs Used
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/chapters/{id}` | Load any chapter |
-| `PUT` | `/api/chapters/{id}` | Force-edit content |
-| `PUT` | `/api/admin/chapters/{id}/status` | Force-change status |
-| `DELETE` | `/api/chapters/{id}` | Force delete |
-
----
-
 ## SCR-62 — System Settings
 
 **Purpose:** Configure platform-wide settings.
@@ -2800,8 +2729,7 @@ GET /api/novels
     },
     "content": {
       "maxNovelDescriptionLength": 5000,
-      "maxChapterLength": 50000,
-      "maxTagsPerNovel": 10
+      "maxChapterLength": 50000
     },
     "moderation": {
       "reviewSLAHours": 48,

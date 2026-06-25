@@ -88,8 +88,6 @@ namespace LitNovel.Application
             services.AddScoped<IGetAdminUsersUseCase, GetAdminUsersUseCase>();
             services.AddScoped<IGetAdminUserDetailUseCase, GetAdminUserDetailUseCase>();
             services.AddScoped<IUpdateAdminUserUseCase, UpdateAdminUserUseCase>();
-            services.AddScoped<IBanAdminUserUseCase, BanAdminUserUseCase>();
-            services.AddScoped<IUnbanAdminUserUseCase, UnbanAdminUserUseCase>();
             services.AddScoped<IDeleteAdminUserUseCase, DeleteAdminUserUseCase>();
             services.AddScoped<IAssignStaffUseCase, AssignStaffUseCase>();
             services.AddScoped<IRevokeStaffUseCase, RevokeStaffUseCase>();
@@ -110,9 +108,6 @@ namespace LitNovel.Application
             services.AddScoped<ISendAdminNotificationUseCase, SendAdminNotificationUseCase>();
             services.AddScoped<IGetAdminReportsUseCase, GetAdminReportsUseCase>();
             services.AddScoped<IGetAdminAuditLogsUseCase, GetAdminAuditLogsUseCase>();
-            services.AddScoped<IUpdateAdminNovelStatusUseCase, UpdateAdminNovelStatusUseCase>();
-            services.AddScoped<IUpdateAdminNovelAuthorUseCase, UpdateAdminNovelAuthorUseCase>();
-            services.AddScoped<IUpdateAdminChapterStatusUseCase, UpdateAdminChapterStatusUseCase>();
             services.AddScoped<IGetAdminAnnouncementsUseCase, GetAdminAnnouncementsUseCase>();
             services.AddScoped<ICreateAdminAnnouncementUseCase, CreateAdminAnnouncementUseCase>();
             services.AddScoped<IUpdateAdminAnnouncementUseCase, UpdateAdminAnnouncementUseCase>();
