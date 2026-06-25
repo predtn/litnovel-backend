@@ -1,5 +1,6 @@
 using LitNovel.Application;
 using LitNovel.Infrastructure;
+using LitNovel.Infrastructure.Hubs;
 using LitNovel.WebAPI;
 using LitNovel.WebAPI.Middlewares;
 
@@ -22,9 +23,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseCors("FrontendPolicy");
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.Run();
+

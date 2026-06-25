@@ -48,6 +48,7 @@ namespace LitNovel.Infrastructure
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<INotificationPushService, SignalRNotificationPushService>();
 
             return services;
         }

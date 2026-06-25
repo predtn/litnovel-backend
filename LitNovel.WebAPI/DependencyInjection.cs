@@ -60,6 +60,17 @@ namespace LitNovel.WebAPI
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
 
+            // SignalR
+            services.AddSignalR();
+
+            // CORS — allow frontend origin for SignalR WebSocket
+            services.AddCors(options =>
+                options.AddPolicy("FrontendPolicy", policy =>
+                    policy.WithOrigins("http://localhost:5031", "https://localhost:7031")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials()));
+
             services.AddOptions<JwtConfig>()
                 .BindConfiguration("Jwt")
                 .ValidateDataAnnotations();
@@ -99,6 +110,18 @@ namespace LitNovel.WebAPI
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromMinutes(1)
+            };
+            // SignalR sends token via query string for WebSocket connections
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = ctx =>
+                {
+                    var token = ctx.Request.Query["access_token"];
+                    var path  = ctx.HttpContext.Request.Path;
+                    if (!string.IsNullOrEmpty(token) && path.StartsWithSegments("/hubs"))
+                        ctx.Token = token;
+                    return Task.CompletedTask;
+                }
             };
         }
 

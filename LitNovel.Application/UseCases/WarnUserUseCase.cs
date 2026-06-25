@@ -3,6 +3,7 @@ using LitNovel.Application.Common.Exceptions;
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Interfaces.Services;
 using LitNovel.Application.Common.Interfaces.UseCases;
+using LitNovel.Application.DTOs.Notification;
 using LitNovel.Application.DTOs.Staff;
 using LitNovel.Domain.Entities;
 using LitNovel.Domain.Enums;
@@ -18,6 +19,7 @@ namespace LitNovel.Application.UseCases
         private readonly ICurrentUserService      _currentUserService;
         private readonly IUnitOfWork              _unitOfWork;
         private readonly IValidator<WarnUserRequestDto> _validator;
+        private readonly INotificationPushService _notificationPush;
 
         public WarnUserUseCase(
             IUserRepository userRepository,
@@ -26,7 +28,8 @@ namespace LitNovel.Application.UseCases
             IModerationLogRepository moderationLogRepository,
             ICurrentUserService currentUserService,
             IUnitOfWork unitOfWork,
-            IValidator<WarnUserRequestDto> validator)
+            IValidator<WarnUserRequestDto> validator,
+            INotificationPushService notificationPush)
         {
             _userRepository          = userRepository;
             _userWarningRepository   = userWarningRepository;
@@ -35,6 +38,7 @@ namespace LitNovel.Application.UseCases
             _currentUserService      = currentUserService;
             _unitOfWork              = unitOfWork;
             _validator               = validator;
+            _notificationPush        = notificationPush;
         }
 
         public async Task ExecuteAsync(int userId, WarnUserRequestDto request, CancellationToken ct)
@@ -86,6 +90,19 @@ namespace LitNovel.Application.UseCases
             await _notificationRepository.AddAsync(notification, ct);
             await _moderationLogRepository.AddAsync(log, ct);
             await _unitOfWork.SaveChangesAsync(ct);
+
+            // Push real-time notification via SignalR
+            var pushDto = new NotificationResponseDto
+            {
+                Id               = notification.Id,
+                NotificationType = notification.NotificationType.ToString(),
+                EntityType       = notification.EntityType,
+                EntityId         = notification.EntityId,
+                Message          = notification.Message,
+                IsRead           = false,
+                CreatedAt        = notification.CreatedAt
+            };
+            await _notificationPush.PushAsync(user.Id, pushDto, ct);
         }
     }
 }
