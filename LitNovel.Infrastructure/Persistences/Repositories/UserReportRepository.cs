@@ -82,6 +82,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .Include(r => r.Reporter)
                 .Include(r => r.ProcessedBy)
                 .Include(r => r.TargetUser)
+                .Include(r => r.TargetComment)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(r => r.Id == id, ct);
         }

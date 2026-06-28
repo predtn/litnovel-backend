@@ -92,6 +92,13 @@ namespace LitNovel.Application.UseCases
                     TargetUser      = report.TargetUser == null ? null : new ReportActorDto
                     {
                         Id = report.TargetUser.Id, Username = report.TargetUser.Username, Avatar = report.TargetUser.Avatar
+                    },
+                    TargetComment   = report.TargetComment == null ? null : new ReportTargetCommentDto
+                    {
+                        Id       = report.TargetComment.Id,
+                        Content  = report.TargetComment.Content,
+                        UserId   = report.TargetComment.UserId,
+                        Username = report.TargetComment.User?.Username ?? string.Empty
                     }
                 };
             }
