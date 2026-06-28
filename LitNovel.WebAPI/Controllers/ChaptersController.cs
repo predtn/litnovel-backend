@@ -17,6 +17,7 @@ namespace LitNovel.WebAPI.Controllers
         private readonly IGetChapterUseCase _getChapterUseCase;
         private readonly IUpdateChapterUseCase _updateChapterUseCase;
         private readonly ISubmitChapterUseCase _submitChapterUseCase;
+        private readonly IWithdrawChapterSubmissionUseCase _withdrawChapterSubmissionUseCase;
         private readonly IDeleteChapterUseCase _deleteChapterUseCase;
         private readonly ISaveReadingProgressUseCase _saveReadingProgressUseCase;
         private readonly IGetChapterCommentsUseCase _getChapterCommentsUseCase;
@@ -26,6 +27,7 @@ namespace LitNovel.WebAPI.Controllers
             IGetChapterUseCase getChapterUseCase,
             IUpdateChapterUseCase updateChapterUseCase,
             ISubmitChapterUseCase submitChapterUseCase,
+            IWithdrawChapterSubmissionUseCase withdrawChapterSubmissionUseCase,
             IDeleteChapterUseCase deleteChapterUseCase,
             ISaveReadingProgressUseCase saveReadingProgressUseCase,
             IGetChapterCommentsUseCase getChapterCommentsUseCase,
@@ -34,6 +36,7 @@ namespace LitNovel.WebAPI.Controllers
             _getChapterUseCase = getChapterUseCase;
             _updateChapterUseCase = updateChapterUseCase;
             _submitChapterUseCase = submitChapterUseCase;
+            _withdrawChapterSubmissionUseCase = withdrawChapterSubmissionUseCase;
             _deleteChapterUseCase = deleteChapterUseCase;
             _saveReadingProgressUseCase = saveReadingProgressUseCase;
             _getChapterCommentsUseCase = getChapterCommentsUseCase;
@@ -68,6 +71,13 @@ namespace LitNovel.WebAPI.Controllers
         {
             var result = await _submitChapterUseCase.ExecuteAsync(id, ct);
             return Ok(new ApiResponse<SubmitChapterResponseDto> { Success = true, Message = "Chapter submitted for review", Data = result });
+        }
+
+        [HttpPost("{id:int}/withdraw")]
+        public async Task<IActionResult> WithdrawSubmission(int id, CancellationToken ct)
+        {
+            var result = await _withdrawChapterSubmissionUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<SubmitChapterResponseDto> { Success = true, Message = "Chapter submission withdrawn", Data = result });
         }
 
         [HttpDelete("{id:int}")]
