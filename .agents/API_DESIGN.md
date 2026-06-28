@@ -1142,6 +1142,8 @@ GET /api/novels
 
 **Permission:** Owner / Staff / Admin
 
+**Moderation rule:** If the novel is `Draft`, this endpoint saves directly as draft. If the novel has already been approved/published and is edited, the update is saved immediately and the novel status changes to `Pending` for staff review.
+
 **Request:**
 ```json
 {
@@ -1162,6 +1164,7 @@ GET /api/novels
     "id": 42,
     "title": "Updated Title",
     "slug": "updated-title",
+    "status": "Pending",
     "updatedAt": "2024-01-12T11:00:00Z"
   }
 }
@@ -1171,6 +1174,8 @@ GET /api/novels
 
 | Status | Message | Cause |
 |---|---|---|
+| 400 | "Withdraw the novel submission before editing" | Novel is pending review |
+| 400 | "Locked novel cannot be edited" | Novel is locked |
 | 403 | "You do not have permission to edit this novel" | Not owner/staff |
 | 404 | "Novel not found" | Invalid ID |
 
@@ -1186,6 +1191,7 @@ GET /api/novels
 |---|---|---|
 | `GET` | `/api/novels/{id}` | Load novel detail |
 | `POST` | `/api/novels/{id}/submit` | Submit for moderation |
+| `POST` | `/api/novels/{id}/withdraw` | Withdraw pending submission back to draft |
 | `DELETE` | `/api/novels/{id}` | Delete novel |
 
 ---
@@ -1214,6 +1220,37 @@ GET /api/novels
 | Status | Message | Cause |
 |---|---|---|
 | 400 | "Novel must be in Draft status to submit" | Wrong status |
+
+**Rejected submissions:** If staff rejects the novel, its status returns to `Draft`. The author can edit it and call this endpoint again to resubmit.
+
+---
+
+### `POST /api/novels/{id}/withdraw`
+
+**Permission:** Owner / Staff / Admin
+
+**Request body:** None required
+
+**Success — 200 OK:**
+```json
+{
+  "success": true,
+  "message": "Novel submission withdrawn",
+  "data": {
+    "id": 42,
+    "status": "Draft",
+    "updatedAt": "2024-01-12T10:30:00Z"
+  }
+}
+```
+
+**Error:**
+
+| Status | Message | Cause |
+|---|---|---|
+| 400 | "Novel must be in Pending status to withdraw" | Wrong status |
+| 403 | "You do not have permission to edit this novel" | Not owner/staff |
+| 404 | "Novel not found" | Invalid ID |
 
 ---
 
@@ -1357,6 +1394,8 @@ GET /api/novels
 
 **Permission:** Owner / Staff / Admin
 
+**Moderation rule:** If the chapter is `Draft`, this endpoint saves directly as draft. If the chapter has already been published or scheduled and is edited, the update is saved immediately and the chapter status changes to `Pending` for staff review.
+
 **Request:**
 ```json
 {
@@ -1375,11 +1414,22 @@ GET /api/novels
   "data": {
     "id": 87,
     "title": "Chapter 1: Updated Title",
-    "status": "Draft",
+    "status": "Pending",
     "updatedAt": "2024-01-12T11:00:00Z"
   }
 }
 ```
+
+---
+
+**Errors:**
+
+| Status | Message | Cause |
+|---|---|---|
+| 400 | "Withdraw the chapter submission before editing" | Chapter is pending review |
+| 400 | "Locked chapter cannot be edited" | Chapter is locked |
+| 403 | "You do not have permission to edit this novel" | Not owner/staff |
+| 404 | "Chapter not found" | Invalid ID |
 
 ---
 
@@ -1393,6 +1443,7 @@ GET /api/novels
 |---|---|---|
 | `GET` | `/api/volumes/{volumeId}/chapters` | Load chapter list |
 | `POST` | `/api/chapters/{id}/submit` | Submit chapter for review |
+| `POST` | `/api/chapters/{id}/withdraw` | Withdraw pending submission back to draft |
 | `DELETE` | `/api/chapters/{id}` | Delete chapter |
 
 ---
@@ -1436,6 +1487,33 @@ GET /api/novels
   "data": { "id": 87, "status": "Pending", "updatedAt": "..." }
 }
 ```
+
+**Rejected submissions:** If staff rejects the chapter, its status returns to `Draft`. The author can edit it and call this endpoint again to resubmit.
+
+---
+
+### `POST /api/chapters/{id}/withdraw`
+
+**Permission:** Owner / Staff / Admin
+
+**Request body:** None required
+
+**Success — 200 OK:**
+```json
+{
+  "success": true,
+  "message": "Chapter submission withdrawn",
+  "data": { "id": 87, "status": "Draft", "updatedAt": "..." }
+}
+```
+
+**Error:**
+
+| Status | Message | Cause |
+|---|---|---|
+| 400 | "Chapter must be in Pending status to withdraw" | Wrong status |
+| 403 | "You do not have permission to edit this novel" | Not owner/staff |
+| 404 | "Chapter not found" | Invalid ID |
 
 ---
 
@@ -1486,7 +1564,9 @@ GET /api/novels
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/novels/my?status=Pending` | Pending novels |
+| `POST` | `/api/novels/{id}/withdraw` | Withdraw pending novel back to draft |
 | `GET` | `/api/volumes/{volumeId}/chapters?status=Pending` | Pending chapters |
+| `POST` | `/api/chapters/{id}/withdraw` | Withdraw pending chapter back to draft |
 
 ---
 

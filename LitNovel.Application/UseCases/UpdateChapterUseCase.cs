@@ -5,6 +5,7 @@ using LitNovel.Application.Common.Interfaces.Services;
 using LitNovel.Application.Common.Interfaces.UseCases;
 using LitNovel.Application.DTOs.Chapter;
 using LitNovel.Domain.Entities;
+using LitNovel.Domain.Enums;
 
 namespace LitNovel.Application.UseCases
 {
@@ -46,25 +47,43 @@ namespace LitNovel.Application.UseCases
                 throw new ForbiddenException("You do not have permission to edit this novel");
             }
 
+            if (chapter.Status == ChapterStatus.Pending)
+            {
+                throw new BadRequestException("Withdraw the chapter submission before editing");
+            }
+
+            if (chapter.Status == ChapterStatus.Locked)
+            {
+                throw new BadRequestException("Locked chapter cannot be edited");
+            }
+
             if (await _chapterRepository.ChapterNumberExistsAsync(chapter.VolumeId, request.ChapterNumber, id, ct))
             {
                 throw new ConflictException("Chapter number already exists in this volume");
             }
 
+            var title = request.Title.Trim();
+            var slug = NovelSlugGenerator.Generate($"{chapter.VolumeId}-{request.ChapterNumber}-{request.Title}");
+            var shouldResubmitForReview = chapter.Status != ChapterStatus.Draft;
             chapter.ChapterNumber = request.ChapterNumber;
-            chapter.Title = request.Title.Trim();
-            chapter.Slug = NovelSlugGenerator.Generate($"{chapter.VolumeId}-{request.ChapterNumber}-{request.Title}");
+            chapter.Title = title;
+            chapter.Slug = slug;
             chapter.ReleaseDate = request.ReleaseDate;
             chapter.Content ??= new ChapterContent { ChapterId = chapter.Id };
             chapter.Content.Content = request.Content.Trim();
             chapter.Content.Version++;
+
+            if (shouldResubmitForReview)
+            {
+                chapter.Status = ChapterStatus.Pending;
+            }
 
             await _unitOfWork.SaveChangesAsync(ct);
 
             return new UpdateChapterResponseDto
             {
                 Id = chapter.Id,
-                Title = chapter.Title,
+                Title = title,
                 Status = chapter.Status.ToString(),
                 UpdatedAt = chapter.UpdatedAt
             };

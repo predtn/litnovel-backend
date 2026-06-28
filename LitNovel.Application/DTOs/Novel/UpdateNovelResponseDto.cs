@@ -5,6 +5,7 @@ namespace LitNovel.Application.DTOs.Novel
         public int Id { get; set; }
         public string Title { get; set; } = default!;
         public string Slug { get; set; } = default!;
+        public string Status { get; set; } = default!;
         public DateTime UpdatedAt { get; set; }
     }
 }

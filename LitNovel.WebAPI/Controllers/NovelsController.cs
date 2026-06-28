@@ -22,6 +22,7 @@ namespace LitNovel.WebAPI.Controllers
         private readonly ICreateNovelUseCase _createNovelUseCase;
         private readonly IUpdateNovelUseCase _updateNovelUseCase;
         private readonly ISubmitNovelUseCase _submitNovelUseCase;
+        private readonly IWithdrawNovelSubmissionUseCase _withdrawNovelSubmissionUseCase;
         private readonly IDeleteNovelUseCase _deleteNovelUseCase;
         private readonly IGetVolumesUseCase _getVolumesUseCase;
         private readonly ICreateVolumeUseCase _createVolumeUseCase;
@@ -40,6 +41,7 @@ namespace LitNovel.WebAPI.Controllers
             ICreateNovelUseCase createNovelUseCase,
             IUpdateNovelUseCase updateNovelUseCase,
             ISubmitNovelUseCase submitNovelUseCase,
+            IWithdrawNovelSubmissionUseCase withdrawNovelSubmissionUseCase,
             IDeleteNovelUseCase deleteNovelUseCase,
             IGetVolumesUseCase getVolumesUseCase,
             ICreateVolumeUseCase createVolumeUseCase,
@@ -57,6 +59,7 @@ namespace LitNovel.WebAPI.Controllers
             _createNovelUseCase = createNovelUseCase;
             _updateNovelUseCase = updateNovelUseCase;
             _submitNovelUseCase = submitNovelUseCase;
+            _withdrawNovelSubmissionUseCase = withdrawNovelSubmissionUseCase;
             _deleteNovelUseCase = deleteNovelUseCase;
             _getVolumesUseCase = getVolumesUseCase;
             _createVolumeUseCase = createVolumeUseCase;
@@ -143,6 +146,14 @@ namespace LitNovel.WebAPI.Controllers
         {
             var result = await _submitNovelUseCase.ExecuteAsync(id, ct);
             return Ok(new ApiResponse<SubmitNovelResponseDto> { Success = true, Message = "Novel submitted for review", Data = result });
+        }
+
+        [HttpPost("{id:int}/withdraw")]
+        [Authorize]
+        public async Task<IActionResult> WithdrawSubmission(int id, CancellationToken ct)
+        {
+            var result = await _withdrawNovelSubmissionUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<SubmitNovelResponseDto> { Success = true, Message = "Novel submission withdrawn", Data = result });
         }
 
         [HttpGet("{novelId:int}/volumes")]

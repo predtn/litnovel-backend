@@ -53,6 +53,16 @@ namespace LitNovel.Application.UseCases
                 throw new ForbiddenException("You do not have permission to edit this novel");
             }
 
+            if (novel.Status == NovelStatus.Pending)
+            {
+                throw new BadRequestException("Withdraw the novel submission before editing");
+            }
+
+            if (novel.Status == NovelStatus.Locked)
+            {
+                throw new BadRequestException("Locked novel cannot be edited");
+            }
+
             await EnsureReferencesExistAsync(request.CategoryId, request.TagIds, ct);
 
             var title = request.Title.Trim();
@@ -61,20 +71,28 @@ namespace LitNovel.Application.UseCases
                 throw new ConflictException("Novel title already exists");
             }
 
+            var slug = await CreateUniqueSlugAsync(title, novel.Id, ct);
+            var shouldResubmitForReview = novel.Status != NovelStatus.Draft;
             novel.Title = title;
-            novel.Slug = await CreateUniqueSlugAsync(novel.Title, novel.Id, ct);
+            novel.Slug = slug;
             novel.Description = request.Description;
             novel.CoverImage = request.CoverImage;
             novel.CategoryId = request.CategoryId;
             ReplaceTags(novel, request.TagIds ?? new List<int>());
+
+            if (shouldResubmitForReview)
+            {
+                novel.Status = NovelStatus.Pending;
+            }
 
             await _unitOfWork.SaveChangesAsync(ct);
 
             return new UpdateNovelResponseDto
             {
                 Id = novel.Id,
-                Title = novel.Title,
-                Slug = novel.Slug,
+                Title = title,
+                Slug = slug,
+                Status = novel.Status.ToString(),
                 UpdatedAt = novel.UpdatedAt
             };
         }
@@ -132,5 +150,6 @@ namespace LitNovel.Application.UseCases
                 novel.NovelTags.Add(new NovelTag { NovelId = novel.Id, TagId = tagId });
             }
         }
+
     }
 }
