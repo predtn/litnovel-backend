@@ -19,6 +19,7 @@ namespace LitNovel.Application.DTOs.Staff
         public string? ResolutionNotes { get; set; }
         public ReportActorDto? ProcessedBy { get; set; }
         public ReportTargetChapterDto? TargetChapter { get; set; }
+        public ReportTargetCommentDto? TargetComment { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
 
@@ -42,5 +43,13 @@ namespace LitNovel.Application.DTOs.Staff
         public int Id { get; set; }
         public string Title { get; set; } = default!;
         public int ChapterNumber { get; set; }
+    }
+
+    public class ReportTargetCommentDto
+    {
+        public int Id { get; set; }
+        public string Content { get; set; } = default!;
+        public int UserId { get; set; }
+        public string Username { get; set; } = default!;
     }
 }
