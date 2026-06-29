@@ -2,6 +2,7 @@ using LitNovel.Application.Common.Exceptions;
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Interfaces.Services;
 using LitNovel.Application.Common.Interfaces.UseCases;
+using LitNovel.Domain.Enums;
 
 namespace LitNovel.Application.UseCases
 {
@@ -23,7 +24,8 @@ namespace LitNovel.Application.UseCases
             var comment = await _commentChapterRepository.GetByIdAsync(id, ct)
                 ?? throw new NotFoundException("Comment not found");
 
-            if (comment.UserId != _currentUserService.UserId)
+            var isAdmin = string.Equals(_currentUserService.Role, UserRole.Admin.ToString(), StringComparison.OrdinalIgnoreCase);
+            if (comment.UserId != _currentUserService.UserId && !isAdmin)
             {
                 throw new ForbiddenException("You do not have permission to delete this comment");
             }
