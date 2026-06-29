@@ -141,6 +141,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     TotalVolumes = n.TotalVolumes,
                     ViewCount = n.ViewCount,
                     RatingAverage = n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0,
+                    RatingCount = n.NovelRatings.Count,
                     CreatedAt = n.CreatedAt,
                     UpdatedAt = n.UpdatedAt
                 })
@@ -172,6 +173,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     TotalVolumes = n.TotalVolumes,
                     ViewCount = n.ViewCount,
                     RatingAverage = n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0,
+                    RatingCount = n.NovelRatings.Count,
                     CreatedAt = n.CreatedAt,
                     UpdatedAt = n.UpdatedAt
                 });

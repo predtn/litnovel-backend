@@ -499,6 +499,7 @@ GET /api/novels?sort=viewCount&order=desc&status=Ongoing&page=1&size=6
 | `GET` | `/api/users/me/reading-history` | Continue reading section |
 | `GET` | `/api/novels?sort=viewCount&order=desc` | Trending novels |
 | `GET` | `/api/novels?sort=updatedAt&order=desc` | New releases |
+| `GET` | `/api/announcements` | Fetch active announcements |
 | `GET` | `/api/notifications?isRead=false` | Unread count for bell |
 
 ---
@@ -2635,53 +2636,6 @@ GET /api/novels
 
 ---
 
-## SCR-56 — Notification Management
-
-**Purpose:** Send system notifications to users.
-
-### APIs Used
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/admin/notifications/sent` | Load sent notifications history |
-| `POST` | `/api/admin/notifications` | Send notification |
-
----
-
-### `POST /api/admin/notifications`
-
-**Permission:** Admin
-
-**Request:**
-```json
-{
-  "notificationType": "SystemAlert",
-  "message": "The platform will undergo maintenance on Jan 20th.",
-  "targetAll": true,
-  "targetUserId": null
-}
-```
-
-**Validation:**
-
-| Field | Rule |
-|---|---|
-| `notificationType` | Required, valid `NotificationType` enum |
-| `message` | Required, 1–1000 chars |
-| `targetAll` | Required boolean |
-| `targetUserId` | Required if `targetAll = false`, valid user ID |
-
-**Success — 201 Created:**
-```json
-{
-  "success": true,
-  "message": "Notification sent to all users",
-  "data": { "sentCount": 12450, "sentAt": "2024-01-12T10:00:00Z" }
-}
-```
-
----
-
 ## SCR-57 — Reports Overview (Admin)
 
 **Purpose:** High-level view of all platform reports.
@@ -2834,6 +2788,31 @@ GET /api/novels
 | `PUT` | `/api/admin/announcements/{id}` | Edit announcement |
 | `DELETE` | `/api/admin/announcements/{id}` | Delete announcement |
 | `PUT` | `/api/admin/announcements/{id}/toggle` | Toggle active/inactive |
+| `GET` | `/api/announcements` | Display active announcements to readers |
+
+---
+
+### `GET /api/announcements`
+
+**Permission:** Guest+
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 5,
+      "title": "Scheduled Maintenance Notice",
+      "content": "<p>The platform will be down for maintenance on Jan 20th from 2-4 AM UTC.</p>",
+      "startDate": "2024-01-18T00:00:00Z",
+      "endDate": "2024-01-21T00:00:00Z"
+    }
+  ]
+}
+```
+
+> Returns only active announcements where `startDate <= now` and `endDate` is empty or still in the future.
 
 ---
 
