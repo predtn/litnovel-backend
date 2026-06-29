@@ -12,7 +12,11 @@ namespace LitNovel.Application.DTOs.Novel
         public string Status { get; set; } = default!;
         public int TotalChapters { get; set; }
         public int TotalVolumes { get; set; }
+        public int? LatestChapterNumber { get; set; }
+        public string? LatestChapterTitle { get; set; }
+        public string? LatestChapterSlug { get; set; }
         public int ViewCount { get; set; }
+        public int FavoritesCount { get; set; }
         public double RatingAverage { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

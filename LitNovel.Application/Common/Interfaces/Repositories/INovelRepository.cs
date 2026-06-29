@@ -18,6 +18,7 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
         Task<Novel?> GetByIdWithTagsForUpdateAsync(int id, CancellationToken ct);
         Task<bool> TitleExistsForAuthorAsync(int authorId, string title, int? excludeNovelId, CancellationToken ct);
         Task<bool> SlugExistsAsync(string slug, int? excludeNovelId, CancellationToken ct);
+        Task<int> IncrementViewCountAsync(int id, CancellationToken ct);
         Task AddAsync(Novel novel, CancellationToken ct);
         void Delete(Novel novel);
         Task<PagedResult<PendingNovelListItemResponseDto>> GetPendingAsync(int page, int size, CancellationToken ct);

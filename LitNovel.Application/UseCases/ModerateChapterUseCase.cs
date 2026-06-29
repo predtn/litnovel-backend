@@ -15,6 +15,7 @@ namespace LitNovel.Application.UseCases
         private readonly IChapterRepository      _chapterRepository;
         private readonly INotificationRepository  _notificationRepository;
         private readonly IModerationLogRepository _moderationLogRepository;
+        private readonly IFavoriteRepository      _favoriteRepository;
         private readonly ICurrentUserService      _currentUserService;
         private readonly IUnitOfWork              _unitOfWork;
         private readonly IValidator<ModerateChapterRequestDto> _validator;
@@ -24,6 +25,7 @@ namespace LitNovel.Application.UseCases
             IChapterRepository chapterRepository,
             INotificationRepository notificationRepository,
             IModerationLogRepository moderationLogRepository,
+            IFavoriteRepository favoriteRepository,
             ICurrentUserService currentUserService,
             IUnitOfWork unitOfWork,
             IValidator<ModerateChapterRequestDto> validator,
@@ -32,11 +34,13 @@ namespace LitNovel.Application.UseCases
             _chapterRepository       = chapterRepository;
             _notificationRepository  = notificationRepository;
             _moderationLogRepository = moderationLogRepository;
+            _favoriteRepository      = favoriteRepository;
             _currentUserService      = currentUserService;
             _unitOfWork              = unitOfWork;
             _validator               = validator;
             _notificationPush        = notificationPush;
         }
+
 
         public async Task ExecuteAsync(int chapterId, ModerateChapterRequestDto request, CancellationToken ct)
         {
@@ -104,6 +108,30 @@ namespace LitNovel.Application.UseCases
 
             await _notificationRepository.AddAsync(notification, ct);
             await _moderationLogRepository.AddAsync(log, ct);
+
+            // If chapter is Approved (Published), send batch NewChapter notification to all favorites of this novel
+            List<Notification> followerNotifications = new();
+            if (newStatus == ChapterStatus.Published)
+            {
+                int novelId = chapter.Volume.NovelId;
+                var followerIds = await _favoriteRepository.GetUserIdsByNovelAsync(novelId, ct);
+                // Exclude the author from the follower list (they already get the author notification)
+                followerIds = followerIds.Where(uid => uid != authorId).ToList();
+
+                followerNotifications = followerIds.Select(uid => new Notification
+                {
+                    UserId           = uid,
+                    NotificationType = NotificationType.NewChapter,
+                    EntityType       = "Chapter",
+                    EntityId         = chapter.Id,
+                    Message          = $"Truyện bạn yêu thích có chương mới: \"{chapter.Title}\".",
+                    IsRead           = false
+                }).ToList();
+
+                if (followerNotifications.Count > 0)
+                    await _notificationRepository.AddRangeAsync(followerNotifications, ct);
+            }
+
             await _unitOfWork.SaveChangesAsync(ct);
 
             var pushDto = new NotificationResponseDto
@@ -117,6 +145,22 @@ namespace LitNovel.Application.UseCases
                 CreatedAt        = notification.CreatedAt
             };
             await _notificationPush.PushAsync(authorId, pushDto, ct);
+
+            // Push NewChapter notification to each follower via SignalR
+            foreach (var fn in followerNotifications)
+            {
+                var followerPushDto = new NotificationResponseDto
+                {
+                    Id               = fn.Id,
+                    NotificationType = fn.NotificationType.ToString(),
+                    EntityType       = fn.EntityType,
+                    EntityId         = fn.EntityId,
+                    Message          = fn.Message,
+                    IsRead           = false,
+                    CreatedAt        = fn.CreatedAt
+                };
+                await _notificationPush.PushAsync(fn.UserId, followerPushDto, ct);
+            }
         }
     }
 }

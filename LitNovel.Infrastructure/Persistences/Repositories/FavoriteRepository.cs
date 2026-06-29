@@ -82,5 +82,14 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         {
             _context.Favorites.Remove(favorite);
         }
+
+        public Task<List<int>> GetUserIdsByNovelAsync(int novelId, CancellationToken ct)
+        {
+            return _context.Favorites
+                .AsNoTracking()
+                .Where(f => f.NovelId == novelId)
+                .Select(f => f.UserId)
+                .ToListAsync(ct);
+        }
     }
 }

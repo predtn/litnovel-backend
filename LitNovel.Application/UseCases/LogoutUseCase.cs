@@ -31,10 +31,7 @@ namespace LitNovel.Application.UseCases
             }
 
             _refreshTokenRepository.Revoke(refreshToken);
-            if (!await _refreshTokenRepository.HasOtherActiveTokenForUserAsync(refreshToken.UserId, refreshToken.Id, ct))
-            {
-                refreshToken.User.Status = UserStatus.Offline;
-            }
+            refreshToken.User.Status = UserStatus.Offline;
 
             await _unitOfWork.SaveChangesAsync(ct);
         }

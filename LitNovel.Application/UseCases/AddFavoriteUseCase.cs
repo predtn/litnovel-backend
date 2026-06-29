@@ -2,7 +2,9 @@ using LitNovel.Application.Common.Exceptions;
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Interfaces.Services;
 using LitNovel.Application.Common.Interfaces.UseCases;
+using LitNovel.Application.DTOs.Notification;
 using LitNovel.Domain.Entities;
+using LitNovel.Domain.Enums;
 
 namespace LitNovel.Application.UseCases
 {
@@ -10,20 +12,30 @@ namespace LitNovel.Application.UseCases
     {
         private readonly INovelRepository _novelRepository;
         private readonly IFavoriteRepository _favoriteRepository;
+        private readonly INotificationRepository _notificationRepository;
+        private readonly INotificationPushService _notificationPush;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
 
-        public AddFavoriteUseCase(INovelRepository novelRepository, IFavoriteRepository favoriteRepository, IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
+        public AddFavoriteUseCase(
+            INovelRepository novelRepository,
+            IFavoriteRepository favoriteRepository,
+            INotificationRepository notificationRepository,
+            INotificationPushService notificationPush,
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUserService)
         {
             _novelRepository = novelRepository;
             _favoriteRepository = favoriteRepository;
+            _notificationRepository = notificationRepository;
+            _notificationPush = notificationPush;
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
         }
 
         public async Task ExecuteAsync(int novelId, CancellationToken ct)
         {
-            _ = await _novelRepository.GetByIdWithDetailsAsync(novelId, ct)
+            var novel = await _novelRepository.GetByIdWithDetailsAsync(novelId, ct)
                 ?? throw new NotFoundException("Novel not found");
 
             if (await _favoriteRepository.GetAsync(_currentUserService.UserId, novelId, ct) is not null)
@@ -32,7 +44,40 @@ namespace LitNovel.Application.UseCases
             }
 
             await _favoriteRepository.AddAsync(new Favorite { UserId = _currentUserService.UserId, NovelId = novelId }, ct);
+
+            // Trigger NewFollower notification to the novel's author (skip if the user favorites their own novel)
+            int authorId = novel.AuthorId;
+            Notification? notification = null;
+            if (authorId != _currentUserService.UserId)
+            {
+                notification = new Notification
+                {
+                    UserId = authorId,
+                    NotificationType = NotificationType.NewFollower,
+                    EntityType = "Novel",
+                    EntityId = novelId,
+                    Message = $"Có người vừa yêu thích truyện \"{novel.Title}\" của bạn.",
+                    IsRead = false
+                };
+                await _notificationRepository.AddAsync(notification, ct);
+            }
+
             await _unitOfWork.SaveChangesAsync(ct);
+
+            if (notification is not null)
+            {
+                var pushDto = new NotificationResponseDto
+                {
+                    Id = notification.Id,
+                    NotificationType = notification.NotificationType.ToString(),
+                    EntityType = notification.EntityType,
+                    EntityId = notification.EntityId,
+                    Message = notification.Message,
+                    IsRead = false,
+                    CreatedAt = notification.CreatedAt
+                };
+                await _notificationPush.PushAsync(authorId, pushDto, ct);
+            }
         }
     }
 }

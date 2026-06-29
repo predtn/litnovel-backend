@@ -10,5 +10,6 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
         Task<Favorite?> GetAsync(int userId, int novelId, CancellationToken ct);
         Task AddAsync(Favorite favorite, CancellationToken ct);
         void Delete(Favorite favorite);
+        Task<List<int>> GetUserIdsByNovelAsync(int novelId, CancellationToken ct);
     }
 }

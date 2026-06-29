@@ -1,4 +1,4 @@
-﻿using LitNovel.Application.Common.Interfaces.Repositories;
+using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Novel;
 using LitNovel.Application.DTOs.Staff;
@@ -88,7 +88,29 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     Status = n.Status.ToString(),
                     TotalChapters = n.TotalChapters,
                     TotalVolumes = n.TotalVolumes,
+                    LatestChapterNumber = n.Volumes
+                        .SelectMany(v => v.Chapters)
+                        .Where(c => c.Status == ChapterStatus.Published)
+                        .OrderByDescending(c => c.UpdatedAt)
+                        .ThenByDescending(c => c.CreatedAt)
+                        .Select(c => (int?)c.ChapterNumber)
+                        .FirstOrDefault(),
+                    LatestChapterTitle = n.Volumes
+                        .SelectMany(v => v.Chapters)
+                        .Where(c => c.Status == ChapterStatus.Published)
+                        .OrderByDescending(c => c.UpdatedAt)
+                        .ThenByDescending(c => c.CreatedAt)
+                        .Select(c => c.Title)
+                        .FirstOrDefault(),
+                    LatestChapterSlug = n.Volumes
+                        .SelectMany(v => v.Chapters)
+                        .Where(c => c.Status == ChapterStatus.Published)
+                        .OrderByDescending(c => c.UpdatedAt)
+                        .ThenByDescending(c => c.CreatedAt)
+                        .Select(c => c.Slug)
+                        .FirstOrDefault(),
                     ViewCount = n.ViewCount,
+                    FavoritesCount = n.Favorites.Count,
                     RatingAverage = n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0,
                     UpdatedAt = n.UpdatedAt
                 })
@@ -361,6 +383,14 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         public Task<int> CountPendingAsync(CancellationToken ct)
         {
             return _context.Novels.CountAsync(n => n.Status == NovelStatus.Pending, ct);
+        }
+
+        public async Task<int> IncrementViewCountAsync(int id, CancellationToken ct)
+        {
+            var novel = await _context.Novels.FirstOrDefaultAsync(n => n.Id == id, ct);
+            if (novel == null) return 0;
+            novel.ViewCount++;
+            return await _context.SaveChangesAsync(ct);
         }
     }
 }
