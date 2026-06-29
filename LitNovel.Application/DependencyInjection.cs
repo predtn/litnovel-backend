@@ -25,6 +25,7 @@ namespace LitNovel.Application
             services.AddScoped<IGetTagsUseCase, GetTagsUseCase>();
             services.AddScoped<IGetNovelsUseCase, GetNovelsUseCase>();
             services.AddScoped<IGetNovelUseCase, GetNovelUseCase>();
+            services.AddScoped<IIncrementNovelViewUseCase, IncrementNovelViewUseCase>();
             services.AddScoped<IGetNovelAnalyticsUseCase, GetNovelAnalyticsUseCase>();
             services.AddScoped<IGetMyNovelsUseCase, GetMyNovelsUseCase>();
             services.AddScoped<ICreateNovelUseCase, CreateNovelUseCase>();

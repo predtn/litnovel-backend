@@ -59,6 +59,9 @@ namespace LitNovel.Application.UseCases
             }
 
             var canManage = CanManage(novel);
+            var currentUserRating = _currentUserService.IsAuthenticated
+                ? novel.NovelRatings.FirstOrDefault(r => r.UserId == _currentUserService.UserId)
+                : null;
             var visibleVolumes = novel.Volumes
                 .OrderBy(v => v.VolumeNumber)
                 .Select(v => new NovelDetailVolumeResponseDto
@@ -113,6 +116,9 @@ namespace LitNovel.Application.UseCases
                 IsLiked = _currentUserService.IsAuthenticated
                     ? novel.NovelLikes.Any(l => l.UserId == _currentUserService.UserId)
                     : null,
+                UserReviewId = currentUserRating?.Id,
+                UserRating = currentUserRating?.Rating,
+                UserReview = currentUserRating?.Review,
                 TotalChapters = canManage ? novel.TotalChapters : visibleVolumes.Sum(v => v.Chapters.Count),
                 TotalVolumes = canManage ? novel.TotalVolumes : visibleVolumes.Count,
                 RatingAverage = novel.NovelRatings.Any() ? novel.NovelRatings.Average(r => r.Rating) : 0,

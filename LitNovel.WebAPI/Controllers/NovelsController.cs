@@ -17,6 +17,7 @@ namespace LitNovel.WebAPI.Controllers
     {
         private readonly IGetNovelsUseCase _getNovelsUseCase;
         private readonly IGetNovelUseCase _getNovelUseCase;
+        private readonly IIncrementNovelViewUseCase _incrementNovelViewUseCase;
         private readonly IGetNovelAnalyticsUseCase _getNovelAnalyticsUseCase;
         private readonly IGetMyNovelsUseCase _getMyNovelsUseCase;
         private readonly ICreateNovelUseCase _createNovelUseCase;
@@ -36,6 +37,7 @@ namespace LitNovel.WebAPI.Controllers
         public NovelsController(
             IGetNovelsUseCase getNovelsUseCase,
             IGetNovelUseCase getNovelUseCase,
+            IIncrementNovelViewUseCase incrementNovelViewUseCase,
             IGetNovelAnalyticsUseCase getNovelAnalyticsUseCase,
             IGetMyNovelsUseCase getMyNovelsUseCase,
             ICreateNovelUseCase createNovelUseCase,
@@ -54,6 +56,7 @@ namespace LitNovel.WebAPI.Controllers
         {
             _getNovelsUseCase = getNovelsUseCase;
             _getNovelUseCase = getNovelUseCase;
+            _incrementNovelViewUseCase = incrementNovelViewUseCase;
             _getNovelAnalyticsUseCase = getNovelAnalyticsUseCase;
             _getMyNovelsUseCase = getMyNovelsUseCase;
             _createNovelUseCase = createNovelUseCase;
@@ -90,6 +93,13 @@ namespace LitNovel.WebAPI.Controllers
         {
             var result = await _getNovelUseCase.ExecuteBySlugAsync(slug, ct);
             return Ok(new ApiResponse<NovelDetailResponseDto> { Success = true, Data = result });
+        }
+
+        [HttpPost("{id:int}/views")]
+        public async Task<IActionResult> IncrementView(int id, CancellationToken ct)
+        {
+            await _incrementNovelViewUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<object> { Success = true, Message = "Novel view recorded", Data = null });
         }
 
         [HttpGet("{id:int}/analytics")]
