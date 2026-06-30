@@ -56,6 +56,8 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             {
                 ("viewcount", "asc") => novels.OrderBy(n => n.ViewCount),
                 ("viewcount", _) => novels.OrderByDescending(n => n.ViewCount),
+                ("ratingaverage", "asc") => novels.OrderBy(n => n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0),
+                ("ratingaverage", _) => novels.OrderByDescending(n => n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0),
                 ("updatedat", "asc") => novels.OrderBy(n => n.UpdatedAt),
                 ("updatedat", _) => novels.OrderByDescending(n => n.UpdatedAt),
                 _ => novels.OrderByDescending(n => n.UpdatedAt)
@@ -71,6 +73,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     Title = n.Title,
                     Slug = n.Slug,
                     CoverImage = n.CoverImage,
+                    Description = n.Description,
                     Author = new NovelAuthorResponseDto
                     {
                         Id = n.Author.Id,
@@ -112,6 +115,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     ViewCount = n.ViewCount,
                     FavoritesCount = n.Favorites.Count,
                     RatingAverage = n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0,
+                    RatingCount = n.NovelRatings.Count,
                     UpdatedAt = n.UpdatedAt
                 })
                 .ToListAsync(ct);

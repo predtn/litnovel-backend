@@ -14,7 +14,10 @@ namespace LitNovel.Application.UseCases.Validators.Novel
                 .Must(status => string.IsNullOrWhiteSpace(status) || IsPublicStatus(status))
                 .WithMessage("Invalid public novel status");
             RuleFor(x => x.Sort)
-                .Must(sort => string.IsNullOrWhiteSpace(sort) || sort.Equals("updatedAt", StringComparison.OrdinalIgnoreCase) || sort.Equals("viewCount", StringComparison.OrdinalIgnoreCase))
+                .Must(sort => string.IsNullOrWhiteSpace(sort)
+                    || sort.Equals("updatedAt", StringComparison.OrdinalIgnoreCase)
+                    || sort.Equals("viewCount", StringComparison.OrdinalIgnoreCase)
+                    || sort.Equals("ratingAverage", StringComparison.OrdinalIgnoreCase))
                 .WithMessage("Invalid sort field");
             RuleFor(x => x.Order)
                 .Must(order => string.IsNullOrWhiteSpace(order) || order.Equals("asc", StringComparison.OrdinalIgnoreCase) || order.Equals("desc", StringComparison.OrdinalIgnoreCase))

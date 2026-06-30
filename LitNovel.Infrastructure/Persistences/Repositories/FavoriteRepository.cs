@@ -35,6 +35,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     Title = f.Novel.Title,
                     Slug = f.Novel.Slug,
                     CoverImage = f.Novel.CoverImage,
+                    Description = f.Novel.Description,
                     Author = new NovelAuthorResponseDto
                     {
                         Id = f.Novel.Author.Id,
@@ -52,8 +53,30 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     Status = f.Novel.Status.ToString(),
                     TotalChapters = f.Novel.TotalChapters,
                     TotalVolumes = f.Novel.TotalVolumes,
+                    LatestChapterNumber = f.Novel.Volumes
+                        .SelectMany(v => v.Chapters)
+                        .Where(c => c.Status == LitNovel.Domain.Enums.ChapterStatus.Published)
+                        .OrderByDescending(c => c.UpdatedAt)
+                        .ThenByDescending(c => c.CreatedAt)
+                        .Select(c => (int?)c.ChapterNumber)
+                        .FirstOrDefault(),
+                    LatestChapterTitle = f.Novel.Volumes
+                        .SelectMany(v => v.Chapters)
+                        .Where(c => c.Status == LitNovel.Domain.Enums.ChapterStatus.Published)
+                        .OrderByDescending(c => c.UpdatedAt)
+                        .ThenByDescending(c => c.CreatedAt)
+                        .Select(c => c.Title)
+                        .FirstOrDefault(),
+                    LatestChapterSlug = f.Novel.Volumes
+                        .SelectMany(v => v.Chapters)
+                        .Where(c => c.Status == LitNovel.Domain.Enums.ChapterStatus.Published)
+                        .OrderByDescending(c => c.UpdatedAt)
+                        .ThenByDescending(c => c.CreatedAt)
+                        .Select(c => c.Slug)
+                        .FirstOrDefault(),
                     ViewCount = f.Novel.ViewCount,
                     RatingAverage = f.Novel.NovelRatings.Any() ? f.Novel.NovelRatings.Average(r => r.Rating) : 0,
+                    RatingCount = f.Novel.NovelRatings.Count,
                     UpdatedAt = f.Novel.UpdatedAt
                 })
                 .ToListAsync(ct);
