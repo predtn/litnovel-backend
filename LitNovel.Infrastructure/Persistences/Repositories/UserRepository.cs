@@ -2,6 +2,7 @@ using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Admin;
 using LitNovel.Application.DTOs.User;
+using LitNovel.Application.DTOs.Staff;
 using LitNovel.Domain.Enums;
 using LitNovel.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -89,6 +90,44 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 Size = size,
                 TotalElements = total,
                 TotalPages = (int)Math.Ceiling(total / (double)size)
+            };
+        }
+
+        public async Task<PagedResult<StaffUserListItemResponseDto>> GetStaffUsersAsync(int pageNumber, int pageSize, string? searchKeyword, CancellationToken ct)
+        {
+            var query = _context.Users
+                .AsNoTracking()
+                .Where(u => u.Role == UserRole.User);
+
+            if (!string.IsNullOrWhiteSpace(searchKeyword))
+            {
+                query = query.Where(u => u.Username.Contains(searchKeyword) || u.Email.Contains(searchKeyword));
+            }
+
+            var totalCount = await query.CountAsync(ct);
+
+            var users = await query
+                .OrderByDescending(u => u.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => new StaffUserListItemResponseDto
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    Email = u.Email,
+                    Status = u.Status.ToString(),
+                    CreatedAt = u.CreatedAt,
+                    WarningCount = _context.UserWarnings.Count(w => w.UserId == u.Id)
+                })
+                .ToListAsync(ct);
+
+            return new PagedResult<StaffUserListItemResponseDto>
+            {
+                Items = users,
+                Page = pageNumber,
+                Size = pageSize,
+                TotalElements = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
             };
         }
 

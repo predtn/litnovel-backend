@@ -38,5 +38,17 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         {
             refreshToken.IsRevoked = true;
         }
+
+        public async Task RevokeAllForUserAsync(int userId, CancellationToken ct)
+        {
+            var tokens = await _context.RefreshTokens
+                .Where(rt => rt.UserId == userId && !rt.IsRevoked)
+                .ToListAsync(ct);
+
+            foreach (var token in tokens)
+            {
+                token.IsRevoked = true;
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@ using LitNovel.Domain.Entities;
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.User;
 using LitNovel.Application.DTOs.Admin;
+using LitNovel.Application.DTOs.Staff;
 using LitNovel.Domain.Enums;
 
 namespace LitNovel.Application.Common.Interfaces.Repositories
@@ -13,6 +14,7 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
         Task<User?> GetByIdentifierAsync(string identifier, CancellationToken ct);
         Task<IReadOnlyList<int>> GetAllIdsAsync(CancellationToken ct);
         Task<PagedResult<UserSearchResponseDto>> SearchAsync(UserSearchQueryDto query, CancellationToken ct);
+        Task<PagedResult<StaffUserListItemResponseDto>> GetStaffUsersAsync(int pageNumber, int pageSize, string? searchKeyword, CancellationToken ct);
         IQueryable<AdminUserListItemResponseDto> QueryAdminUsers();
         Task<AdminUserDetailResponseDto?> GetAdminUserDetailAsync(int id, CancellationToken ct);
         Task<int> CountByRoleAsync(UserRole role, CancellationToken ct);

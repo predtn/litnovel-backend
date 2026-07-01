@@ -11,5 +11,9 @@ namespace LitNovel.Application.DTOs.Staff
         /// hoặc chuyển Chapter về Draft (NovelReport).
         /// </summary>
         public bool TakeDownContent { get; set; }
+        
+        public bool WarnUser { get; set; }
+        public bool BanUser { get; set; }
+        public int? TargetUserId { get; set; }
     }
 }

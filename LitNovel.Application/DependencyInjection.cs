@@ -90,6 +90,8 @@ namespace LitNovel.Application
             services.AddScoped<IWarnUserUseCase, WarnUserUseCase>();
             services.AddScoped<IGetModerationHistoryUseCase, GetModerationHistoryUseCase>();
             services.AddScoped<IGetUserWarningsUseCase, GetUserWarningsUseCase>();
+            services.AddScoped<IGetStaffUsersUseCase, GetStaffUsersUseCase>();
+            services.AddScoped<IUpdateUserStatusUseCase, UpdateUserStatusUseCase>();
             // Admin use cases (from main)
             services.AddScoped<IGetAdminStatisticsUseCase, GetAdminStatisticsUseCase>();
             services.AddScoped<IGetAdminStatisticsChartUseCase, GetAdminStatisticsChartUseCase>();
