@@ -9,6 +9,7 @@ namespace LitNovel.Domain.Enums
         Hiatus = 4,
         Dropped = 5,
         Canceled = 6,
-        Locked = 7
+        Locked = 7,
+        PendingDeletion = 8
     }
 }

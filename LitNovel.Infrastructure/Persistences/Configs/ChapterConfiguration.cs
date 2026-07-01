@@ -15,10 +15,15 @@ namespace LitNovel.Infrastructure.Persistences.Configs
             builder.Property(c => c.Slug).IsRequired().HasMaxLength(220);
             builder.Property(c => c.ChapterNumber).IsRequired();
             builder.Property(c => c.Status).HasConversion<string>().IsRequired();
+            builder.Property(c => c.PreviousPublicStatus).HasConversion<string>();
+            builder.Property(c => c.DeletionRequestedAt).IsRequired(false);
+            builder.Property(c => c.ScheduledHardDeleteAt).IsRequired(false);
+            builder.Property(c => c.DeletionRequestedById).IsRequired(false);
             builder.Property(c => c.ReleaseDate).IsRequired(false);
 
             builder.HasIndex(c => new { c.VolumeId, c.ChapterNumber }).IsUnique();
             builder.HasIndex(c => c.Slug).IsUnique();
+            builder.HasIndex(c => c.ScheduledHardDeleteAt);
 
             builder.HasOne(c => c.Volume)
                 .WithMany(v => v.Chapters)

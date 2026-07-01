@@ -18,6 +18,7 @@ namespace LitNovel.WebAPI.Controllers
         private readonly ISubmitChapterUseCase _submitChapterUseCase;
         private readonly IWithdrawChapterSubmissionUseCase _withdrawChapterSubmissionUseCase;
         private readonly IDeleteChapterUseCase _deleteChapterUseCase;
+        private readonly IRestoreChapterUseCase _restoreChapterUseCase;
         private readonly IGetChapterCommentsUseCase _getChapterCommentsUseCase;
         private readonly ICreateChapterCommentUseCase _createChapterCommentUseCase;
 
@@ -27,6 +28,7 @@ namespace LitNovel.WebAPI.Controllers
             ISubmitChapterUseCase submitChapterUseCase,
             IWithdrawChapterSubmissionUseCase withdrawChapterSubmissionUseCase,
             IDeleteChapterUseCase deleteChapterUseCase,
+            IRestoreChapterUseCase restoreChapterUseCase,
             IGetChapterCommentsUseCase getChapterCommentsUseCase,
             ICreateChapterCommentUseCase createChapterCommentUseCase)
         {
@@ -35,6 +37,7 @@ namespace LitNovel.WebAPI.Controllers
             _submitChapterUseCase = submitChapterUseCase;
             _withdrawChapterSubmissionUseCase = withdrawChapterSubmissionUseCase;
             _deleteChapterUseCase = deleteChapterUseCase;
+            _restoreChapterUseCase = restoreChapterUseCase;
             _getChapterCommentsUseCase = getChapterCommentsUseCase;
             _createChapterCommentUseCase = createChapterCommentUseCase;
         }
@@ -81,6 +84,13 @@ namespace LitNovel.WebAPI.Controllers
         {
             await _deleteChapterUseCase.ExecuteAsync(id, ct);
             return Ok(new ApiResponse<object> { Success = true, Data = null });
+        }
+
+        [HttpPost("{id:int}/restore")]
+        public async Task<IActionResult> Restore(int id, CancellationToken ct)
+        {
+            var result = await _restoreChapterUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<UpdateChapterResponseDto> { Success = true, Message = "Chapter restored successfully", Data = result });
         }
 
         [HttpGet("{id:int}/comments")]

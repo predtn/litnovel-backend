@@ -78,7 +78,7 @@ namespace LitNovel.Application.UseCases
                     VolumeNumber = v.VolumeNumber,
                     Title = v.Title,
                     Chapters = v.Chapters
-                        .Where(c => canManage || c.Status == ChapterStatus.Published)
+                        .Where(c => canManage || IsPublicChapterStatus(c.Status))
                         .OrderBy(c => c.ChapterNumber)
                         .Select(c => new NovelDetailChapterResponseDto
                         {
@@ -88,6 +88,8 @@ namespace LitNovel.Application.UseCases
                             Title = c.Title,
                             Status = c.Status.ToString(),
                             IsRead = readChapterIds.Contains(c.Id),
+                            DeletionRequestedAt = c.DeletionRequestedAt,
+                            ScheduledHardDeleteAt = c.ScheduledHardDeleteAt,
                             CreatedAt = c.CreatedAt
                         })
                         .ToList()
@@ -136,6 +138,8 @@ namespace LitNovel.Application.UseCases
                 ReadingProgressPercentage = CalculateReadingProgress(visibleVolumes),
                 RatingAverage = novel.NovelRatings.Any() ? novel.NovelRatings.Average(r => r.Rating) : 0,
                 RatingCount = novel.NovelRatings.Count,
+                DeletionRequestedAt = novel.DeletionRequestedAt,
+                ScheduledHardDeleteAt = novel.ScheduledHardDeleteAt,
                 Volumes = visibleVolumes,
                 CreatedAt = novel.CreatedAt,
                 UpdatedAt = novel.UpdatedAt
@@ -146,7 +150,8 @@ namespace LitNovel.Application.UseCases
         {
             var chapters = volumes
                 .SelectMany(v => v.Chapters)
-                .Where(c => string.Equals(c.Status, ChapterStatus.Published.ToString(), StringComparison.OrdinalIgnoreCase))
+                .Where(c => string.Equals(c.Status, ChapterStatus.Published.ToString(), StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(c.Status, ChapterStatus.PendingDeletion.ToString(), StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
             if (chapters.Count == 0)
@@ -183,7 +188,12 @@ namespace LitNovel.Application.UseCases
 
         private static bool IsPublicStatus(NovelStatus status)
         {
-            return status is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped;
+            return status is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped or NovelStatus.PendingDeletion;
+        }
+
+        private static bool IsPublicChapterStatus(ChapterStatus status)
+        {
+            return status is ChapterStatus.Published or ChapterStatus.PendingDeletion;
         }
     }
 }

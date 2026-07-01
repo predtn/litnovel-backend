@@ -7,6 +7,8 @@ namespace LitNovel.Application.DTOs.Chapter
         public int ChapterNumber { get; set; }
         public string Title { get; set; } = default!;
         public string Status { get; set; } = default!;
+        public DateTime? DeletionRequestedAt { get; set; }
+        public DateTime? ScheduledHardDeleteAt { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

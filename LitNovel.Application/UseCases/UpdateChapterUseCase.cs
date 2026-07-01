@@ -57,6 +57,11 @@ namespace LitNovel.Application.UseCases
                 throw new BadRequestException("Locked chapter cannot be edited");
             }
 
+            if (chapter.Status == ChapterStatus.PendingDeletion)
+            {
+                throw new BadRequestException("Restore the chapter before editing");
+            }
+
             if (await _chapterRepository.ChapterNumberExistsAsync(chapter.VolumeId, request.ChapterNumber, id, ct))
             {
                 throw new ConflictException("Chapter number already exists in this volume");

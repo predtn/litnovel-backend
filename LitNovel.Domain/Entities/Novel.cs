@@ -18,6 +18,9 @@ namespace LitNovel.Domain.Entities
         public int? CategoryId { get; set; }
         public int TotalChapters { get; set; } = 0;
         public int TotalVolumes { get; set; } = 0;
+        public DateTime? DeletionRequestedAt { get; set; }
+        public DateTime? ScheduledHardDeleteAt { get; set; }
+        public int? DeletionRequestedById { get; set; }
 
         public User Author { get; set; } = default!;
         public Category? Category { get; set; }

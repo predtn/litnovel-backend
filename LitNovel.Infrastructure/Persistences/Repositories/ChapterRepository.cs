@@ -52,6 +52,8 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     ChapterNumber = c.ChapterNumber,
                     Title = c.Title,
                     Status = c.Status.ToString(),
+                    DeletionRequestedAt = c.DeletionRequestedAt,
+                    ScheduledHardDeleteAt = c.ScheduledHardDeleteAt,
                     CreatedAt = c.CreatedAt
                 })
                 .ToListAsync(ct);
@@ -78,6 +80,8 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     ChapterNumber = c.ChapterNumber,
                     Title = c.Title,
                     Status = c.Status.ToString(),
+                    DeletionRequestedAt = c.DeletionRequestedAt,
+                    ScheduledHardDeleteAt = c.ScheduledHardDeleteAt,
                     CreatedAt = c.CreatedAt
                 });
         }
@@ -121,6 +125,18 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .Include(c => c.Volume)
                     .ThenInclude(v => v.Novel)
                 .FirstOrDefaultAsync(c => c.Id == id, ct);
+        }
+
+        public Task<List<Chapter>> GetExpiredPendingDeletionAsync(DateTime utcNow, CancellationToken ct)
+        {
+            return _context.Chapters
+                .Include(c => c.ChapterProgresses)
+                .Include(c => c.ChapterReads)
+                .Where(c => c.Status == ChapterStatus.PendingDeletion
+                    && c.ScheduledHardDeleteAt.HasValue
+                    && c.ScheduledHardDeleteAt <= utcNow)
+                .AsSplitQuery()
+                .ToListAsync(ct);
         }
 
         public Task<bool> ChapterNumberExistsAsync(int volumeId, int chapterNumber, int? excludeChapterId, CancellationToken ct)

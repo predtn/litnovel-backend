@@ -44,7 +44,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .AsNoTracking()
                 .Where(cr => cr.UserId == userId
                     && cr.NovelId == novelId
-                    && cr.Chapter.Status == ChapterStatus.Published)
+                    && (cr.Chapter.Status == ChapterStatus.Published || cr.Chapter.Status == ChapterStatus.PendingDeletion))
                 .Select(cr => cr.ChapterId)
                 .Distinct()
                 .CountAsync(ct);
@@ -54,7 +54,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         {
             return _context.Chapters
                 .AsNoTracking()
-                .CountAsync(c => c.Volume.NovelId == novelId && c.Status == ChapterStatus.Published, ct);
+                .CountAsync(c => c.Volume.NovelId == novelId && (c.Status == ChapterStatus.Published || c.Status == ChapterStatus.PendingDeletion), ct);
         }
 
         public async Task AddAsync(ChapterRead chapterRead, CancellationToken ct)

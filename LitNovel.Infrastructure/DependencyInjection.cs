@@ -50,6 +50,8 @@ namespace LitNovel.Infrastructure
             services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<INotificationPushService, SignalRNotificationPushService>();
+            services.AddSingleton<IPendingDeletionSettingsProvider, PendingDeletionSettingsProvider>();
+            services.AddHostedService<PendingDeletionCleanupService>();
 
             return services;
         }

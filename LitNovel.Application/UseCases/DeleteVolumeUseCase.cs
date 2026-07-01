@@ -2,6 +2,7 @@ using LitNovel.Application.Common.Exceptions;
 using LitNovel.Application.Common.Interfaces.Repositories;
 using LitNovel.Application.Common.Interfaces.Services;
 using LitNovel.Application.Common.Interfaces.UseCases;
+using LitNovel.Domain.Enums;
 
 namespace LitNovel.Application.UseCases
 {
@@ -37,6 +38,11 @@ namespace LitNovel.Application.UseCases
             if (!VolumePermissionHelper.CanManage(_currentUserService, volume.Novel.AuthorId))
             {
                 throw new ForbiddenException("You do not have permission to edit this novel");
+            }
+
+            if (volume.Chapters.Any(c => c.Status != ChapterStatus.Draft))
+            {
+                throw new BadRequestException("Only volumes containing draft chapters can be deleted directly. Delete or restore chapters individually for approved content.");
             }
 
             volume.Novel.TotalVolumes = Math.Max(0, volume.Novel.TotalVolumes - 1);

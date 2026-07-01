@@ -13,6 +13,7 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
         Task<Chapter?> GetBySlugWithDetailsAsync(string slug, CancellationToken ct);
         Task<Chapter?> GetByIdForUpdateAsync(int id, CancellationToken ct);
         Task<Chapter?> GetByIdForDeleteAsync(int id, CancellationToken ct);
+        Task<List<Chapter>> GetExpiredPendingDeletionAsync(DateTime utcNow, CancellationToken ct);
         Task<bool> ChapterNumberExistsAsync(int volumeId, int chapterNumber, int? excludeChapterId, CancellationToken ct);
         Task AddAsync(Chapter chapter, CancellationToken ct);
         void Delete(Chapter chapter);

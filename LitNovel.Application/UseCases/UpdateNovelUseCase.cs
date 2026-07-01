@@ -63,6 +63,11 @@ namespace LitNovel.Application.UseCases
                 throw new BadRequestException("Locked novel cannot be edited");
             }
 
+            if (novel.Status == NovelStatus.PendingDeletion)
+            {
+                throw new BadRequestException("Restore the novel before editing");
+            }
+
             await EnsureReferencesExistAsync(request.CategoryId, request.TagIds, ct);
 
             var title = request.Title.Trim();
