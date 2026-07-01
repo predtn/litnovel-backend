@@ -23,6 +23,7 @@ namespace LitNovel.Application
             services.AddScoped<IChangePasswordUseCase, ChangePasswordUseCase>();
             services.AddScoped<IGetCategoriesUseCase, GetCategoriesUseCase>();
             services.AddScoped<IGetTagsUseCase, GetTagsUseCase>();
+            services.AddScoped<IGetAnnouncementsUseCase, GetAnnouncementsUseCase>();
             services.AddScoped<IGetNovelsUseCase, GetNovelsUseCase>();
             services.AddScoped<IGetNovelUseCase, GetNovelUseCase>();
             services.AddScoped<IIncrementNovelViewUseCase, IncrementNovelViewUseCase>();
@@ -30,6 +31,7 @@ namespace LitNovel.Application
             services.AddScoped<IGetMyNovelsUseCase, GetMyNovelsUseCase>();
             services.AddScoped<ICreateNovelUseCase, CreateNovelUseCase>();
             services.AddScoped<IUpdateNovelUseCase, UpdateNovelUseCase>();
+            services.AddScoped<IUpdateNovelLifecycleStatusUseCase, UpdateNovelLifecycleStatusUseCase>();
             services.AddScoped<ISubmitNovelUseCase, SubmitNovelUseCase>();
             services.AddScoped<IWithdrawNovelSubmissionUseCase, WithdrawNovelSubmissionUseCase>();
             services.AddScoped<IDeleteNovelUseCase, DeleteNovelUseCase>();
@@ -107,8 +109,6 @@ namespace LitNovel.Application
             services.AddScoped<ICreateAdminTagUseCase, CreateAdminTagUseCase>();
             services.AddScoped<IUpdateAdminTagUseCase, UpdateAdminTagUseCase>();
             services.AddScoped<IDeleteAdminTagUseCase, DeleteAdminTagUseCase>();
-            services.AddScoped<IGetAdminSentNotificationsUseCase, GetAdminSentNotificationsUseCase>();
-            services.AddScoped<ISendAdminNotificationUseCase, SendAdminNotificationUseCase>();
             services.AddScoped<IGetAdminReportsUseCase, GetAdminReportsUseCase>();
             services.AddScoped<IGetAdminAuditLogsUseCase, GetAdminAuditLogsUseCase>();
             services.AddScoped<IGetAdminAnnouncementsUseCase, GetAdminAnnouncementsUseCase>();

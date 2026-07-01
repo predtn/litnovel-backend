@@ -11,6 +11,7 @@ namespace LitNovel.Application.DTOs.Novel
         public int TotalVolumes { get; set; }
         public int ViewCount { get; set; }
         public double RatingAverage { get; set; }
+        public int RatingCount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

@@ -499,6 +499,7 @@ GET /api/novels?sort=viewCount&order=desc&status=Ongoing&page=1&size=6
 | `GET` | `/api/users/me/reading-history` | Continue reading section |
 | `GET` | `/api/novels?sort=viewCount&order=desc` | Trending novels |
 | `GET` | `/api/novels?sort=updatedAt&order=desc` | New releases |
+| `GET` | `/api/announcements` | Fetch active announcements |
 | `GET` | `/api/notifications?isRead=false` | Unread count for bell |
 
 ---
@@ -1191,6 +1192,7 @@ GET /api/novels
 |---|---|---|
 | `GET` | `/api/novels/{id}` | Load novel detail |
 | `POST` | `/api/novels/{id}/submit` | Submit for moderation |
+| `PATCH` | `/api/novels/{id}/lifecycle-status` | Update public lifecycle status without moderation |
 | `POST` | `/api/novels/{id}/withdraw` | Withdraw pending submission back to draft |
 | `DELETE` | `/api/novels/{id}` | Delete novel |
 
@@ -1222,6 +1224,47 @@ GET /api/novels
 | 400 | "Novel must be in Draft status to submit" | Wrong status |
 
 **Rejected submissions:** If staff rejects the novel, its status returns to `Draft`. The author can edit it and call this endpoint again to resubmit.
+
+---
+
+### `PATCH /api/novels/{id}/lifecycle-status`
+
+**Permission:** Owner / Staff / Admin
+
+**Purpose:** Change the public lifecycle status only. This does not trigger moderation because it does not change novel metadata or chapter content.
+
+**Allowed status values:** `Ongoing` | `Ended` | `Hiatus` | `Dropped`
+
+**Request:**
+```json
+{ "status": "Ended" }
+```
+
+**Success — 200 OK:**
+```json
+{
+  "success": true,
+  "message": "Novel lifecycle status updated successfully",
+  "data": {
+    "id": 42,
+    "title": "The Dragon War Chronicles",
+    "slug": "the-dragon-war-chronicles",
+    "status": "Ended",
+    "updatedAt": "2024-01-12T10:30:00Z"
+  }
+}
+```
+
+**Errors:**
+
+| Status | Message | Cause |
+|---|---|---|
+| 400 | "Lifecycle status must be one of: Ongoing, Ended, Hiatus, Dropped" | Invalid lifecycle status |
+| 400 | "Cannot change lifecycle status while novel is pending review" | Novel has a pending moderation submission |
+| 400 | "Only published novels can change lifecycle status" | Novel is Draft or Canceled |
+| 400 | "Locked novel cannot be edited" | Novel is locked |
+| 403 | "You do not have permission to edit this novel" | Not owner/staff |
+| 404 | "Novel not found" | Invalid ID |
 
 ---
 
@@ -1954,6 +1997,8 @@ GET /api/novels
 }
 ```
 
+> Initial novel submissions are approved as `Ongoing`. If a previously public novel was edited and moved to `Pending`, approval restores its previous public lifecycle status (`Ongoing`, `Ended`, `Hiatus`, or `Dropped`).
+
 **Errors:**
 
 | Status | Message | Cause |
@@ -2635,53 +2680,6 @@ GET /api/novels
 
 ---
 
-## SCR-56 — Notification Management
-
-**Purpose:** Send system notifications to users.
-
-### APIs Used
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/admin/notifications/sent` | Load sent notifications history |
-| `POST` | `/api/admin/notifications` | Send notification |
-
----
-
-### `POST /api/admin/notifications`
-
-**Permission:** Admin
-
-**Request:**
-```json
-{
-  "notificationType": "SystemAlert",
-  "message": "The platform will undergo maintenance on Jan 20th.",
-  "targetAll": true,
-  "targetUserId": null
-}
-```
-
-**Validation:**
-
-| Field | Rule |
-|---|---|
-| `notificationType` | Required, valid `NotificationType` enum |
-| `message` | Required, 1–1000 chars |
-| `targetAll` | Required boolean |
-| `targetUserId` | Required if `targetAll = false`, valid user ID |
-
-**Success — 201 Created:**
-```json
-{
-  "success": true,
-  "message": "Notification sent to all users",
-  "data": { "sentCount": 12450, "sentAt": "2024-01-12T10:00:00Z" }
-}
-```
-
----
-
 ## SCR-57 — Reports Overview (Admin)
 
 **Purpose:** High-level view of all platform reports.
@@ -2834,6 +2832,31 @@ GET /api/novels
 | `PUT` | `/api/admin/announcements/{id}` | Edit announcement |
 | `DELETE` | `/api/admin/announcements/{id}` | Delete announcement |
 | `PUT` | `/api/admin/announcements/{id}/toggle` | Toggle active/inactive |
+| `GET` | `/api/announcements` | Display active announcements to readers |
+
+---
+
+### `GET /api/announcements`
+
+**Permission:** Guest+
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 5,
+      "title": "Scheduled Maintenance Notice",
+      "content": "<p>The platform will be down for maintenance on Jan 20th from 2-4 AM UTC.</p>",
+      "startDate": "2024-01-18T00:00:00Z",
+      "endDate": "2024-01-21T00:00:00Z"
+    }
+  ]
+}
+```
+
+> Returns only active announcements where `startDate <= now` and `endDate` is empty or still in the future.
 
 ---
 

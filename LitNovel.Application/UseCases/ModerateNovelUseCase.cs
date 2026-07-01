@@ -58,7 +58,7 @@ namespace LitNovel.Application.UseCases
             switch (action.ToLowerInvariant())
             {
                 case "approve":
-                    newStatus = NovelStatus.Ongoing;
+                    newStatus = novel.PreviousPublicStatus ?? NovelStatus.Ongoing;
                     notificationMessage = $"Tiểu thuyết \"{novel.Title}\" của bạn đã được phê duyệt và xuất bản.";
                     logAction = "ApproveNovel";
                     break;
@@ -79,6 +79,7 @@ namespace LitNovel.Application.UseCases
             }
 
             novel.Status = newStatus;
+            novel.PreviousPublicStatus = null;
 
             var notification = new Notification
             {

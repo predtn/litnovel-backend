@@ -22,6 +22,7 @@ namespace LitNovel.WebAPI.Controllers
         private readonly IGetMyNovelsUseCase _getMyNovelsUseCase;
         private readonly ICreateNovelUseCase _createNovelUseCase;
         private readonly IUpdateNovelUseCase _updateNovelUseCase;
+        private readonly IUpdateNovelLifecycleStatusUseCase _updateNovelLifecycleStatusUseCase;
         private readonly ISubmitNovelUseCase _submitNovelUseCase;
         private readonly IWithdrawNovelSubmissionUseCase _withdrawNovelSubmissionUseCase;
         private readonly IDeleteNovelUseCase _deleteNovelUseCase;
@@ -42,6 +43,7 @@ namespace LitNovel.WebAPI.Controllers
             IGetMyNovelsUseCase getMyNovelsUseCase,
             ICreateNovelUseCase createNovelUseCase,
             IUpdateNovelUseCase updateNovelUseCase,
+            IUpdateNovelLifecycleStatusUseCase updateNovelLifecycleStatusUseCase,
             ISubmitNovelUseCase submitNovelUseCase,
             IWithdrawNovelSubmissionUseCase withdrawNovelSubmissionUseCase,
             IDeleteNovelUseCase deleteNovelUseCase,
@@ -61,6 +63,7 @@ namespace LitNovel.WebAPI.Controllers
             _getMyNovelsUseCase = getMyNovelsUseCase;
             _createNovelUseCase = createNovelUseCase;
             _updateNovelUseCase = updateNovelUseCase;
+            _updateNovelLifecycleStatusUseCase = updateNovelLifecycleStatusUseCase;
             _submitNovelUseCase = submitNovelUseCase;
             _withdrawNovelSubmissionUseCase = withdrawNovelSubmissionUseCase;
             _deleteNovelUseCase = deleteNovelUseCase;
@@ -140,6 +143,14 @@ namespace LitNovel.WebAPI.Controllers
         {
             var result = await _updateNovelUseCase.ExecuteAsync(id, request, ct);
             return Ok(new ApiResponse<UpdateNovelResponseDto> { Success = true, Message = "Novel updated successfully", Data = result });
+        }
+
+        [HttpPatch("{id:int}/lifecycle-status")]
+        [Authorize]
+        public async Task<IActionResult> UpdateLifecycleStatus(int id, UpdateNovelLifecycleStatusRequestDto request, CancellationToken ct)
+        {
+            var result = await _updateNovelLifecycleStatusUseCase.ExecuteAsync(id, request, ct);
+            return Ok(new ApiResponse<UpdateNovelResponseDto> { Success = true, Message = "Novel lifecycle status updated successfully", Data = result });
         }
 
         [HttpDelete("{id:int}")]

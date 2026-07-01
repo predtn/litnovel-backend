@@ -11,6 +11,7 @@ namespace LitNovel.Domain.Entities
         public string? CoverImage { get; set; }
         public int AuthorId { get; set; }
         public NovelStatus Status { get; set; } = NovelStatus.Pending;
+        public NovelStatus? PreviousPublicStatus { get; set; }
         public int ViewCount { get; set; } = 0;
         public int LikeCount { get; set; } = 0;
         public int DislikeCount { get; set; } = 0;
