@@ -25,6 +25,8 @@ namespace LitNovel.WebAPI.Controllers
         private readonly IWarnUserUseCase             _warnUser;
         private readonly IGetUserWarningsUseCase      _getUserWarnings;
         private readonly IGetModerationHistoryUseCase _getModerationHistory;
+        private readonly IGetStaffUsersUseCase        _getStaffUsers;
+        private readonly IUpdateUserStatusUseCase     _updateUserStatus;
 
         public StaffController(
             IGetStaffDashboardUseCase getDashboard,
@@ -39,7 +41,9 @@ namespace LitNovel.WebAPI.Controllers
             IResolveReportUseCase resolveReport,
             IWarnUserUseCase warnUser,
             IGetUserWarningsUseCase getUserWarnings,
-            IGetModerationHistoryUseCase getModerationHistory)
+            IGetModerationHistoryUseCase getModerationHistory,
+            IGetStaffUsersUseCase getStaffUsers,
+            IUpdateUserStatusUseCase updateUserStatus)
         {
             _getDashboard         = getDashboard;
             _getPendingNovels     = getPendingNovels;
@@ -54,6 +58,8 @@ namespace LitNovel.WebAPI.Controllers
             _warnUser             = warnUser;
             _getUserWarnings      = getUserWarnings;
             _getModerationHistory = getModerationHistory;
+            _getStaffUsers        = getStaffUsers;
+            _updateUserStatus     = updateUserStatus;
         }
 
         // ─────────────────────────────────────────────
@@ -266,6 +272,30 @@ namespace LitNovel.WebAPI.Controllers
         {
             var result = await _getUserWarnings.ExecuteAsync(id, page, size, ct);
             return Ok(new ApiResponse<PagedResult<UserWarningResponseDto>> { Success = true, Data = result });
+        }
+
+        // ─────────────────────────────────────────────
+        // SCR-XX: User Management
+        // ─────────────────────────────────────────────
+
+        /// <summary>GET /api/staff/users</summary>
+        [HttpGet("users")]
+        public async Task<IActionResult> GetStaffUsers(
+            [FromQuery] string? searchKeyword = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int size = 20,
+            CancellationToken ct = default)
+        {
+            var result = await _getStaffUsers.ExecuteAsync(page, size, searchKeyword, ct);
+            return Ok(new ApiResponse<PagedResult<StaffUserListItemResponseDto>> { Success = true, Data = result });
+        }
+
+        /// <summary>PUT /api/staff/users/{id}/status</summary>
+        [HttpPut("users/{id:int}/status")]
+        public async Task<IActionResult> UpdateUserStatus(int id, [FromBody] UpdateUserStatusRequestDto request, CancellationToken ct)
+        {
+            await _updateUserStatus.ExecuteAsync(id, request, ct);
+            return Ok(new ApiResponse<object> { Success = true, Message = "User status updated successfully.", Data = null });
         }
 
         // ─────────────────────────────────────────────
