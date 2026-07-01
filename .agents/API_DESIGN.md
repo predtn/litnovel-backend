@@ -1192,6 +1192,7 @@ GET /api/novels
 |---|---|---|
 | `GET` | `/api/novels/{id}` | Load novel detail |
 | `POST` | `/api/novels/{id}/submit` | Submit for moderation |
+| `PATCH` | `/api/novels/{id}/lifecycle-status` | Update public lifecycle status without moderation |
 | `POST` | `/api/novels/{id}/withdraw` | Withdraw pending submission back to draft |
 | `DELETE` | `/api/novels/{id}` | Delete novel |
 
@@ -1223,6 +1224,47 @@ GET /api/novels
 | 400 | "Novel must be in Draft status to submit" | Wrong status |
 
 **Rejected submissions:** If staff rejects the novel, its status returns to `Draft`. The author can edit it and call this endpoint again to resubmit.
+
+---
+
+### `PATCH /api/novels/{id}/lifecycle-status`
+
+**Permission:** Owner / Staff / Admin
+
+**Purpose:** Change the public lifecycle status only. This does not trigger moderation because it does not change novel metadata or chapter content.
+
+**Allowed status values:** `Ongoing` | `Ended` | `Hiatus` | `Dropped`
+
+**Request:**
+```json
+{ "status": "Ended" }
+```
+
+**Success — 200 OK:**
+```json
+{
+  "success": true,
+  "message": "Novel lifecycle status updated successfully",
+  "data": {
+    "id": 42,
+    "title": "The Dragon War Chronicles",
+    "slug": "the-dragon-war-chronicles",
+    "status": "Ended",
+    "updatedAt": "2024-01-12T10:30:00Z"
+  }
+}
+```
+
+**Errors:**
+
+| Status | Message | Cause |
+|---|---|---|
+| 400 | "Lifecycle status must be one of: Ongoing, Ended, Hiatus, Dropped" | Invalid lifecycle status |
+| 400 | "Cannot change lifecycle status while novel is pending review" | Novel has a pending moderation submission |
+| 400 | "Only published novels can change lifecycle status" | Novel is Draft or Canceled |
+| 400 | "Locked novel cannot be edited" | Novel is locked |
+| 403 | "You do not have permission to edit this novel" | Not owner/staff |
+| 404 | "Novel not found" | Invalid ID |
 
 ---
 
@@ -1954,6 +1996,8 @@ GET /api/novels
   "data": { "id": 42, "status": "Ongoing", "processedAt": "2024-01-12T10:00:00Z" }
 }
 ```
+
+> Initial novel submissions are approved as `Ongoing`. If a previously public novel was edited and moved to `Pending`, approval restores its previous public lifecycle status (`Ongoing`, `Ended`, `Hiatus`, or `Dropped`).
 
 **Errors:**
 

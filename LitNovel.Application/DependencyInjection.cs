@@ -31,6 +31,7 @@ namespace LitNovel.Application
             services.AddScoped<IGetMyNovelsUseCase, GetMyNovelsUseCase>();
             services.AddScoped<ICreateNovelUseCase, CreateNovelUseCase>();
             services.AddScoped<IUpdateNovelUseCase, UpdateNovelUseCase>();
+            services.AddScoped<IUpdateNovelLifecycleStatusUseCase, UpdateNovelLifecycleStatusUseCase>();
             services.AddScoped<ISubmitNovelUseCase, SubmitNovelUseCase>();
             services.AddScoped<IWithdrawNovelSubmissionUseCase, WithdrawNovelSubmissionUseCase>();
             services.AddScoped<IDeleteNovelUseCase, DeleteNovelUseCase>();

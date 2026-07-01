@@ -68,6 +68,11 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             await _context.Notifications.AddAsync(notification, ct);
         }
 
+        public Task AddRangeAsync(IEnumerable<Notification> notifications, CancellationToken ct)
+        {
+            return _context.Notifications.AddRangeAsync(notifications, ct);
+        }
+
         public async Task<bool> MarkAsReadAsync(int notificationId, int userId, CancellationToken ct)
         {
             var affected = await _context.Notifications

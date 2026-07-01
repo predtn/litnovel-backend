@@ -8,6 +8,7 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
         Task<NotificationListResponseDto> GetByUserAsync(int userId, NotificationQueryDto query, CancellationToken ct);
         Task<NotificationResponseDto?> GetByIdAsync(int notificationId, int userId, CancellationToken ct);
         Task AddAsync(Notification notification, CancellationToken ct);
+        Task AddRangeAsync(IEnumerable<Notification> notifications, CancellationToken ct);
         Task<bool> MarkAsReadAsync(int notificationId, int userId, CancellationToken ct);
         Task MarkAllAsReadAsync(int userId, CancellationToken ct);
         Task<bool> DeleteAsync(int notificationId, int userId, CancellationToken ct);

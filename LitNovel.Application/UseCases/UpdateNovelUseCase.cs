@@ -73,6 +73,11 @@ namespace LitNovel.Application.UseCases
 
             var slug = await CreateUniqueSlugAsync(title, novel.Id, ct);
             var shouldResubmitForReview = novel.Status != NovelStatus.Draft;
+            if (shouldResubmitForReview && IsPublicStatus(novel.Status))
+            {
+                novel.PreviousPublicStatus = novel.Status;
+            }
+
             novel.Title = title;
             novel.Slug = slug;
             novel.Description = request.Description;
@@ -149,6 +154,11 @@ namespace LitNovel.Application.UseCases
             {
                 novel.NovelTags.Add(new NovelTag { NovelId = novel.Id, TagId = tagId });
             }
+        }
+
+        private static bool IsPublicStatus(NovelStatus status)
+        {
+            return status is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped;
         }
 
     }
