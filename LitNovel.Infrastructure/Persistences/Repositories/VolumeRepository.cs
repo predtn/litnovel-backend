@@ -53,6 +53,8 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .Include(v => v.Novel)
                 .Include(v => v.Chapters)
                     .ThenInclude(c => c.ChapterProgresses)
+                .Include(v => v.Chapters)
+                    .ThenInclude(c => c.ChapterReads)
                 .FirstOrDefaultAsync(v => v.Id == volumeId, ct);
         }
 
@@ -73,6 +75,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         public void Delete(Volume volume)
         {
             _context.ReadingProgresses.RemoveRange(volume.Chapters.SelectMany(c => c.ChapterProgresses));
+            _context.ChapterReads.RemoveRange(volume.Chapters.SelectMany(c => c.ChapterReads));
             _context.Volumes.Remove(volume);
         }
     }

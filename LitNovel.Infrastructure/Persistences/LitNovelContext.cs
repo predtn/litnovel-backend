@@ -28,6 +28,7 @@ namespace LitNovel.Infrastructure.Persistences
         public DbSet<CommentLike> CommentLikes => Set<CommentLike>();
         public DbSet<NovelRating> NovelRatings => Set<NovelRating>();
         public DbSet<ReadingProgress> ReadingProgresses => Set<ReadingProgress>();
+        public DbSet<ChapterRead> ChapterReads => Set<ChapterRead>();
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
         public DbSet<Announcement> Announcements => Set<Announcement>();

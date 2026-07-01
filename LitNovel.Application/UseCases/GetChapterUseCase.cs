@@ -11,14 +11,23 @@ namespace LitNovel.Application.UseCases
     public class GetChapterUseCase : IGetChapterUseCase
     {
         private readonly IChapterRepository _chapterRepository;
+        private readonly IChapterReadRepository _chapterReadRepository;
+        private readonly IReadingProgressRepository _readingProgressRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IUnitOfWork _unitOfWork;
 
         public GetChapterUseCase(
             IChapterRepository chapterRepository,
-            ICurrentUserService currentUserService)
+            IChapterReadRepository chapterReadRepository,
+            IReadingProgressRepository readingProgressRepository,
+            ICurrentUserService currentUserService,
+            IUnitOfWork unitOfWork)
         {
             _chapterRepository = chapterRepository;
+            _chapterReadRepository = chapterReadRepository;
+            _readingProgressRepository = readingProgressRepository;
             _currentUserService = currentUserService;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<ChapterDetailResponseDto> ExecuteAsync(int id, CancellationToken ct)
@@ -34,7 +43,9 @@ namespace LitNovel.Application.UseCases
                 throw new NotFoundException("Chapter not found");
             }
 
-            return MapChapter(chapter);
+            var result = MapChapter(chapter);
+            await MarkReadIfNeededAsync(chapter, ct);
+            return result;
         }
 
         public async Task<ChapterDetailResponseDto> ExecuteBySlugAsync(string slug, CancellationToken ct)
@@ -50,7 +61,9 @@ namespace LitNovel.Application.UseCases
                 throw new NotFoundException("Chapter not found");
             }
 
-            return MapChapter(chapter);
+            var result = MapChapter(chapter);
+            await MarkReadIfNeededAsync(chapter, ct);
+            return result;
         }
 
         private ChapterDetailResponseDto MapChapter(Chapter chapter)
@@ -69,6 +82,8 @@ namespace LitNovel.Application.UseCases
                 Content = chapter.Content?.Content ?? string.Empty,
                 Status = chapter.Status.ToString(),
                 ReleaseDate = chapter.ReleaseDate,
+                DeletionRequestedAt = chapter.DeletionRequestedAt,
+                ScheduledHardDeleteAt = chapter.ScheduledHardDeleteAt,
                 Volume = new ChapterVolumeResponseDto
                 {
                     Id = chapter.Volume.Id,
@@ -88,7 +103,7 @@ namespace LitNovel.Application.UseCases
 
         private bool CanView(Chapter chapter)
         {
-            if (chapter.Status == ChapterStatus.Published && IsPublicStatus(chapter.Volume.Novel.Status))
+            if (IsPublicChapterStatus(chapter.Status) && IsPublicStatus(chapter.Volume.Novel.Status))
             {
                 return true;
             }
@@ -98,7 +113,75 @@ namespace LitNovel.Application.UseCases
 
         private static bool IsPublicStatus(NovelStatus status)
         {
-            return status is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped;
+            return status is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped or NovelStatus.PendingDeletion;
+        }
+
+        private static bool IsPublicChapterStatus(ChapterStatus status)
+        {
+            return status is ChapterStatus.Published or ChapterStatus.PendingDeletion;
+        }
+
+        private async Task MarkReadIfNeededAsync(Chapter chapter, CancellationToken ct)
+        {
+            if (!_currentUserService.IsAuthenticated
+                || !IsPublicChapterStatus(chapter.Status)
+                || !IsPublicStatus(chapter.Volume.Novel.Status))
+            {
+                return;
+            }
+
+            var userId = _currentUserService.UserId;
+            var novelId = chapter.Volume.NovelId;
+            var now = DateTime.UtcNow;
+            var existingRead = await _chapterReadRepository.GetByUserAndChapterAsync(userId, chapter.Id, ct);
+            var isNewRead = existingRead is null;
+
+            if (existingRead is null)
+            {
+                await _chapterReadRepository.AddAsync(new ChapterRead
+                {
+                    UserId = userId,
+                    NovelId = novelId,
+                    ChapterId = chapter.Id,
+                    ReadAt = now
+                }, ct);
+            }
+            else
+            {
+                existingRead.ReadAt = now;
+            }
+
+            var readCount = await _chapterReadRepository.CountReadPublishedChaptersByNovelAsync(userId, novelId, ct);
+            if (isNewRead)
+            {
+                readCount++;
+            }
+
+            var totalPublishedChapters = await _chapterReadRepository.CountPublishedChaptersByNovelAsync(novelId, ct);
+            var progressPercentage = totalPublishedChapters <= 0
+                ? 0
+                : Math.Min(100, (int)Math.Round(readCount * 100d / totalPublishedChapters, MidpointRounding.AwayFromZero));
+
+            var progress = await _readingProgressRepository.GetByUserAndNovelAsync(userId, novelId, ct);
+            if (progress is null)
+            {
+                await _readingProgressRepository.AddAsync(new ReadingProgress
+                {
+                    UserId = userId,
+                    NovelId = novelId,
+                    ChapterId = chapter.Id,
+                    ProgressPercentage = (byte)progressPercentage,
+                    LastReadAt = now
+                }, ct);
+            }
+            else
+            {
+                progress.ChapterId = chapter.Id;
+                progress.ProgressPercentage = (byte)progressPercentage;
+                progress.LastReadAt = now;
+            }
+
+            await _unitOfWork.SaveChangesAsync(ct);
         }
     }
 }

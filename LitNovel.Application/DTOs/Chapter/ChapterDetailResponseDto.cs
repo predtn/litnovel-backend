@@ -9,6 +9,8 @@ namespace LitNovel.Application.DTOs.Chapter
         public string Content { get; set; } = default!;
         public string Status { get; set; } = default!;
         public DateTime? ReleaseDate { get; set; }
+        public DateTime? DeletionRequestedAt { get; set; }
+        public DateTime? ScheduledHardDeleteAt { get; set; }
         public ChapterVolumeResponseDto Volume { get; set; } = default!;
         public ChapterNovelResponseDto Novel { get; set; } = default!;
         public DateTime CreatedAt { get; set; }

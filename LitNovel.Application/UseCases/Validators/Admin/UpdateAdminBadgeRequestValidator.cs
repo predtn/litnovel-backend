@@ -40,6 +40,8 @@ namespace LitNovel.Application.UseCases.Validators.Admin
 
         private static bool BeValidUrl(string? value)
         {
+            if (value?.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase) == true) return true;
+
             return Uri.TryCreate(value, UriKind.Absolute, out var uri)
                 && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
         }

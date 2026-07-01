@@ -14,7 +14,11 @@ namespace LitNovel.Application.UseCases.Validators.Novel
                 .Must(status => string.IsNullOrWhiteSpace(status) || IsPublicStatus(status))
                 .WithMessage("Invalid public novel status");
             RuleFor(x => x.Sort)
-                .Must(sort => string.IsNullOrWhiteSpace(sort) || sort.Equals("updatedAt", StringComparison.OrdinalIgnoreCase) || sort.Equals("viewCount", StringComparison.OrdinalIgnoreCase))
+                .Must(sort => string.IsNullOrWhiteSpace(sort)
+                    || sort.Equals("updatedAt", StringComparison.OrdinalIgnoreCase)
+                    || sort.Equals("latestChapterUpdatedAt", StringComparison.OrdinalIgnoreCase)
+                    || sort.Equals("viewCount", StringComparison.OrdinalIgnoreCase)
+                    || sort.Equals("ratingAverage", StringComparison.OrdinalIgnoreCase))
                 .WithMessage("Invalid sort field");
             RuleFor(x => x.Order)
                 .Must(order => string.IsNullOrWhiteSpace(order) || order.Equals("asc", StringComparison.OrdinalIgnoreCase) || order.Equals("desc", StringComparison.OrdinalIgnoreCase))
@@ -24,7 +28,7 @@ namespace LitNovel.Application.UseCases.Validators.Novel
         private static bool IsPublicStatus(string status)
         {
             return Enum.TryParse<NovelStatus>(status, true, out var parsed)
-                && parsed is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped;
+                && parsed is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped or NovelStatus.PendingDeletion;
         }
     }
 }

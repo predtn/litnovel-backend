@@ -195,7 +195,19 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DeletionRequestedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DeletionRequestedById")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PreviousPublicStatus")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("ReleaseDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ScheduledHardDeleteAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Slug")
@@ -219,6 +231,8 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ScheduledHardDeleteAt");
 
                     b.HasIndex("Slug")
                         .IsUnique();
@@ -255,6 +269,31 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                         .IsUnique();
 
                     b.ToTable("ChapterContents", (string)null);
+                });
+
+            modelBuilder.Entity("LitNovel.Domain.Entities.ChapterRead", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ChapterId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NovelId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId", "ChapterId");
+
+                    b.HasIndex("ChapterId");
+
+                    b.HasIndex("NovelId");
+
+                    b.HasIndex("UserId", "NovelId");
+
+                    b.ToTable("ChapterReads", (string)null);
                 });
 
             modelBuilder.Entity("LitNovel.Domain.Entities.CommentChapter", b =>
@@ -460,6 +499,12 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DeletionRequestedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DeletionRequestedById")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .HasMaxLength(5000)
                         .HasColumnType("nvarchar(max)");
@@ -473,6 +518,12 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(0);
+
+                    b.Property<string>("PreviousPublicStatus")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ScheduledHardDeleteAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -511,6 +562,8 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.HasIndex("AuthorId");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("ScheduledHardDeleteAt");
 
                     b.HasIndex("Slug")
                         .IsUnique();
@@ -1005,6 +1058,33 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                     b.Navigation("Chapter");
                 });
 
+            modelBuilder.Entity("LitNovel.Domain.Entities.ChapterRead", b =>
+                {
+                    b.HasOne("LitNovel.Domain.Entities.Chapter", "Chapter")
+                        .WithMany("ChapterReads")
+                        .HasForeignKey("ChapterId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LitNovel.Domain.Entities.Novel", "Novel")
+                        .WithMany("ChapterReads")
+                        .HasForeignKey("NovelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LitNovel.Domain.Entities.User", "User")
+                        .WithMany("ChapterReads")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chapter");
+
+                    b.Navigation("Novel");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("LitNovel.Domain.Entities.CommentChapter", b =>
                 {
                     b.HasOne("LitNovel.Domain.Entities.Chapter", "Chapter")
@@ -1344,6 +1424,8 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
                 {
                     b.Navigation("ChapterProgresses");
 
+                    b.Navigation("ChapterReads");
+
                     b.Navigation("CommentChapters");
 
                     b.Navigation("Content");
@@ -1360,6 +1442,8 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
 
             modelBuilder.Entity("LitNovel.Domain.Entities.Novel", b =>
                 {
+                    b.Navigation("ChapterReads");
+
                     b.Navigation("Favorites");
 
                     b.Navigation("NovelLikes");
@@ -1383,6 +1467,8 @@ namespace LitNovel.Infrastructure.Persistences.Migrations
             modelBuilder.Entity("LitNovel.Domain.Entities.User", b =>
                 {
                     b.Navigation("AuditLogs");
+
+                    b.Navigation("ChapterReads");
 
                     b.Navigation("CommentChapters");
 

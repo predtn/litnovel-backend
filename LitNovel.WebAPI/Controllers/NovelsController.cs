@@ -17,13 +17,16 @@ namespace LitNovel.WebAPI.Controllers
     {
         private readonly IGetNovelsUseCase _getNovelsUseCase;
         private readonly IGetNovelUseCase _getNovelUseCase;
+        private readonly IIncrementNovelViewUseCase _incrementNovelViewUseCase;
         private readonly IGetNovelAnalyticsUseCase _getNovelAnalyticsUseCase;
         private readonly IGetMyNovelsUseCase _getMyNovelsUseCase;
         private readonly ICreateNovelUseCase _createNovelUseCase;
         private readonly IUpdateNovelUseCase _updateNovelUseCase;
+        private readonly IUpdateNovelLifecycleStatusUseCase _updateNovelLifecycleStatusUseCase;
         private readonly ISubmitNovelUseCase _submitNovelUseCase;
         private readonly IWithdrawNovelSubmissionUseCase _withdrawNovelSubmissionUseCase;
         private readonly IDeleteNovelUseCase _deleteNovelUseCase;
+        private readonly IRestoreNovelUseCase _restoreNovelUseCase;
         private readonly IGetVolumesUseCase _getVolumesUseCase;
         private readonly ICreateVolumeUseCase _createVolumeUseCase;
         private readonly IAddFavoriteUseCase _addFavoriteUseCase;
@@ -36,13 +39,16 @@ namespace LitNovel.WebAPI.Controllers
         public NovelsController(
             IGetNovelsUseCase getNovelsUseCase,
             IGetNovelUseCase getNovelUseCase,
+            IIncrementNovelViewUseCase incrementNovelViewUseCase,
             IGetNovelAnalyticsUseCase getNovelAnalyticsUseCase,
             IGetMyNovelsUseCase getMyNovelsUseCase,
             ICreateNovelUseCase createNovelUseCase,
             IUpdateNovelUseCase updateNovelUseCase,
+            IUpdateNovelLifecycleStatusUseCase updateNovelLifecycleStatusUseCase,
             ISubmitNovelUseCase submitNovelUseCase,
             IWithdrawNovelSubmissionUseCase withdrawNovelSubmissionUseCase,
             IDeleteNovelUseCase deleteNovelUseCase,
+            IRestoreNovelUseCase restoreNovelUseCase,
             IGetVolumesUseCase getVolumesUseCase,
             ICreateVolumeUseCase createVolumeUseCase,
             IAddFavoriteUseCase addFavoriteUseCase,
@@ -54,13 +60,16 @@ namespace LitNovel.WebAPI.Controllers
         {
             _getNovelsUseCase = getNovelsUseCase;
             _getNovelUseCase = getNovelUseCase;
+            _incrementNovelViewUseCase = incrementNovelViewUseCase;
             _getNovelAnalyticsUseCase = getNovelAnalyticsUseCase;
             _getMyNovelsUseCase = getMyNovelsUseCase;
             _createNovelUseCase = createNovelUseCase;
             _updateNovelUseCase = updateNovelUseCase;
+            _updateNovelLifecycleStatusUseCase = updateNovelLifecycleStatusUseCase;
             _submitNovelUseCase = submitNovelUseCase;
             _withdrawNovelSubmissionUseCase = withdrawNovelSubmissionUseCase;
             _deleteNovelUseCase = deleteNovelUseCase;
+            _restoreNovelUseCase = restoreNovelUseCase;
             _getVolumesUseCase = getVolumesUseCase;
             _createVolumeUseCase = createVolumeUseCase;
             _addFavoriteUseCase = addFavoriteUseCase;
@@ -90,6 +99,13 @@ namespace LitNovel.WebAPI.Controllers
         {
             var result = await _getNovelUseCase.ExecuteBySlugAsync(slug, ct);
             return Ok(new ApiResponse<NovelDetailResponseDto> { Success = true, Data = result });
+        }
+
+        [HttpPost("{id:int}/views")]
+        public async Task<IActionResult> IncrementView(int id, CancellationToken ct)
+        {
+            await _incrementNovelViewUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<object> { Success = true, Message = "Novel view recorded", Data = null });
         }
 
         [HttpGet("{id:int}/analytics")]
@@ -132,12 +148,28 @@ namespace LitNovel.WebAPI.Controllers
             return Ok(new ApiResponse<UpdateNovelResponseDto> { Success = true, Message = "Novel updated successfully", Data = result });
         }
 
+        [HttpPatch("{id:int}/lifecycle-status")]
+        [Authorize]
+        public async Task<IActionResult> UpdateLifecycleStatus(int id, UpdateNovelLifecycleStatusRequestDto request, CancellationToken ct)
+        {
+            var result = await _updateNovelLifecycleStatusUseCase.ExecuteAsync(id, request, ct);
+            return Ok(new ApiResponse<UpdateNovelResponseDto> { Success = true, Message = "Novel lifecycle status updated successfully", Data = result });
+        }
+
         [HttpDelete("{id:int}")]
         [Authorize]
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {
             await _deleteNovelUseCase.ExecuteAsync(id, ct);
             return Ok(new ApiResponse<object> { Success = true, Data = null });
+        }
+
+        [HttpPost("{id:int}/restore")]
+        [Authorize]
+        public async Task<IActionResult> Restore(int id, CancellationToken ct)
+        {
+            var result = await _restoreNovelUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<UpdateNovelResponseDto> { Success = true, Message = "Novel restored successfully", Data = result });
         }
 
         [HttpPost("{id:int}/submit")]

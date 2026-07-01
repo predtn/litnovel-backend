@@ -63,6 +63,11 @@ namespace LitNovel.Application.UseCases
                 throw new BadRequestException("Locked novel cannot be edited");
             }
 
+            if (novel.Status == NovelStatus.PendingDeletion)
+            {
+                throw new BadRequestException("Restore the novel before editing");
+            }
+
             await EnsureReferencesExistAsync(request.CategoryId, request.TagIds, ct);
 
             var title = request.Title.Trim();
@@ -73,6 +78,11 @@ namespace LitNovel.Application.UseCases
 
             var slug = await CreateUniqueSlugAsync(title, novel.Id, ct);
             var shouldResubmitForReview = novel.Status != NovelStatus.Draft;
+            if (shouldResubmitForReview && IsPublicStatus(novel.Status))
+            {
+                novel.PreviousPublicStatus = novel.Status;
+            }
+
             novel.Title = title;
             novel.Slug = slug;
             novel.Description = request.Description;
@@ -149,6 +159,11 @@ namespace LitNovel.Application.UseCases
             {
                 novel.NovelTags.Add(new NovelTag { NovelId = novel.Id, TagId = tagId });
             }
+        }
+
+        private static bool IsPublicStatus(NovelStatus status)
+        {
+            return status is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped;
         }
 
     }

@@ -28,6 +28,7 @@ namespace LitNovel.Infrastructure
             services.AddScoped<IChapterRepository, ChapterRepository>();
             services.AddScoped<IUserReportRepository, UserReportRepository>();
             services.AddScoped<IReadingProgressRepository, ReadingProgressRepository>();
+            services.AddScoped<IChapterReadRepository, ChapterReadRepository>();
             services.AddScoped<IFavoriteRepository, FavoriteRepository>();
             services.AddScoped<INovelRatingRepository, NovelRatingRepository>();
             services.AddScoped<ICommentChapterRepository, CommentChapterRepository>();
@@ -49,6 +50,8 @@ namespace LitNovel.Infrastructure
             services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<INotificationPushService, SignalRNotificationPushService>();
+            services.AddSingleton<IPendingDeletionSettingsProvider, PendingDeletionSettingsProvider>();
+            services.AddHostedService<PendingDeletionCleanupService>();
 
             return services;
         }

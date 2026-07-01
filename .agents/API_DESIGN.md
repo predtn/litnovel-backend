@@ -499,6 +499,7 @@ GET /api/novels?sort=viewCount&order=desc&status=Ongoing&page=1&size=6
 | `GET` | `/api/users/me/reading-history` | Continue reading section |
 | `GET` | `/api/novels?sort=viewCount&order=desc` | Trending novels |
 | `GET` | `/api/novels?sort=updatedAt&order=desc` | New releases |
+| `GET` | `/api/announcements` | Fetch active announcements |
 | `GET` | `/api/notifications?isRead=false` | Unread count for bell |
 
 ---
@@ -1028,7 +1029,8 @@ GET /api/novels
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/novels/my` | Load own novels list |
-| `DELETE` | `/api/novels/{id}` | Delete a novel |
+| `DELETE` | `/api/novels/{id}` | Delete draft novel or schedule approved novel deletion |
+| `POST` | `/api/novels/{id}/restore` | Restore novel pending deletion |
 
 ---
 
@@ -1038,7 +1040,7 @@ GET /api/novels
 
 **Query:** `?status=Draft&page=1&size=20&sort=updatedAt&order=desc`
 
-**Status filter options:** `Draft` | `Pending` | `Ongoing` | `Ended` | `Hiatus` | `Dropped` | `Canceled`
+**Status filter options:** `Draft` | `Pending` | `Ongoing` | `Ended` | `Hiatus` | `Dropped` | `Canceled` | `PendingDeletion`
 
 **Response:**
 ```json
@@ -1056,6 +1058,8 @@ GET /api/novels
         "totalVolumes": 1,
         "viewCount": 0,
         "ratingAverage": 0,
+        "deletionRequestedAt": null,
+        "scheduledHardDeleteAt": null,
         "createdAt": "2024-01-01T00:00:00Z",
         "updatedAt": "2024-01-10T00:00:00Z"
       }
@@ -1176,6 +1180,7 @@ GET /api/novels
 |---|---|---|
 | 400 | "Withdraw the novel submission before editing" | Novel is pending review |
 | 400 | "Locked novel cannot be edited" | Novel is locked |
+| 400 | "Restore the novel before editing" | Novel is pending deletion |
 | 403 | "You do not have permission to edit this novel" | Not owner/staff |
 | 404 | "Novel not found" | Invalid ID |
 
@@ -1191,8 +1196,10 @@ GET /api/novels
 |---|---|---|
 | `GET` | `/api/novels/{id}` | Load novel detail |
 | `POST` | `/api/novels/{id}/submit` | Submit for moderation |
+| `PATCH` | `/api/novels/{id}/lifecycle-status` | Update public lifecycle status without moderation |
 | `POST` | `/api/novels/{id}/withdraw` | Withdraw pending submission back to draft |
-| `DELETE` | `/api/novels/{id}` | Delete novel |
+| `DELETE` | `/api/novels/{id}` | Delete draft novel or schedule approved novel deletion |
+| `POST` | `/api/novels/{id}/restore` | Restore novel pending deletion |
 
 ---
 
@@ -1225,6 +1232,47 @@ GET /api/novels
 
 ---
 
+### `PATCH /api/novels/{id}/lifecycle-status`
+
+**Permission:** Owner / Staff / Admin
+
+**Purpose:** Change the public lifecycle status only. This does not trigger moderation because it does not change novel metadata or chapter content.
+
+**Allowed status values:** `Ongoing` | `Ended` | `Hiatus` | `Dropped`
+
+**Request:**
+```json
+{ "status": "Ended" }
+```
+
+**Success — 200 OK:**
+```json
+{
+  "success": true,
+  "message": "Novel lifecycle status updated successfully",
+  "data": {
+    "id": 42,
+    "title": "The Dragon War Chronicles",
+    "slug": "the-dragon-war-chronicles",
+    "status": "Ended",
+    "updatedAt": "2024-01-12T10:30:00Z"
+  }
+}
+```
+
+**Errors:**
+
+| Status | Message | Cause |
+|---|---|---|
+| 400 | "Lifecycle status must be one of: Ongoing, Ended, Hiatus, Dropped" | Invalid lifecycle status |
+| 400 | "Cannot change lifecycle status while novel is pending review" | Novel has a pending moderation submission |
+| 400 | "Only published novels can change lifecycle status" | Novel is Draft or Canceled |
+| 400 | "Locked novel cannot be edited" | Novel is locked |
+| 403 | "You do not have permission to edit this novel" | Not owner/staff |
+| 404 | "Novel not found" | Invalid ID |
+
+---
+
 ### `POST /api/novels/{id}/withdraw`
 
 **Permission:** Owner / Staff / Admin
@@ -1254,6 +1302,52 @@ GET /api/novels
 
 ---
 
+### `DELETE /api/novels/{id}`
+
+**Permission:** Owner / Staff / Admin
+
+**Behavior:** If the novel is `Draft`, it is hard deleted immediately. If the novel has already passed moderation (`Ongoing`, `Ended`, `Hiatus`, `Dropped`, or `Canceled`), it is moved to `PendingDeletion` until `scheduledHardDeleteAt`. The restore window is configured by `PendingDeletion:RetentionSeconds` (`2592000` seconds / 30 days by default; `120` seconds in Development for testing). During this restore window, readers can still see the novel with `deletionRequestedAt` and `scheduledHardDeleteAt`, allowing the UI to show a deletion warning. The background cleanup job purges expired pending-deletion novels.
+
+**Success — 200 OK:**
+```json
+{ "success": true, "data": null }
+```
+
+**Errors:**
+
+| Status | Message | Cause |
+|---|---|---|
+| 400 | "Only draft novels can be deleted directly. Approved novels can only be scheduled for deletion." | Novel is pending review, locked, or already pending deletion |
+| 403 | "You do not have permission to delete this novel" | Not owner/staff |
+| 404 | "Novel not found" | Invalid ID |
+
+---
+
+### `POST /api/novels/{id}/restore`
+
+**Permission:** Owner / Staff / Admin
+
+**Request body:** None required
+
+**Success — 200 OK:**
+```json
+{
+  "success": true,
+  "message": "Novel restored successfully",
+  "data": {
+    "id": 42,
+    "title": "The Dragon War Chronicles",
+    "slug": "the-dragon-war-chronicles",
+    "status": "Ongoing",
+    "updatedAt": "2024-01-12T10:40:00Z"
+  }
+}
+```
+
+**Error:** `400 "Novel is not pending deletion"`
+
+---
+
 ## SCR-22 — Volume Management
 
 **Purpose:** Create, reorder, and manage volumes within a novel.
@@ -1265,7 +1359,9 @@ GET /api/novels
 | `GET` | `/api/novels/{novelId}/volumes` | Load volume list |
 | `POST` | `/api/novels/{novelId}/volumes` | Create volume |
 | `PUT` | `/api/volumes/{volumeId}` | Edit volume |
-| `DELETE` | `/api/volumes/{volumeId}` | Delete volume (cascade chapters) |
+| `DELETE` | `/api/volumes/{volumeId}` | Delete volume only when all chapters are drafts |
+
+> Volumes containing any non-draft chapter cannot be hard deleted, because deleting the volume would cascade-delete approved chapters, comments, reading progress, and moderation/report context. Move/delete draft chapters individually, or schedule approved chapters/novels for deletion instead.
 
 ---
 
@@ -1428,6 +1524,7 @@ GET /api/novels
 |---|---|---|
 | 400 | "Withdraw the chapter submission before editing" | Chapter is pending review |
 | 400 | "Locked chapter cannot be edited" | Chapter is locked |
+| 400 | "Restore the chapter before editing" | Chapter is pending deletion |
 | 403 | "You do not have permission to edit this novel" | Not owner/staff |
 | 404 | "Chapter not found" | Invalid ID |
 
@@ -1444,7 +1541,8 @@ GET /api/novels
 | `GET` | `/api/volumes/{volumeId}/chapters` | Load chapter list |
 | `POST` | `/api/chapters/{id}/submit` | Submit chapter for review |
 | `POST` | `/api/chapters/{id}/withdraw` | Withdraw pending submission back to draft |
-| `DELETE` | `/api/chapters/{id}` | Delete chapter |
+| `DELETE` | `/api/chapters/{id}` | Delete draft chapter or schedule approved chapter deletion |
+| `POST` | `/api/chapters/{id}/restore` | Restore chapter pending deletion |
 
 ---
 
@@ -1465,6 +1563,8 @@ GET /api/novels
         "chapterNumber": 1,
         "title": "Chapter 1: The Awakening",
         "status": "Published",
+        "deletionRequestedAt": null,
+        "scheduledHardDeleteAt": null,
         "createdAt": "2024-01-01T00:00:00Z"
       }
     ],
@@ -1514,6 +1614,51 @@ GET /api/novels
 | 400 | "Chapter must be in Pending status to withdraw" | Wrong status |
 | 403 | "You do not have permission to edit this novel" | Not owner/staff |
 | 404 | "Chapter not found" | Invalid ID |
+
+---
+
+### `DELETE /api/chapters/{id}`
+
+**Permission:** Owner / Staff / Admin
+
+**Behavior:** If the chapter is `Draft`, it is hard deleted immediately. If it has already passed moderation (`Published` or `Scheduled`), it is moved to `PendingDeletion` until `scheduledHardDeleteAt`. The restore window is configured by `PendingDeletion:RetentionSeconds` (`2592000` seconds / 30 days by default; `120` seconds in Development for testing). During this restore window, readers can still access the chapter and receive `deletionRequestedAt` / `scheduledHardDeleteAt` so the UI can show a deletion warning. The background cleanup job purges expired pending-deletion chapters.
+
+**Success — 200 OK:**
+```json
+{ "success": true, "data": null }
+```
+
+**Errors:**
+
+| Status | Message | Cause |
+|---|---|---|
+| 400 | "Only draft chapters can be deleted directly. Approved chapters can only be scheduled for deletion." | Chapter is pending review, locked, or already pending deletion |
+| 403 | "You do not have permission to edit this novel" | Not owner/staff |
+| 404 | "Chapter not found" | Invalid ID |
+
+---
+
+### `POST /api/chapters/{id}/restore`
+
+**Permission:** Owner / Staff / Admin
+
+**Request body:** None required
+
+**Success — 200 OK:**
+```json
+{
+  "success": true,
+  "message": "Chapter restored successfully",
+  "data": {
+    "id": 87,
+    "title": "Chapter 1: The Awakening",
+    "status": "Published",
+    "updatedAt": "2024-01-12T10:40:00Z"
+  }
+}
+```
+
+**Error:** `400 "Chapter is not pending deletion"`
 
 ---
 
@@ -1953,6 +2098,8 @@ GET /api/novels
   "data": { "id": 42, "status": "Ongoing", "processedAt": "2024-01-12T10:00:00Z" }
 }
 ```
+
+> Initial novel submissions are approved as `Ongoing`. If a previously public novel was edited and moved to `Pending`, approval restores its previous public lifecycle status (`Ongoing`, `Ended`, `Hiatus`, or `Dropped`).
 
 **Errors:**
 
@@ -2635,53 +2782,6 @@ GET /api/novels
 
 ---
 
-## SCR-56 — Notification Management
-
-**Purpose:** Send system notifications to users.
-
-### APIs Used
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/admin/notifications/sent` | Load sent notifications history |
-| `POST` | `/api/admin/notifications` | Send notification |
-
----
-
-### `POST /api/admin/notifications`
-
-**Permission:** Admin
-
-**Request:**
-```json
-{
-  "notificationType": "SystemAlert",
-  "message": "The platform will undergo maintenance on Jan 20th.",
-  "targetAll": true,
-  "targetUserId": null
-}
-```
-
-**Validation:**
-
-| Field | Rule |
-|---|---|
-| `notificationType` | Required, valid `NotificationType` enum |
-| `message` | Required, 1–1000 chars |
-| `targetAll` | Required boolean |
-| `targetUserId` | Required if `targetAll = false`, valid user ID |
-
-**Success — 201 Created:**
-```json
-{
-  "success": true,
-  "message": "Notification sent to all users",
-  "data": { "sentCount": 12450, "sentAt": "2024-01-12T10:00:00Z" }
-}
-```
-
----
-
 ## SCR-57 — Reports Overview (Admin)
 
 **Purpose:** High-level view of all platform reports.
@@ -2834,6 +2934,31 @@ GET /api/novels
 | `PUT` | `/api/admin/announcements/{id}` | Edit announcement |
 | `DELETE` | `/api/admin/announcements/{id}` | Delete announcement |
 | `PUT` | `/api/admin/announcements/{id}/toggle` | Toggle active/inactive |
+| `GET` | `/api/announcements` | Display active announcements to readers |
+
+---
+
+### `GET /api/announcements`
+
+**Permission:** Guest+
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 5,
+      "title": "Scheduled Maintenance Notice",
+      "content": "<p>The platform will be down for maintenance on Jan 20th from 2-4 AM UTC.</p>",
+      "startDate": "2024-01-18T00:00:00Z",
+      "endDate": "2024-01-21T00:00:00Z"
+    }
+  ]
+}
+```
+
+> Returns only active announcements where `startDate <= now` and `endDate` is empty or still in the future.
 
 ---
 

@@ -8,12 +8,18 @@ namespace LitNovel.Application.UseCases
     public class DeleteReadingHistoryUseCase : IDeleteReadingHistoryUseCase
     {
         private readonly IReadingProgressRepository _readingProgressRepository;
+        private readonly IChapterReadRepository _chapterReadRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
 
-        public DeleteReadingHistoryUseCase(IReadingProgressRepository readingProgressRepository, IUnitOfWork unitOfWork, ICurrentUserService currentUserService)
+        public DeleteReadingHistoryUseCase(
+            IReadingProgressRepository readingProgressRepository,
+            IChapterReadRepository chapterReadRepository,
+            IUnitOfWork unitOfWork,
+            ICurrentUserService currentUserService)
         {
             _readingProgressRepository = readingProgressRepository;
+            _chapterReadRepository = chapterReadRepository;
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
         }
@@ -22,8 +28,10 @@ namespace LitNovel.Application.UseCases
         {
             var progress = await _readingProgressRepository.GetByUserAndNovelAsync(_currentUserService.UserId, novelId, ct)
                 ?? throw new NotFoundException("Reading history not found");
+            var chapterReads = await _chapterReadRepository.GetByUserAndNovelForDeleteAsync(_currentUserService.UserId, novelId, ct);
 
             _readingProgressRepository.Delete(progress);
+            _chapterReadRepository.DeleteRange(chapterReads);
             await _unitOfWork.SaveChangesAsync(ct);
         }
     }
