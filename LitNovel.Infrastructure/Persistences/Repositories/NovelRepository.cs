@@ -58,6 +58,20 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 ("viewcount", _) => novels.OrderByDescending(n => n.ViewCount),
                 ("ratingaverage", "asc") => novels.OrderBy(n => n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0),
                 ("ratingaverage", _) => novels.OrderByDescending(n => n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0),
+                ("latestchapterupdatedat", "asc") => novels.OrderBy(n => n.Volumes
+                    .SelectMany(v => v.Chapters)
+                    .Where(c => c.Status == ChapterStatus.Published)
+                    .OrderByDescending(c => c.UpdatedAt)
+                    .ThenByDescending(c => c.CreatedAt)
+                    .Select(c => (DateTime?)c.UpdatedAt)
+                    .FirstOrDefault() ?? n.UpdatedAt),
+                ("latestchapterupdatedat", _) => novels.OrderByDescending(n => n.Volumes
+                    .SelectMany(v => v.Chapters)
+                    .Where(c => c.Status == ChapterStatus.Published)
+                    .OrderByDescending(c => c.UpdatedAt)
+                    .ThenByDescending(c => c.CreatedAt)
+                    .Select(c => (DateTime?)c.UpdatedAt)
+                    .FirstOrDefault() ?? n.UpdatedAt),
                 ("updatedat", "asc") => novels.OrderBy(n => n.UpdatedAt),
                 ("updatedat", _) => novels.OrderByDescending(n => n.UpdatedAt),
                 _ => novels.OrderByDescending(n => n.UpdatedAt)
@@ -111,6 +125,13 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                         .OrderByDescending(c => c.UpdatedAt)
                         .ThenByDescending(c => c.CreatedAt)
                         .Select(c => c.Slug)
+                        .FirstOrDefault(),
+                    LatestChapterUpdatedAt = n.Volumes
+                        .SelectMany(v => v.Chapters)
+                        .Where(c => c.Status == ChapterStatus.Published)
+                        .OrderByDescending(c => c.UpdatedAt)
+                        .ThenByDescending(c => c.CreatedAt)
+                        .Select(c => (DateTime?)c.UpdatedAt)
                         .FirstOrDefault(),
                     ViewCount = n.ViewCount,
                     FavoritesCount = n.Favorites.Count,
@@ -393,10 +414,11 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
 
         public async Task<int> IncrementViewCountAsync(int id, CancellationToken ct)
         {
-            var novel = await _context.Novels.FirstOrDefaultAsync(n => n.Id == id, ct);
-            if (novel == null) return 0;
-            novel.ViewCount++;
-            return await _context.SaveChangesAsync(ct);
+            return await _context.Novels
+                .Where(n => n.Id == id)
+                .ExecuteUpdateAsync(
+                    setters => setters.SetProperty(n => n.ViewCount, n => n.ViewCount + 1),
+                    ct);
         }
     }
 }

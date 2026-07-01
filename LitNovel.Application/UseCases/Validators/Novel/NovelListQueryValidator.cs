@@ -16,6 +16,7 @@ namespace LitNovel.Application.UseCases.Validators.Novel
             RuleFor(x => x.Sort)
                 .Must(sort => string.IsNullOrWhiteSpace(sort)
                     || sort.Equals("updatedAt", StringComparison.OrdinalIgnoreCase)
+                    || sort.Equals("latestChapterUpdatedAt", StringComparison.OrdinalIgnoreCase)
                     || sort.Equals("viewCount", StringComparison.OrdinalIgnoreCase)
                     || sort.Equals("ratingAverage", StringComparison.OrdinalIgnoreCase))
                 .WithMessage("Invalid sort field");

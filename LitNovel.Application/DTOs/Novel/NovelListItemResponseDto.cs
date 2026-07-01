@@ -16,6 +16,7 @@ namespace LitNovel.Application.DTOs.Novel
         public int? LatestChapterNumber { get; set; }
         public string? LatestChapterTitle { get; set; }
         public string? LatestChapterSlug { get; set; }
+        public DateTime? LatestChapterUpdatedAt { get; set; }
         public int ViewCount { get; set; }
         public int FavoritesCount { get; set; }
         public double RatingAverage { get; set; }
