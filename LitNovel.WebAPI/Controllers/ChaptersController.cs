@@ -2,7 +2,6 @@ using LitNovel.Application.Common.Interfaces.UseCases;
 using LitNovel.Application.Common.Models;
 using LitNovel.Application.DTOs.Chapter;
 using LitNovel.Application.DTOs.Comment;
-using LitNovel.Application.DTOs.Reading;
 using LitNovel.WebAPI.Common.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +18,6 @@ namespace LitNovel.WebAPI.Controllers
         private readonly ISubmitChapterUseCase _submitChapterUseCase;
         private readonly IWithdrawChapterSubmissionUseCase _withdrawChapterSubmissionUseCase;
         private readonly IDeleteChapterUseCase _deleteChapterUseCase;
-        private readonly ISaveReadingProgressUseCase _saveReadingProgressUseCase;
         private readonly IGetChapterCommentsUseCase _getChapterCommentsUseCase;
         private readonly ICreateChapterCommentUseCase _createChapterCommentUseCase;
 
@@ -29,7 +27,6 @@ namespace LitNovel.WebAPI.Controllers
             ISubmitChapterUseCase submitChapterUseCase,
             IWithdrawChapterSubmissionUseCase withdrawChapterSubmissionUseCase,
             IDeleteChapterUseCase deleteChapterUseCase,
-            ISaveReadingProgressUseCase saveReadingProgressUseCase,
             IGetChapterCommentsUseCase getChapterCommentsUseCase,
             ICreateChapterCommentUseCase createChapterCommentUseCase)
         {
@@ -38,7 +35,6 @@ namespace LitNovel.WebAPI.Controllers
             _submitChapterUseCase = submitChapterUseCase;
             _withdrawChapterSubmissionUseCase = withdrawChapterSubmissionUseCase;
             _deleteChapterUseCase = deleteChapterUseCase;
-            _saveReadingProgressUseCase = saveReadingProgressUseCase;
             _getChapterCommentsUseCase = getChapterCommentsUseCase;
             _createChapterCommentUseCase = createChapterCommentUseCase;
         }
@@ -85,13 +81,6 @@ namespace LitNovel.WebAPI.Controllers
         {
             await _deleteChapterUseCase.ExecuteAsync(id, ct);
             return Ok(new ApiResponse<object> { Success = true, Data = null });
-        }
-
-        [HttpPost("{id:int}/progress")]
-        public async Task<IActionResult> SaveProgress(int id, SaveReadingProgressRequestDto request, CancellationToken ct)
-        {
-            var result = await _saveReadingProgressUseCase.ExecuteAsync(id, request, ct);
-            return Ok(new ApiResponse<SaveReadingProgressResponseDto> { Success = true, Message = "Reading progress saved", Data = result });
         }
 
         [HttpGet("{id:int}/comments")]

@@ -117,6 +117,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         {
             return _context.Chapters
                 .Include(c => c.ChapterProgresses)
+                .Include(c => c.ChapterReads)
                 .Include(c => c.Volume)
                     .ThenInclude(v => v.Novel)
                 .FirstOrDefaultAsync(c => c.Id == id, ct);
@@ -139,6 +140,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         public void Delete(Chapter chapter)
         {
             _context.ReadingProgresses.RemoveRange(chapter.ChapterProgresses);
+            _context.ChapterReads.RemoveRange(chapter.ChapterReads);
             _context.Chapters.Remove(chapter);
         }
 

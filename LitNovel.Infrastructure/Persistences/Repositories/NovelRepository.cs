@@ -296,6 +296,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             return _context.Novels
                 .Include(n => n.TargetReports)
                 .Include(n => n.NovelProgresses)
+                .Include(n => n.ChapterReads)
                 .FirstOrDefaultAsync(n => n.Id == id, ct);
         }
 
@@ -330,6 +331,7 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
         {
             _context.NovelReports.RemoveRange(novel.TargetReports);
             _context.ReadingProgresses.RemoveRange(novel.NovelProgresses);
+            _context.ChapterReads.RemoveRange(novel.ChapterReads);
             _context.Novels.Remove(novel);
         }
 

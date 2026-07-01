@@ -24,6 +24,7 @@ namespace LitNovel.Domain.Entities
         public ICollection<NovelLike> NovelLikes { get; set; } = new List<NovelLike>();
         public ICollection<CommentLike> CommentLikes { get; set; } = new List<CommentLike>();
         public ICollection<ReadingProgress> ReadingProgresses { get; set; } = new List<ReadingProgress>();
+        public ICollection<ChapterRead> ChapterReads { get; set; } = new List<ChapterRead>();
         public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
         public ICollection<NovelRating> NovelRatings { get; set; } = new List<NovelRating>();
         public ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();

@@ -20,6 +20,8 @@ namespace LitNovel.Application.DTOs.Novel
         public string? UserReview { get; set; }
         public int TotalChapters { get; set; }
         public int TotalVolumes { get; set; }
+        public int ReadChapterCount { get; set; }
+        public int ReadingProgressPercentage { get; set; }
         public double RatingAverage { get; set; }
         public int RatingCount { get; set; }
         public List<NovelDetailVolumeResponseDto> Volumes { get; set; } = new();
@@ -42,6 +44,7 @@ namespace LitNovel.Application.DTOs.Novel
         public int ChapterNumber { get; set; }
         public string Title { get; set; } = default!;
         public string Status { get; set; } = default!;
+        public bool IsRead { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

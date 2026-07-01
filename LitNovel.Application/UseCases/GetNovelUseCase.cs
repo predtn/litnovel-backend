@@ -11,11 +11,16 @@ namespace LitNovel.Application.UseCases
     public class GetNovelUseCase : IGetNovelUseCase
     {
         private readonly INovelRepository _novelRepository;
+        private readonly IChapterReadRepository _chapterReadRepository;
         private readonly ICurrentUserService _currentUserService;
 
-        public GetNovelUseCase(INovelRepository novelRepository, ICurrentUserService currentUserService)
+        public GetNovelUseCase(
+            INovelRepository novelRepository,
+            IChapterReadRepository chapterReadRepository,
+            ICurrentUserService currentUserService)
         {
             _novelRepository = novelRepository;
+            _chapterReadRepository = chapterReadRepository;
             _currentUserService = currentUserService;
         }
 
@@ -32,7 +37,7 @@ namespace LitNovel.Application.UseCases
                 throw new NotFoundException("Novel not found");
             }
 
-            return MapNovel(novel);
+            return await MapNovelAsync(novel, ct);
         }
 
         public async Task<NovelDetailResponseDto> ExecuteBySlugAsync(string slug, CancellationToken ct)
@@ -48,10 +53,10 @@ namespace LitNovel.Application.UseCases
                 throw new NotFoundException("Novel not found");
             }
 
-            return MapNovel(novel);
+            return await MapNovelAsync(novel, ct);
         }
 
-        private NovelDetailResponseDto MapNovel(Novel novel)
+        private async Task<NovelDetailResponseDto> MapNovelAsync(Novel novel, CancellationToken ct)
         {
             if (!CanView(novel))
             {
@@ -59,6 +64,9 @@ namespace LitNovel.Application.UseCases
             }
 
             var canManage = CanManage(novel);
+            var readChapterIds = _currentUserService.IsAuthenticated
+                ? await _chapterReadRepository.GetReadChapterIdsByNovelAsync(_currentUserService.UserId, novel.Id, ct)
+                : new HashSet<int>();
             var currentUserRating = _currentUserService.IsAuthenticated
                 ? novel.NovelRatings.FirstOrDefault(r => r.UserId == _currentUserService.UserId)
                 : null;
@@ -79,6 +87,7 @@ namespace LitNovel.Application.UseCases
                             ChapterNumber = c.ChapterNumber,
                             Title = c.Title,
                             Status = c.Status.ToString(),
+                            IsRead = readChapterIds.Contains(c.Id),
                             CreatedAt = c.CreatedAt
                         })
                         .ToList()
@@ -121,12 +130,32 @@ namespace LitNovel.Application.UseCases
                 UserReview = currentUserRating?.Review,
                 TotalChapters = canManage ? novel.TotalChapters : visibleVolumes.Sum(v => v.Chapters.Count),
                 TotalVolumes = canManage ? novel.TotalVolumes : visibleVolumes.Count,
+                ReadChapterCount = visibleVolumes
+                    .SelectMany(v => v.Chapters)
+                    .Count(c => c.IsRead && string.Equals(c.Status, ChapterStatus.Published.ToString(), StringComparison.OrdinalIgnoreCase)),
+                ReadingProgressPercentage = CalculateReadingProgress(visibleVolumes),
                 RatingAverage = novel.NovelRatings.Any() ? novel.NovelRatings.Average(r => r.Rating) : 0,
                 RatingCount = novel.NovelRatings.Count,
                 Volumes = visibleVolumes,
                 CreatedAt = novel.CreatedAt,
                 UpdatedAt = novel.UpdatedAt
             };
+        }
+
+        private static int CalculateReadingProgress(IEnumerable<NovelDetailVolumeResponseDto> volumes)
+        {
+            var chapters = volumes
+                .SelectMany(v => v.Chapters)
+                .Where(c => string.Equals(c.Status, ChapterStatus.Published.ToString(), StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (chapters.Count == 0)
+            {
+                return 0;
+            }
+
+            var readCount = chapters.Count(c => c.IsRead);
+            return Math.Min(100, (int)Math.Round(readCount * 100d / chapters.Count, MidpointRounding.AwayFromZero));
         }
 
         private bool CanView(Novel novel)

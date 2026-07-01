@@ -17,5 +17,6 @@ namespace LitNovel.Domain.Entities
 
         public ICollection<CommentChapter> CommentChapters { get; set; } = new List<CommentChapter>();
         public ICollection<ReadingProgress> ChapterProgresses { get; set; } = new List<ReadingProgress>();
+        public ICollection<ChapterRead> ChapterReads { get; set; } = new List<ChapterRead>();
     }
 }

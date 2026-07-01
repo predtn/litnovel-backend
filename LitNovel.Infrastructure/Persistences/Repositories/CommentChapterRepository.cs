@@ -36,7 +36,18 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     {
                         Id = c.User.Id,
                         Username = c.User.Username,
-                        Avatar = c.User.Avatar
+                        Avatar = c.User.Avatar,
+                        Badges = c.User.UserBadges
+                            .OrderByDescending(ub => ub.EarnedAt)
+                            .Select(ub => new CommentUserBadgeResponseDto
+                            {
+                                Key = ub.Badge.Key,
+                                Name = ub.Badge.Name,
+                                Icon = ub.Badge.Icon,
+                                Color = ub.Badge.Color,
+                                EarnedAt = ub.EarnedAt
+                            })
+                            .ToList()
                     },
                     Content = c.Content,
                     LikeCount = c.LikeCount,
@@ -52,7 +63,18 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                             {
                                 Id = r.User.Id,
                                 Username = r.User.Username,
-                                Avatar = r.User.Avatar
+                                Avatar = r.User.Avatar,
+                                Badges = r.User.UserBadges
+                                    .OrderByDescending(ub => ub.EarnedAt)
+                                    .Select(ub => new CommentUserBadgeResponseDto
+                                    {
+                                        Key = ub.Badge.Key,
+                                        Name = ub.Badge.Name,
+                                        Icon = ub.Badge.Icon,
+                                        Color = ub.Badge.Color,
+                                        EarnedAt = ub.EarnedAt
+                                    })
+                                    .ToList()
                             },
                             Content = r.Content,
                             LikeCount = r.LikeCount,
