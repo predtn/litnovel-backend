@@ -17,6 +17,9 @@ namespace LitNovel.Infrastructure.Persistences.Configs
             builder.Property(n => n.CoverImage).HasMaxLength(512);
             builder.Property(n => n.Status).HasConversion<string>().IsRequired();
             builder.Property(n => n.PreviousPublicStatus).HasConversion<string>();
+            builder.Property(n => n.DeletionRequestedAt).IsRequired(false);
+            builder.Property(n => n.ScheduledHardDeleteAt).IsRequired(false);
+            builder.Property(n => n.DeletionRequestedById).IsRequired(false);
             builder.Property(n => n.ViewCount).HasDefaultValue(0);
             builder.Property(n => n.LikeCount).HasDefaultValue(0);
             builder.Property(n => n.DislikeCount).HasDefaultValue(0);
@@ -26,6 +29,7 @@ namespace LitNovel.Infrastructure.Persistences.Configs
             builder.HasIndex(n => n.Slug).IsUnique();
             builder.HasIndex(n => n.AuthorId);
             builder.HasIndex(n => n.CategoryId);
+            builder.HasIndex(n => n.ScheduledHardDeleteAt);
 
             builder.HasOne(n => n.Author)
                 .WithMany(u => u.Novels)

@@ -24,7 +24,8 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .Where(n => n.Status == NovelStatus.Ongoing
                     || n.Status == NovelStatus.Ended
                     || n.Status == NovelStatus.Hiatus
-                    || n.Status == NovelStatus.Dropped);
+                    || n.Status == NovelStatus.Dropped
+                    || n.Status == NovelStatus.PendingDeletion);
 
             if (query.AuthorId.HasValue)
             {
@@ -107,21 +108,21 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     TotalVolumes = n.TotalVolumes,
                     LatestChapterNumber = n.Volumes
                         .SelectMany(v => v.Chapters)
-                        .Where(c => c.Status == ChapterStatus.Published)
+                        .Where(c => c.Status == ChapterStatus.Published || c.Status == ChapterStatus.PendingDeletion)
                         .OrderByDescending(c => c.UpdatedAt)
                         .ThenByDescending(c => c.CreatedAt)
                         .Select(c => (int?)c.ChapterNumber)
                         .FirstOrDefault(),
                     LatestChapterTitle = n.Volumes
                         .SelectMany(v => v.Chapters)
-                        .Where(c => c.Status == ChapterStatus.Published)
+                        .Where(c => c.Status == ChapterStatus.Published || c.Status == ChapterStatus.PendingDeletion)
                         .OrderByDescending(c => c.UpdatedAt)
                         .ThenByDescending(c => c.CreatedAt)
                         .Select(c => c.Title)
                         .FirstOrDefault(),
                     LatestChapterSlug = n.Volumes
                         .SelectMany(v => v.Chapters)
-                        .Where(c => c.Status == ChapterStatus.Published)
+                        .Where(c => c.Status == ChapterStatus.Published || c.Status == ChapterStatus.PendingDeletion)
                         .OrderByDescending(c => c.UpdatedAt)
                         .ThenByDescending(c => c.CreatedAt)
                         .Select(c => c.Slug)
@@ -137,6 +138,8 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     FavoritesCount = n.Favorites.Count,
                     RatingAverage = n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0,
                     RatingCount = n.NovelRatings.Count,
+                    DeletionRequestedAt = n.DeletionRequestedAt,
+                    ScheduledHardDeleteAt = n.ScheduledHardDeleteAt,
                     UpdatedAt = n.UpdatedAt
                 })
                 .ToListAsync(ct);
@@ -189,6 +192,8 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     ViewCount = n.ViewCount,
                     RatingAverage = n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0,
                     RatingCount = n.NovelRatings.Count,
+                    DeletionRequestedAt = n.DeletionRequestedAt,
+                    ScheduledHardDeleteAt = n.ScheduledHardDeleteAt,
                     CreatedAt = n.CreatedAt,
                     UpdatedAt = n.UpdatedAt
                 })
@@ -221,6 +226,8 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                     ViewCount = n.ViewCount,
                     RatingAverage = n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0,
                     RatingCount = n.NovelRatings.Count,
+                    DeletionRequestedAt = n.DeletionRequestedAt,
+                    ScheduledHardDeleteAt = n.ScheduledHardDeleteAt,
                     CreatedAt = n.CreatedAt,
                     UpdatedAt = n.UpdatedAt
                 });
@@ -319,6 +326,19 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .Include(n => n.NovelProgresses)
                 .Include(n => n.ChapterReads)
                 .FirstOrDefaultAsync(n => n.Id == id, ct);
+        }
+
+        public Task<List<LitNovel.Domain.Entities.Novel>> GetExpiredPendingDeletionAsync(DateTime utcNow, CancellationToken ct)
+        {
+            return _context.Novels
+                .Include(n => n.TargetReports)
+                .Include(n => n.NovelProgresses)
+                .Include(n => n.ChapterReads)
+                .Where(n => n.Status == NovelStatus.PendingDeletion
+                    && n.ScheduledHardDeleteAt.HasValue
+                    && n.ScheduledHardDeleteAt <= utcNow)
+                .AsSplitQuery()
+                .ToListAsync(ct);
         }
 
         public Task<LitNovel.Domain.Entities.Novel?> GetByIdWithTagsForUpdateAsync(int id, CancellationToken ct)

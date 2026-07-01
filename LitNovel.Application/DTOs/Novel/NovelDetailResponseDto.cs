@@ -24,6 +24,8 @@ namespace LitNovel.Application.DTOs.Novel
         public int ReadingProgressPercentage { get; set; }
         public double RatingAverage { get; set; }
         public int RatingCount { get; set; }
+        public DateTime? DeletionRequestedAt { get; set; }
+        public DateTime? ScheduledHardDeleteAt { get; set; }
         public List<NovelDetailVolumeResponseDto> Volumes { get; set; } = new();
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -45,6 +47,8 @@ namespace LitNovel.Application.DTOs.Novel
         public string Title { get; set; } = default!;
         public string Status { get; set; } = default!;
         public bool IsRead { get; set; }
+        public DateTime? DeletionRequestedAt { get; set; }
+        public DateTime? ScheduledHardDeleteAt { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

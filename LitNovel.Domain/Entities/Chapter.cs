@@ -11,6 +11,10 @@ namespace LitNovel.Domain.Entities
         public string Slug { get; set; } = default!;
         public DateTime? ReleaseDate { get; set; }
         public ChapterStatus Status { get; set; } = ChapterStatus.Draft;
+        public ChapterStatus? PreviousPublicStatus { get; set; }
+        public DateTime? DeletionRequestedAt { get; set; }
+        public DateTime? ScheduledHardDeleteAt { get; set; }
+        public int? DeletionRequestedById { get; set; }
 
         public Volume Volume { get; set; } = default!;
         public ChapterContent? Content { get; set; }

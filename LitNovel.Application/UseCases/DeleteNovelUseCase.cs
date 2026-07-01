@@ -10,12 +10,18 @@ namespace LitNovel.Application.UseCases
     {
         private readonly INovelRepository _novelRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IPendingDeletionSettingsProvider _pendingDeletionSettingsProvider;
         private readonly IUnitOfWork _unitOfWork;
 
-        public DeleteNovelUseCase(INovelRepository novelRepository, ICurrentUserService currentUserService, IUnitOfWork unitOfWork)
+        public DeleteNovelUseCase(
+            INovelRepository novelRepository,
+            ICurrentUserService currentUserService,
+            IPendingDeletionSettingsProvider pendingDeletionSettingsProvider,
+            IUnitOfWork unitOfWork)
         {
             _novelRepository = novelRepository;
             _currentUserService = currentUserService;
+            _pendingDeletionSettingsProvider = pendingDeletionSettingsProvider;
             _unitOfWork = unitOfWork;
         }
 
@@ -37,7 +43,24 @@ namespace LitNovel.Application.UseCases
                 throw new ForbiddenException("You do not have permission to delete this novel");
             }
 
-            _novelRepository.Delete(novel);
+            if (novel.Status == NovelStatus.Draft)
+            {
+                _novelRepository.Delete(novel);
+                await _unitOfWork.SaveChangesAsync(ct);
+                return;
+            }
+
+            if (!IsApprovedStatus(novel.Status))
+            {
+                throw new BadRequestException("Only draft novels can be deleted directly. Approved novels can only be scheduled for deletion.");
+            }
+
+            var now = DateTime.UtcNow;
+            novel.PreviousPublicStatus = novel.Status;
+            novel.Status = NovelStatus.PendingDeletion;
+            novel.DeletionRequestedAt = now;
+            novel.ScheduledHardDeleteAt = now.AddSeconds(_pendingDeletionSettingsProvider.GetSettings().RetentionSeconds);
+            novel.DeletionRequestedById = _currentUserService.UserId;
             await _unitOfWork.SaveChangesAsync(ct);
         }
 
@@ -46,6 +69,11 @@ namespace LitNovel.Application.UseCases
             return authorId == _currentUserService.UserId
                 || string.Equals(_currentUserService.Role, UserRole.Staff.ToString(), StringComparison.OrdinalIgnoreCase)
                 || string.Equals(_currentUserService.Role, UserRole.Admin.ToString(), StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsApprovedStatus(NovelStatus status)
+        {
+            return status is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped or NovelStatus.Canceled;
         }
     }
 }

@@ -26,6 +26,7 @@ namespace LitNovel.WebAPI.Controllers
         private readonly ISubmitNovelUseCase _submitNovelUseCase;
         private readonly IWithdrawNovelSubmissionUseCase _withdrawNovelSubmissionUseCase;
         private readonly IDeleteNovelUseCase _deleteNovelUseCase;
+        private readonly IRestoreNovelUseCase _restoreNovelUseCase;
         private readonly IGetVolumesUseCase _getVolumesUseCase;
         private readonly ICreateVolumeUseCase _createVolumeUseCase;
         private readonly IAddFavoriteUseCase _addFavoriteUseCase;
@@ -47,6 +48,7 @@ namespace LitNovel.WebAPI.Controllers
             ISubmitNovelUseCase submitNovelUseCase,
             IWithdrawNovelSubmissionUseCase withdrawNovelSubmissionUseCase,
             IDeleteNovelUseCase deleteNovelUseCase,
+            IRestoreNovelUseCase restoreNovelUseCase,
             IGetVolumesUseCase getVolumesUseCase,
             ICreateVolumeUseCase createVolumeUseCase,
             IAddFavoriteUseCase addFavoriteUseCase,
@@ -67,6 +69,7 @@ namespace LitNovel.WebAPI.Controllers
             _submitNovelUseCase = submitNovelUseCase;
             _withdrawNovelSubmissionUseCase = withdrawNovelSubmissionUseCase;
             _deleteNovelUseCase = deleteNovelUseCase;
+            _restoreNovelUseCase = restoreNovelUseCase;
             _getVolumesUseCase = getVolumesUseCase;
             _createVolumeUseCase = createVolumeUseCase;
             _addFavoriteUseCase = addFavoriteUseCase;
@@ -159,6 +162,14 @@ namespace LitNovel.WebAPI.Controllers
         {
             await _deleteNovelUseCase.ExecuteAsync(id, ct);
             return Ok(new ApiResponse<object> { Success = true, Data = null });
+        }
+
+        [HttpPost("{id:int}/restore")]
+        [Authorize]
+        public async Task<IActionResult> Restore(int id, CancellationToken ct)
+        {
+            var result = await _restoreNovelUseCase.ExecuteAsync(id, ct);
+            return Ok(new ApiResponse<UpdateNovelResponseDto> { Success = true, Message = "Novel restored successfully", Data = result });
         }
 
         [HttpPost("{id:int}/submit")]

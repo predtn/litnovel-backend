@@ -82,6 +82,8 @@ namespace LitNovel.Application.UseCases
                 Content = chapter.Content?.Content ?? string.Empty,
                 Status = chapter.Status.ToString(),
                 ReleaseDate = chapter.ReleaseDate,
+                DeletionRequestedAt = chapter.DeletionRequestedAt,
+                ScheduledHardDeleteAt = chapter.ScheduledHardDeleteAt,
                 Volume = new ChapterVolumeResponseDto
                 {
                     Id = chapter.Volume.Id,
@@ -101,7 +103,7 @@ namespace LitNovel.Application.UseCases
 
         private bool CanView(Chapter chapter)
         {
-            if (chapter.Status == ChapterStatus.Published && IsPublicStatus(chapter.Volume.Novel.Status))
+            if (IsPublicChapterStatus(chapter.Status) && IsPublicStatus(chapter.Volume.Novel.Status))
             {
                 return true;
             }
@@ -111,13 +113,18 @@ namespace LitNovel.Application.UseCases
 
         private static bool IsPublicStatus(NovelStatus status)
         {
-            return status is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped;
+            return status is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped or NovelStatus.PendingDeletion;
+        }
+
+        private static bool IsPublicChapterStatus(ChapterStatus status)
+        {
+            return status is ChapterStatus.Published or ChapterStatus.PendingDeletion;
         }
 
         private async Task MarkReadIfNeededAsync(Chapter chapter, CancellationToken ct)
         {
             if (!_currentUserService.IsAuthenticated
-                || chapter.Status != ChapterStatus.Published
+                || !IsPublicChapterStatus(chapter.Status)
                 || !IsPublicStatus(chapter.Volume.Novel.Status))
             {
                 return;

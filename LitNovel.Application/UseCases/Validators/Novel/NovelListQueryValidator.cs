@@ -28,7 +28,7 @@ namespace LitNovel.Application.UseCases.Validators.Novel
         private static bool IsPublicStatus(string status)
         {
             return Enum.TryParse<NovelStatus>(status, true, out var parsed)
-                && parsed is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped;
+                && parsed is NovelStatus.Ongoing or NovelStatus.Ended or NovelStatus.Hiatus or NovelStatus.Dropped or NovelStatus.PendingDeletion;
         }
     }
 }

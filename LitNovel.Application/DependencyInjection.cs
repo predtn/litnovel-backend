@@ -35,6 +35,8 @@ namespace LitNovel.Application
             services.AddScoped<ISubmitNovelUseCase, SubmitNovelUseCase>();
             services.AddScoped<IWithdrawNovelSubmissionUseCase, WithdrawNovelSubmissionUseCase>();
             services.AddScoped<IDeleteNovelUseCase, DeleteNovelUseCase>();
+            services.AddScoped<IRestoreNovelUseCase, RestoreNovelUseCase>();
+            services.AddScoped<IPurgePendingDeletionUseCase, PurgePendingDeletionUseCase>();
             services.AddScoped<IGetVolumesUseCase, GetVolumesUseCase>();
             services.AddScoped<ICreateVolumeUseCase, CreateVolumeUseCase>();
             services.AddScoped<IUpdateVolumeUseCase, UpdateVolumeUseCase>();
@@ -46,6 +48,7 @@ namespace LitNovel.Application
             services.AddScoped<ISubmitChapterUseCase, SubmitChapterUseCase>();
             services.AddScoped<IWithdrawChapterSubmissionUseCase, WithdrawChapterSubmissionUseCase>();
             services.AddScoped<IDeleteChapterUseCase, DeleteChapterUseCase>();
+            services.AddScoped<IRestoreChapterUseCase, RestoreChapterUseCase>();
             services.AddScoped<ICreateUserReportUseCase, CreateUserReportUseCase>();
             services.AddScoped<IGetReadingHistoryUseCase, GetReadingHistoryUseCase>();
             services.AddScoped<IGetNotificationsUseCase, GetNotificationsUseCase>();
