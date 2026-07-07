@@ -66,7 +66,10 @@ namespace LitNovel.WebAPI
             // CORS — allow frontend origin for SignalR WebSocket
             services.AddCors(options =>
                 options.AddPolicy("FrontendPolicy", policy =>
-                    policy.WithOrigins("http://localhost:5031", "https://localhost:7031")
+                    policy.WithOrigins(
+                            "http://localhost:5031",
+                            "https://localhost:7031",
+                            "http://localhost:5051")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials()));
