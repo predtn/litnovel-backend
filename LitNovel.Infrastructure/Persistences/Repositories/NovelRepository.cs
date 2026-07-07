@@ -154,6 +154,81 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
             };
         }
 
+        public async Task<List<NovelListItemResponseDto>> GetPublicByIdsAsync(IReadOnlyCollection<int> ids, CancellationToken ct)
+        {
+            if (ids.Count == 0)
+            {
+                return new List<NovelListItemResponseDto>();
+            }
+
+            return await _context.Novels
+                .AsNoTracking()
+                .Where(n => ids.Contains(n.Id)
+                    && (n.Status == NovelStatus.Ongoing
+                        || n.Status == NovelStatus.Ended
+                        || n.Status == NovelStatus.Hiatus
+                        || n.Status == NovelStatus.Dropped))
+                .Select(n => new NovelListItemResponseDto
+                {
+                    Id = n.Id,
+                    Title = n.Title,
+                    Slug = n.Slug,
+                    CoverImage = n.CoverImage,
+                    Description = n.Description,
+                    Author = new NovelAuthorResponseDto
+                    {
+                        Id = n.Author.Id,
+                        Username = n.Author.Username,
+                        Avatar = n.Author.Avatar
+                    },
+                    Category = n.Category == null ? null : new NovelCategoryResponseDto
+                    {
+                        Id = n.Category.Id,
+                        Name = n.Category.Name
+                    },
+                    Tags = n.NovelTags
+                        .Select(nt => new NovelTagResponseDto { Id = nt.Tag.Id, Name = nt.Tag.Name })
+                        .ToList(),
+                    Status = n.Status.ToString(),
+                    TotalChapters = n.TotalChapters,
+                    TotalVolumes = n.TotalVolumes,
+                    LatestChapterNumber = n.Volumes
+                        .SelectMany(v => v.Chapters)
+                        .Where(c => c.Status == ChapterStatus.Published)
+                        .OrderByDescending(c => c.UpdatedAt)
+                        .ThenByDescending(c => c.CreatedAt)
+                        .Select(c => (int?)c.ChapterNumber)
+                        .FirstOrDefault(),
+                    LatestChapterTitle = n.Volumes
+                        .SelectMany(v => v.Chapters)
+                        .Where(c => c.Status == ChapterStatus.Published)
+                        .OrderByDescending(c => c.UpdatedAt)
+                        .ThenByDescending(c => c.CreatedAt)
+                        .Select(c => c.Title)
+                        .FirstOrDefault(),
+                    LatestChapterSlug = n.Volumes
+                        .SelectMany(v => v.Chapters)
+                        .Where(c => c.Status == ChapterStatus.Published)
+                        .OrderByDescending(c => c.UpdatedAt)
+                        .ThenByDescending(c => c.CreatedAt)
+                        .Select(c => c.Slug)
+                        .FirstOrDefault(),
+                    LatestChapterUpdatedAt = n.Volumes
+                        .SelectMany(v => v.Chapters)
+                        .Where(c => c.Status == ChapterStatus.Published)
+                        .OrderByDescending(c => c.UpdatedAt)
+                        .ThenByDescending(c => c.CreatedAt)
+                        .Select(c => (DateTime?)c.UpdatedAt)
+                        .FirstOrDefault(),
+                    ViewCount = n.ViewCount,
+                    FavoritesCount = n.Favorites.Count,
+                    RatingAverage = n.NovelRatings.Any() ? n.NovelRatings.Average(r => r.Rating) : 0,
+                    RatingCount = n.NovelRatings.Count,
+                    UpdatedAt = n.UpdatedAt
+                })
+                .ToListAsync(ct);
+        }
+
         public async Task<PagedResult<MyNovelListItemResponseDto>> GetMyNovelsAsync(int authorId, MyNovelListQueryDto query, CancellationToken ct)
         {
             var novels = _context.Novels

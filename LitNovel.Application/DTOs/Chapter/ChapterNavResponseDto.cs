@@ -1,0 +1,16 @@
+namespace LitNovel.Application.DTOs.Chapter
+{
+    public class ChapterNavResponseDto
+    {
+        public int Id { get; set; }
+        public string Slug { get; set; } = default!;
+        public int VolumeId { get; set; }
+        public int ChapterNumber { get; set; }
+        public string Title { get; set; } = default!;
+        public string Status { get; set; } = default!;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public DateTime? DeletionRequestedAt { get; set; }
+        public DateTime? ScheduledHardDeleteAt { get; set; }
+    }
+}

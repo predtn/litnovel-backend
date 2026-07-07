@@ -50,6 +50,12 @@ namespace LitNovel.Infrastructure
             services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<INotificationPushService, SignalRNotificationPushService>();
+            services.AddHttpClient<IRecommendationClient, RecommendationClient>(client =>
+            {
+                var baseUrl = configuration["RecommendationService:BaseUrl"] ?? "http://localhost:8010";
+                client.BaseAddress = new Uri(baseUrl);
+                client.Timeout = TimeSpan.FromSeconds(3);
+            });
             services.AddSingleton<IPendingDeletionSettingsProvider, PendingDeletionSettingsProvider>();
             services.AddHostedService<PendingDeletionCleanupService>();
 

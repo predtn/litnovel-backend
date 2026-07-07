@@ -43,7 +43,7 @@ namespace LitNovel.Application.UseCases
                 throw new NotFoundException("Chapter not found");
             }
 
-            var result = MapChapter(chapter);
+            var result = await MapChapterAsync(chapter, ct);
             await MarkReadIfNeededAsync(chapter, ct);
             return result;
         }
@@ -61,17 +61,21 @@ namespace LitNovel.Application.UseCases
                 throw new NotFoundException("Chapter not found");
             }
 
-            var result = MapChapter(chapter);
+            var result = await MapChapterAsync(chapter, ct);
             await MarkReadIfNeededAsync(chapter, ct);
             return result;
         }
 
-        private ChapterDetailResponseDto MapChapter(Chapter chapter)
+        private async Task<ChapterDetailResponseDto> MapChapterAsync(Chapter chapter, CancellationToken ct)
         {
             if (!CanView(chapter))
             {
                 throw new ForbiddenException("Chapter is not publicly available");
             }
+
+            var novelId = chapter.Volume.NovelId;
+            var prevChapter = await _chapterRepository.GetPreviousPublicChapterAsync(novelId, chapter.ChapterNumber, ct);
+            var nextChapter = await _chapterRepository.GetNextPublicChapterAsync(novelId, chapter.ChapterNumber, ct);
 
             return new ChapterDetailResponseDto
             {
@@ -96,8 +100,32 @@ namespace LitNovel.Application.UseCases
                     Title = chapter.Volume.Novel.Title,
                     Slug = chapter.Volume.Novel.Slug
                 },
+                PrevChapter = MapNavChapter(prevChapter),
+                NextChapter = MapNavChapter(nextChapter),
                 CreatedAt = chapter.CreatedAt,
                 UpdatedAt = chapter.UpdatedAt
+            };
+        }
+
+        private static ChapterNavResponseDto? MapNavChapter(Chapter? chapter)
+        {
+            if (chapter == null)
+            {
+                return null;
+            }
+
+            return new ChapterNavResponseDto
+            {
+                Id = chapter.Id,
+                Slug = chapter.Slug,
+                VolumeId = chapter.VolumeId,
+                ChapterNumber = chapter.ChapterNumber,
+                Title = chapter.Title,
+                Status = chapter.Status.ToString(),
+                CreatedAt = chapter.CreatedAt,
+                UpdatedAt = chapter.UpdatedAt,
+                DeletionRequestedAt = chapter.DeletionRequestedAt,
+                ScheduledHardDeleteAt = chapter.ScheduledHardDeleteAt
             };
         }
 

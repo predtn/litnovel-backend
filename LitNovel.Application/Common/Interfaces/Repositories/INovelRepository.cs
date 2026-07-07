@@ -8,6 +8,7 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
     public interface INovelRepository
     {
         Task<PagedResult<NovelListItemResponseDto>> GetListAsync(NovelListQueryDto query, CancellationToken ct);
+        Task<List<NovelListItemResponseDto>> GetPublicByIdsAsync(IReadOnlyCollection<int> ids, CancellationToken ct);
         Task<PagedResult<MyNovelListItemResponseDto>> GetMyNovelsAsync(int authorId, MyNovelListQueryDto query, CancellationToken ct);
         IQueryable<MyNovelListItemResponseDto> QueryMyNovels(int authorId);
         Task<NovelAnalyticsResponseDto> GetAnalyticsAsync(int id, CancellationToken ct);

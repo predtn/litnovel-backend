@@ -13,6 +13,8 @@ namespace LitNovel.Application.DTOs.Chapter
         public DateTime? ScheduledHardDeleteAt { get; set; }
         public ChapterVolumeResponseDto Volume { get; set; } = default!;
         public ChapterNovelResponseDto Novel { get; set; } = default!;
+        public ChapterNavResponseDto? PrevChapter { get; set; }
+        public ChapterNavResponseDto? NextChapter { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

@@ -108,6 +108,28 @@ namespace LitNovel.Infrastructure.Persistences.Repositories
                 .FirstOrDefaultAsync(c => c.Slug == slug, ct);
         }
 
+        public Task<Chapter?> GetPreviousPublicChapterAsync(int novelId, int chapterNumber, CancellationToken ct)
+        {
+            return _context.Chapters
+                .AsNoTracking()
+                .Where(c => c.Volume.NovelId == novelId
+                    && c.ChapterNumber < chapterNumber
+                    && (c.Status == ChapterStatus.Published || c.Status == ChapterStatus.PendingDeletion))
+                .OrderByDescending(c => c.ChapterNumber)
+                .FirstOrDefaultAsync(ct);
+        }
+
+        public Task<Chapter?> GetNextPublicChapterAsync(int novelId, int chapterNumber, CancellationToken ct)
+        {
+            return _context.Chapters
+                .AsNoTracking()
+                .Where(c => c.Volume.NovelId == novelId
+                    && c.ChapterNumber > chapterNumber
+                    && (c.Status == ChapterStatus.Published || c.Status == ChapterStatus.PendingDeletion))
+                .OrderBy(c => c.ChapterNumber)
+                .FirstOrDefaultAsync(ct);
+        }
+
         public Task<Chapter?> GetByIdForUpdateAsync(int id, CancellationToken ct)
         {
             return _context.Chapters

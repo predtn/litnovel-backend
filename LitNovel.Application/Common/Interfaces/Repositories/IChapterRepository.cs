@@ -11,6 +11,8 @@ namespace LitNovel.Application.Common.Interfaces.Repositories
         IQueryable<ChapterListItemResponseDto> QueryByVolumeId(int volumeId);
         Task<Chapter?> GetByIdWithDetailsAsync(int id, CancellationToken ct);
         Task<Chapter?> GetBySlugWithDetailsAsync(string slug, CancellationToken ct);
+        Task<Chapter?> GetPreviousPublicChapterAsync(int novelId, int chapterNumber, CancellationToken ct);
+        Task<Chapter?> GetNextPublicChapterAsync(int novelId, int chapterNumber, CancellationToken ct);
         Task<Chapter?> GetByIdForUpdateAsync(int id, CancellationToken ct);
         Task<Chapter?> GetByIdForDeleteAsync(int id, CancellationToken ct);
         Task<List<Chapter>> GetExpiredPendingDeletionAsync(DateTime utcNow, CancellationToken ct);

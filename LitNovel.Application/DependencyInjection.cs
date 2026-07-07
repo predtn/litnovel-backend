@@ -28,6 +28,7 @@ namespace LitNovel.Application
             services.AddScoped<IGetNovelUseCase, GetNovelUseCase>();
             services.AddScoped<IIncrementNovelViewUseCase, IncrementNovelViewUseCase>();
             services.AddScoped<IGetNovelAnalyticsUseCase, GetNovelAnalyticsUseCase>();
+            services.AddScoped<IGetRecommendationsUseCase, GetRecommendationsUseCase>();
             services.AddScoped<IGetMyNovelsUseCase, GetMyNovelsUseCase>();
             services.AddScoped<ICreateNovelUseCase, CreateNovelUseCase>();
             services.AddScoped<IUpdateNovelUseCase, UpdateNovelUseCase>();
